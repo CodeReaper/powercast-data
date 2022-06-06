@@ -45,11 +45,11 @@ jobs:
     needs: [pull-data]
     steps:
       - run: |
-        for generated in *.generated; do
-          zone=$(basename $generated .generated)
-          echo "Using generated data for ${zone}..."
-          sh .github/scripts/data-write.sh $generated ./gh-pages/data/ $zone
-        done
+          for generated in *.generated; do
+            zone=$(basename $generated .generated)
+            echo "Using generated data for ${zone}..."
+            sh .github/scripts/data-write.sh $generated ./gh-pages/data/ $zone
+          done
 
   # TODO: add indexer for additional help
 
