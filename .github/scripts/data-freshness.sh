@@ -4,7 +4,7 @@
 #   - directory:
 #       The directory in which to find an end date.
 #       Must be a valid path to a directory with data from `data-write`.
-#       Example:
+#       Examples:
 #           - ./
 #           - data/
 #   - price area:

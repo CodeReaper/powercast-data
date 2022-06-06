@@ -6,16 +6,61 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  should-pull-data:
-    name: Is more data needed?
-    outputs:
-      result: true # TODO: actually check
+  setup-workspaces:
+    name: Setup workspaces
+    # if: github.ref == 'refs/heads/main'
     steps:
-      - name: Faking it
-        run: |
-          echo 'Not really doing anything.'
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.POWERCASTDEPLOY }}
+          ref: gh-pages2
+          path: gh-pages
 
-  more-data-needed:
-    name: More data is needed
-    needs: [should-pull-data]
-    if: ${{ needs.should-pull-data.outputs.result }}
+  setup-matrix:
+    name: Setup matrix
+    needs: [setup-workspaces]
+    steps:
+      - shell: bash
+        id: setup-matrix
+        run: |
+          mkdir -p ./gh-pages/data/ > /dev/null
+          echo ::set-output name=matrix::$(sh .github/scripts/data-matrix.sh .config.json ./gh-pages/data/ | jq -rc '.')
+    outputs:
+      matrix: ${{ steps.setup-matrix.outputs.matrix }}
+
+  pull-data:
+    name: Pull data
+    needs: [setup-matrix]
+    strategy:
+      matrix:
+        sources: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+    steps:
+      - shell: bash
+        run: |
+          sh .github/scripts/data-pull.sh ${{ matrix.sources.zone }} ${{ matrix.sources.endDate }} > "${{ matrix.sources.zone }}".generated
+
+  write-data:
+    name: Write data
+    needs: [pull-data]
+    steps:
+      - run: |
+        for generated in *.generated; do
+          zone=$(basename $generated .generated)
+          echo "Using generated data for ${zone}..."
+          sh .github/scripts/data-write.sh $generated ./gh-pages/data/ $zone
+        done
+
+  # TODO: add indexer for additional help
+
+  publish:
+    name: Publish
+    needs: [write-data]
+    steps:
+      - uses: EndBug/add-and-commit@v9
+        with:
+          cwd: gh-pages
+          add: data
+          push: true
+          default_author: github_actions
+          message: Update new data to GitHub pages via workflow

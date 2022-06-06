@@ -4,7 +4,9 @@
 #   - price area:
 #       Data will be restricted to this price area.
 #       Must be a singular valid area.
-#       Example: DK1 or DE
+#       Examples:
+#           - DK1
+#           - DE
 #   - end date:
 #       Data will be fetched until the end date is reached.
 #       Must be a unix timestamp.

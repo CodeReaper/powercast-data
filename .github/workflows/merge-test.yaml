@@ -1,0 +1,27 @@
+name: Merge test
+
+on:
+  workflow_dispatch: {}
+  pull_request: {}
+  push:
+    branches:
+      - main
+
+jobs:
+  test-data-matrix:
+    name: Test data matrix
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+        set +e
+
+        sh .github/scripts/data-matrix.sh .non-existing-file.json ./data/ > /dev/null
+        [ $? -eq 1 ] || { echo "Non-existing file failed"; exit 1; }
+
+        sh .github/scripts/data-matrix.sh .config.json ./non-existing-directory/ > /dev/null
+        [ $? -eq 2 ] || { echo "Non-existing directory failed"; exit 1; }
+
+        set -e
+
+        sh .github/scripts/data-matrix.sh .config.json ./data/ > result
+        cmp -s .config.json result || { echo "Unexpected difference:"; diff .config.json result; exit 1; }
