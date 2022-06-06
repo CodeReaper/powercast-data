@@ -8,15 +8,9 @@ on:
       - main
 
 jobs:
-  setup-workspace:
-    runs-on: ubuntu-latest
-    name: Setup workspace
-    steps:
-      - uses: actions/checkout@v3
-
   test-data-matrix:
     name: Test data matrix
-    needs: [setup-workspace]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Run test
