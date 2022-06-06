@@ -9,6 +9,7 @@ on:
 
 jobs:
   setup-workspace:
+    runs-on: ubuntu-latest
     name: Setup workspace
     steps:
       - uses: actions/checkout@v3
