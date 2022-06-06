@@ -1,0 +1,21 @@
+name: Pull data
+
+on:
+  # schedule:
+  #   - cron: '5 12,13,14,15,18,21 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  should-pull-data:
+    name: Is more data needed?
+    outputs:
+      result: true # TODO: actually check
+    steps:
+      - name: Faking it
+        run: |
+          echo 'Not really doing anything.'
+
+  more-data-needed:
+    name: More data is needed
+    needs: [should-pull-data]
+    if: ${{ needs.should-pull-data.outputs.result }}
