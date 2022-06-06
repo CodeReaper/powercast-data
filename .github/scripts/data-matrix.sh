@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Takes two arguments:
+# Takes up to three arguments:
 #   - config file:
 #       Will be used to create matrix for generating data.
 #       Examples:
@@ -12,6 +12,11 @@
 #       Examples:
 #           - ./
 #           - data/
+#   - date:
+#       Optional, will default to now.
+#       Script will believe that "date" is now.
+#       Must be a unix timestamp.
+#       Example: 1654012800
 
 # Output example:
 # [
@@ -25,6 +30,7 @@
 
 CONFIG=$1
 FOLDER=$2
+CURRENTDATE=${3:-$(date +"%s")}
 DIR=/tmp/$$
 
 set -e
@@ -35,7 +41,6 @@ trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
 
 SCRIPTS=$(dirname $0)
-CURRENTDATE=$(date +"%s")
 
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
