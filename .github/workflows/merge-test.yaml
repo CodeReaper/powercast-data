@@ -41,12 +41,10 @@ jobs:
         run: |
           set -e
           sh .github/scripts/data-matrix.sh .config.json .github/resources/test/well-known-data/ 1654300800 | jq -rc '.' > result
-          set +e
-          grep DK1 result
-          [ $? -eq 0 ] && exit 1;
+          grep -vq DK1 result
 
       - name: Test with existing well-known data when it was a day old that matrix does contain DK1 items from the configuration
         run: |
           set -e
           sh .github/scripts/data-matrix.sh .config.json .github/resources/test/well-known-data/ 1654387200 | jq -rc '.' > result
-          grep DK1 result > /dev/null
+          grep -q DK1 result
