@@ -13,17 +13,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run test
+      - name: Test non-existing file
         run: |
           set +e
-
           sh .github/scripts/data-matrix.sh .non-existing-file.json ./data/ > /dev/null
-          [ $? -eq 1 ] || { echo "Non-existing file failed"; exit 1; }
+          [ $? -eq 1 ] || exit 1
 
+      - name: Test non-existing directory
+        run: |
+          set +e
           sh .github/scripts/data-matrix.sh .config.json ./non-existing-directory/ > /dev/null
-          [ $? -eq 2 ] || { echo "Non-existing directory failed"; exit 1; }
+          [ $? -eq 2 ] || exit 1
 
+      - name: Test with no existing data that matrix contains all items from the configuration
+        run: |
           set -e
-
+          mkdir ./data
           sh .github/scripts/data-matrix.sh .config.json ./data/ > result
           cmp -s .config.json result || { echo "Unexpected difference:"; diff .config.json result; exit 1; }
