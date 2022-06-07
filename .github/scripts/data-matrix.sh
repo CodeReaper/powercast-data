@@ -45,10 +45,8 @@ SCRIPTS=$(dirname $0)
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
 
-cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,|}\n|g' > $DIR/inputs
-echo >> $DIR/inputs
 echo -n '[' > $DIR/matrix.json
-cat $DIR/inputs | while read ITEM; do
+cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
     AREA=$(echo $ITEM | jq -r '.zone')
     ENDDATE=$(echo $ITEM | jq -r '.endDate')
     DELAY=$(echo $ITEM | jq -r '.expectedDelay')

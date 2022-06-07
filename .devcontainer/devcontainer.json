@@ -4,8 +4,15 @@
 		"dockerfile": "Dockerfile",
 		"args": { "VARIANT": "3.14" }
 	},
-	"settings": {},
-	"extensions": [],
+	"settings": {
+		"files.trimTrailingWhitespace": true,
+		"files.trimFinalNewlines": true
+	},
+	"extensions": [
+		"redhat.vscode-yaml",
+		"eamodio.gitlens",
+		"ms-azuretools.vscode-docker"
+	],
 	"postCreateCommand": "",
 	"remoteUser": "vscode"
 }

@@ -36,7 +36,7 @@ trap 'exit 2' 1 2 3 15
 AREA=$(echo "$AREA" | tr [:lower:] [:upper:])
 [ -z $AREA ] && { echo "Invalid/Missing area."; exit 3; }
 
-cat $FILE | jq -r '.' | tr -d []\\n | sed 's|}\,|}\n|g' | while read ITEM; do # TODO: handle last line too
+cat $FILE | jq -r '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
     echo "[" > $DIR/item.json
     echo "$ITEM" >> $DIR/item.json
     echo "]" >> $DIR/item.json

@@ -6,59 +6,42 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  setup-workspaces:
-    runs-on: ubuntu-latest
-    name: Setup workspaces
+  setup-matrix:
     # if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Setup matrix
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/checkout@v3
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
-          ref: gh-pages2
+          ref: gh-pages2 # gh-pages
           path: gh-pages
 
-  setup-matrix:
-    name: Setup matrix
-    needs: [setup-workspaces]
-    steps:
       - shell: bash
-        id: setup-matrix
+        name: Pull data
         run: |
           mkdir -p ./gh-pages/data/ > /dev/null
-          echo ::set-output name=matrix::$(sh .github/scripts/data-matrix.sh .config.json ./gh-pages/data/ | jq -rc '.')
-    outputs:
-      matrix: ${{ steps.setup-matrix.outputs.matrix }}
 
-  pull-data:
-    name: Pull data
-    needs: [setup-matrix]
-    strategy:
-      matrix:
-        sources: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
-    steps:
-      - shell: bash
-        run: |
-          sh .github/scripts/data-pull.sh ${{ matrix.sources.zone }} ${{ matrix.sources.endDate }} > "${{ matrix.sources.zone }}".generated
+          sh .github/scripts/data-matrix.sh .config.json ./gh-pages/data/ | jq -rc '.[]' | while read CONFIG; do
+            ZONE=$(echo "$ITEM" | jq -r '.zone')
+            ENDDATE=$(echo "$ITEM" | jq -r '.endDate')
 
-  write-data:
-    name: Write data
-    needs: [pull-data]
-    steps:
-      - run: |
-          for generated in *.generated; do
-            zone=$(basename $generated .generated)
-            echo "Using generated data for ${zone}..."
-            sh .github/scripts/data-write.sh $generated ./gh-pages/data/ $zone
+            sh .github/scripts/data-pull.sh $ZONE ${ENDDATE} > "${ZONE}.generated"
           done
 
-  # TODO: add indexer for additional help
+      - shell: bash
+        name: Write data
+        run: |
+          for GENERATED in *.generated; do
+            ZONE=$(basename $GENERATED .generated)
+            echo "Using generated data for ${ZONE}..."
+            sh .github/scripts/data-write.sh $GENERATED ./gh-pages/data/ $ZONE
+          done
 
-  publish:
-    name: Publish
-    needs: [write-data]
-    steps:
       - uses: EndBug/add-and-commit@v9
+        name: Publish data
         with:
           cwd: gh-pages
           add: data

@@ -35,7 +35,7 @@ jobs:
           set -e
           sh .github/scripts/data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
           jq -r '.' .config.json > expected
-          cmp -s expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
         run: |
@@ -48,3 +48,73 @@ jobs:
           set -e
           sh .github/scripts/data-matrix.sh .config.json .github/resources/test/well-known-data/ 1654387200 | jq -rc '.' > result
           grep -q DK1 result
+
+  test-data-write:
+    name: Test data write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        run: |
+          mkdir ./empty-data-folder
+          echo '[]' > ./empty-data-file
+
+      - name: Test non-existing file
+        run: |
+          set +e
+          sh .github/scripts/data-write.sh .non-existing-file.json ./empty-data-folder DK1 > /dev/null
+          [ $? -eq 1 ] || exit 1
+
+      - name: Test non-existing directory
+        run: |
+          set +e
+          sh .github/scripts/data-write.sh .github/resources/test/well-known-data/2022/06/01/DK1.json ./non-existing-directory/ DK1 > /dev/null
+          [ $? -eq 2 ] || exit 1
+
+      - name: Test when given no data that write outputs no files
+        run: |
+          set -e
+          sh .github/scripts/data-write.sh ./empty-data-file ./empty-data-folder DK1
+          [ -z "$(ls -1qA ./empty-data-folder)" ] || { echo "Unexpected files/folders:"; find ./empty-data-folder; exit 1; }
+
+      - name: Test with existing well-known data that write actually writes output files as expected
+        run: |
+          set -e
+          mkdir ./test
+          trap "rm -rf ./test" EXIT
+          sh .github/scripts/data-write.sh .github/resources/test/well-known-data/2022/06/01/DK1.json ./test DK1
+          diff -rq ./test .github/resources/test/well-known-output || { echo "Unexpected difference:"; diff -r ./test .github/resources/test/well-known-output; exit 1; }
+
+  test-data-pull:
+    name: Test data pull
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        run: |
+          mkdir ./empty-folder
+
+      - name: Test if endpoints does not answer pull will fail
+        run: |
+          set -e
+          cd ./empty-folder
+          python3 -m http.server 8000 --bind 127.0.0.1 &
+          trap 'kill $(jobs -p)' EXIT
+          cd -
+
+          set +e
+          sh .github/scripts/data-pull.sh DK1 1654300800 http://localhost:8000/
+          [ $? -ne 0 ] || exit 1
+
+      - name: Test with existing well-known data that pull outputs as expected
+        run: |
+          set -e
+          cd .github/resources/test/well-known-server
+          python3 -m http.server 8000 --bind 127.0.0.1 &
+          trap 'kill $(jobs -p)' EXIT
+          cd -
+
+          sh .github/scripts/data-pull.sh DK1 1654300800 http://localhost:8000/ > result
+          diff -q .github/resources/test/well-known-output2/from-server.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known-output2/from-server.json result; exit 1; }
