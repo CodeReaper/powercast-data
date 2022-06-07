@@ -1,0 +1,17 @@
+#!/bin/sh
+
+[ -f "$WGET_OVERRIDE" ] || { echo "WGET_OVERRIDE is not a file: $WGET_OVERRIDE"; exit 1; }
+
+while getopts ":O:" OPTION; do
+    case "$OPTION" in
+        O)
+            cat "$WGET_OVERRIDE" > "$OPTARG"
+            exit 0
+            ;;
+        *)
+            ;;
+    esac
+done
+
+echo "-O not provided among: $@"
+exit 1

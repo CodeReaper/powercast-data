@@ -92,29 +92,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup
-        run: |
-          mkdir ./empty-folder
-
       - name: Test if endpoints does not answer pull will fail
         run: |
-          set -e
-          cd ./empty-folder
-          python3 -m http.server 8000 --bind 127.0.0.1 &
-          trap 'kill $(jobs -p)' EXIT
-          cd -
-
           set +e
-          sh .github/scripts/data-pull.sh DK1 1654300800 http://localhost:8000/
+          export PATH=.github/resources/test/mocks/:$PATH
+          unset WGET_OVERRIDE
+
+          sh .github/scripts/data-pull.sh DK1 1654545600 http://localhost:8000/
           [ $? -ne 0 ] || exit 1
 
       - name: Test with existing well-known data that pull outputs as expected
         run: |
           set -e
-          cd .github/resources/test/well-known/endpoint-response
-          python3 -m http.server 8000 --bind 127.0.0.1 &
-          trap 'kill $(jobs -p)' EXIT
-          cd -
+          export PATH=.github/resources/test/mocks/:$PATH
+          export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/datastore_search
 
-          sh .github/scripts/data-pull.sh DK1 1654300800 http://localhost:8000/ > result
+          sh .github/scripts/data-pull.sh DK1 1654545600 http://localhost:8000/ > result
           diff -q .github/resources/test/well-known/data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/data-pull-generated-output.json result; exit 1; }
