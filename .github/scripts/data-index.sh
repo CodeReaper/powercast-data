@@ -42,7 +42,7 @@ SCRIPTS=$(dirname $0)
 
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
-[[ "$PREFIX" == */ ]] && { echo "Prefix cannot end on a '/'. Given: $PREFIX"; exit 3; }
+[[ "$PREFIX" =~ /$ ]] && { echo "Prefix cannot end on a '/'. Given: $PREFIX"; exit 3; }
 
 echo -n '[' > $DIR/output.json
 cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
