@@ -51,6 +51,7 @@ jobs:
       - shell: bash
         name: Index data
         run: |
+          find ./gh-pages/api/ # FIXME: REMOVE THIS
           sh .github/scripts/energy-price-data-write.sh .config.json ./gh-pages/api/energy-price/ /api/energy-price > ./gh-pages/api/energy-price/latest.json
 
       - uses: EndBug/add-and-commit@v9
