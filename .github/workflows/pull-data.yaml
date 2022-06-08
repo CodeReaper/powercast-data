@@ -31,8 +31,8 @@ jobs:
           mkdir -p ./gh-pages/api/energy-price/ > /dev/null
 
           sh .github/scripts/energy-price-data-matrix.sh .config.json ./gh-pages/api/energy-price/ | jq -rc '.[]' | while read CONFIG; do
-            ZONE=$(echo "$ITEM" | jq -r '.zone')
-            ENDDATE=$(echo "$ITEM" | jq -r '.endDate')
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            ENDDATE=$(echo "$CONFIG" | jq -r '.endDate')
 
             echo "Pull data for ${ZONE} until ${ENDDATE}..."
             sh .github/scripts/energy-price-data-pull.sh $ZONE $ENDDATE > "${ZONE}.generated"
@@ -51,8 +51,7 @@ jobs:
       - shell: bash
         name: Index data
         run: |
-          find ./gh-pages/api/ # FIXME: REMOVE THIS
-          sh .github/scripts/energy-price-data-write.sh .config.json ./gh-pages/api/energy-price/ /api/energy-price > ./gh-pages/api/energy-price/latest.json
+          sh .github/scripts/energy-price-data-index.sh .config.json ./gh-pages/api/energy-price/ /api/energy-price > ./gh-pages/api/energy-price/latest.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
