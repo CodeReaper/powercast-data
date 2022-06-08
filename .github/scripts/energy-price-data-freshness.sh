@@ -3,7 +3,7 @@
 # Takes three arguments:
 #   - directory:
 #       The directory in which to find an end date.
-#       Must be a valid path to a directory with data from `data-write`.
+#       Must be a valid path to a directory with data from `energy-price-data-write`.
 #       Examples:
 #           - ./
 #           - data/

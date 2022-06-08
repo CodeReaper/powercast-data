@@ -8,7 +8,7 @@
 #           - test.json
 #   - directory:
 #       Data will be used to evaluate how old the current data is.
-#       Must be a valid path to a directory with data from `data-write`.
+#       Must be a valid path to a directory with data from `energy-price-data-write`.
 #       Examples:
 #           - ./
 #           - data/
@@ -50,7 +50,7 @@ cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM;
     AREA=$(echo $ITEM | jq -r '.zone')
     ENDDATE=$(echo $ITEM | jq -r '.endDate')
     DELAY=$(echo $ITEM | jq -r '.expectedDelay')
-    LATEST=$(sh "${SCRIPTS}/data-freshness.sh" "$FOLDER" "$AREA" "$ENDDATE")
+    LATEST=$(sh "${SCRIPTS}/energy-price-data-freshness.sh" "$FOLDER" "$AREA" "$ENDDATE")
     DIFFERENCE=$(($CURRENTDATE-$LATEST))
     if [ $DIFFERENCE -gt $DELAY ]; then
         echo -n "$ITEM" >> $DIR/matrix.json

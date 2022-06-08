@@ -7,7 +7,7 @@
 #           - .config.json
 #           - test.json
 #   - directory:
-#       Must be a valid path to a directory with data from `data-write`.
+#       Must be a valid path to a directory with data from `energy-price-data-write`.
 #       Examples:
 #           - ./
 #           - data/

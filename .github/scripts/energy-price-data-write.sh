@@ -2,7 +2,7 @@
 
 # Takes three arguments:
 #   - file:
-#       This file should contain data from `data-pull`.
+#       This file should contain data from `energy-price-data-pull`.
 #       Example: ./new-data.json
 #   - directory:
 #       The directory in which to write output files.
