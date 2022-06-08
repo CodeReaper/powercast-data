@@ -1,13 +1,14 @@
 name: Pull data
 
 on:
+  # TODO: after successful run on main, enable schedule
   # schedule:
   #   - cron: '5 12,13,14,15,18,21 * * *'
   workflow_dispatch: {}
 
 jobs:
   setup-matrix:
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     name: Setup matrix
     steps:
@@ -16,7 +17,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
-          ref: gh-pages2 # gh-pages
+          ref: gh-pages2 # TODO: after successful run on main, set this to: gh-pages
           path: gh-pages
 
       - shell: bash
@@ -39,6 +40,11 @@ jobs:
             echo "Using generated data for ${ZONE}..."
             sh .github/scripts/data-write.sh $GENERATED ./gh-pages/data/ $ZONE
           done
+
+      - shell: bash
+        name: Index data
+        run: |
+          sh .github/scripts/data-write.sh .config.json ./gh-pages/data/ /data > ./gh-pages/data/latest.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data

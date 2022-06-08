@@ -109,3 +109,44 @@ jobs:
 
           sh .github/scripts/data-pull.sh DK1 1654545600 http://localhost:8000/ > result
           diff -q .github/resources/test/well-known/data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/data-pull-generated-output.json result; exit 1; }
+
+  test-data-index:
+    name: Test data index
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        run: |
+          mkdir ./empty-data-folder
+
+      - name: Test non-existing file
+        run: |
+          set +e
+          sh .github/scripts/data-index.sh .non-existing-file.json ./empty-data-folder > /dev/null
+          [ $? -eq 1 ] || exit 1
+
+      - name: Test non-existing directory
+        run: |
+          set +e
+          sh .github/scripts/data-index.sh .config.json ./non-existing-directory/ > /dev/null
+          [ $? -eq 2 ] || exit 1
+
+      - name: Test incorrect prefix
+        run: |
+          set +e
+          sh .github/scripts/data-index.sh .config.json ./empty-data-folder /prefix/ > /dev/null
+          [ $? -eq 3 ] || exit 1
+
+      - name: Test with no existing data that index outputs no data
+        run: |
+          set -e
+          sh .github/scripts/data-index.sh .config.json ./empty-data-folder/ | jq -r '.' > result
+          echo '[]' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing well-known data index outputs as expected
+        run: |
+          set -e
+          sh .github/scripts/data-index.sh .config.json .github/resources/test/well-known/existing-data-write-output/ /data | jq -r '.' > result
+          diff -q .github/resources/test/well-known/data-index-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/data-index-generated-output.json result; exit 1; }
