@@ -57,7 +57,7 @@ jobs:
         name: Publish data
         with:
           cwd: gh-pages
-          add: data
+          add: api/energy-price/
           push: true
           default_author: github_actions
           message: Update new data to GitHub pages via workflow
