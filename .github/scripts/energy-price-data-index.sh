@@ -32,13 +32,11 @@ PREFIX=$3
 DIR=/tmp/$$
 
 set -e
-which mkdir dirname cat jq tr sed > /dev/null
+which mkdir dirname grep cat jq tr sed > /dev/null
 
 mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
-
-SCRIPTS=$(dirname $0)
 
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
