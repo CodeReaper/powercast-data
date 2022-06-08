@@ -2,7 +2,7 @@
 	"name": "Alpine",
 	"build": {
 		"dockerfile": "Dockerfile",
-		"args": { "VARIANT": "3.14" }
+		"args": { "VARIANT": "3.15" }
 	},
 	"settings": {
 		"files.trimTrailingWhitespace": true,

@@ -1,4 +1,2 @@
-ARG VARIANT="3.15"
+ARG VARIANT
 FROM mcr.microsoft.com/vscode/devcontainers/base:0-alpine-${VARIANT}
-
-RUN git config --global --add safe.directory /workspaces/
