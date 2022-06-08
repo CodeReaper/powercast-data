@@ -1,9 +1,8 @@
 name: Pull data
 
 on:
-  # TODO: after successful run on main, enable schedule
-  # schedule:
-  #   - cron: '5 12,13,14,15,18,21 * * *'
+  schedule:
+    - cron: '5 12,13,14 * * *'
   workflow_dispatch: {}
 
 env:
