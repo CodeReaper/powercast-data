@@ -23,9 +23,9 @@ jobs:
       - shell: bash
         name: Pull data
         run: |
-          mkdir -p ./gh-pages/data/ > /dev/null
+          mkdir -p ./gh-pages/api/energy-price/ > /dev/null
 
-          sh .github/scripts/energy-price-data-matrix.sh .config.json ./gh-pages/data/ | jq -rc '.[]' | while read CONFIG; do
+          sh .github/scripts/energy-price-data-matrix.sh .config.json ./gh-pages/api/energy-price/ | jq -rc '.[]' | while read CONFIG; do
             ZONE=$(echo "$ITEM" | jq -r '.zone')
             ENDDATE=$(echo "$ITEM" | jq -r '.endDate')
 
@@ -38,13 +38,13 @@ jobs:
           for GENERATED in *.generated; do
             ZONE=$(basename $GENERATED .generated)
             echo "Using generated data for ${ZONE}..."
-            sh .github/scripts/energy-price-data-write.sh $GENERATED ./gh-pages/data/ $ZONE
+            sh .github/scripts/energy-price-data-write.sh $GENERATED ./gh-pages/api/energy-price/ $ZONE
           done
 
       - shell: bash
         name: Index data
         run: |
-          sh .github/scripts/energy-price-data-write.sh .config.json ./gh-pages/data/ /data > ./gh-pages/data/latest.json
+          sh .github/scripts/energy-price-data-write.sh .config.json ./gh-pages/api/energy-price/ /api/energy-price > ./gh-pages/api/energy-price/latest.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
