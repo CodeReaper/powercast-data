@@ -7,11 +7,11 @@ on:
   workflow_dispatch: {}
 
 env:
-  publish-branch: gh-pages2 # TODO: after successful run on main, change to just: gh-pages
+  publish-branch: gh-pages
 
 jobs:
   update-energy-price-data:
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     name: Update energy price data
     steps:
@@ -20,13 +20,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
-          ref: main
+          ref: ${{ env.publish-branch }}
           path: github-pages
-
-      - shell: bash
-        name: Checkout or create publish branch
-        working-directory: github-pages
-        run: git checkout ${{ env.publish-branch }} > /dev/null || git checkout -b ${{ env.publish-branch }}
 
       - shell: bash
         name: Pull data
