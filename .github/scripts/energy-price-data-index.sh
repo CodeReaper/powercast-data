@@ -48,16 +48,16 @@ set -e
 
 echo -n '[' > $DIR/output.json
 cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
+    [ -z "$ITEM" ] && continue
+
     cd $FOLDER
     AREA=$(echo $ITEM | jq -r '.zone')
-    LATEST=$(find * -type f -name "${AREA}.json" | sort -r | tail -n1)
+    LATEST=$(find * -type f -name "${AREA}.json" | sort | tail -n1)
     cd - > /dev/null
 
-    if [ -z "$LATEST" ]; then
-        continue
-    fi
+    [ -z "$LATEST" ] && continue
 
-    echo "{\"latest\":\"${PREFIX}/${LATEST}\",\"zone\":\"${AREA}\"}" >> $DIR/output.json
+    echo -n "{\"latest\":\"${PREFIX}/${LATEST}\",\"zone\":\"${AREA}\"}," >> $DIR/output.json
 done
 
 echo -n ']' >> $DIR/output.json

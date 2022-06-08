@@ -6,51 +6,56 @@ on:
   #   - cron: '5 12,13,14,15,18,21 * * *'
   workflow_dispatch: {}
 
+env:
+  publish-branch: gh-pages
+
 jobs:
-  setup-matrix:
+  update-energy-price-data:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    name: Setup matrix
+    name: Update energy price data
     steps:
       - uses: actions/checkout@v3
 
       - uses: actions/checkout@v3
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
-          ref: gh-pages2 # TODO: after successful run on main, set this to: gh-pages
-          path: gh-pages
+          ref: ${{ env.publish-branch }}
+          path: github-pages
 
       - shell: bash
         name: Pull data
         run: |
-          mkdir -p ./gh-pages/api/energy-price/ > /dev/null
+          mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
-          sh .github/scripts/energy-price-data-matrix.sh .config.json ./gh-pages/api/energy-price/ | jq -rc '.[]' | while read CONFIG; do
-            ZONE=$(echo "$ITEM" | jq -r '.zone')
-            ENDDATE=$(echo "$ITEM" | jq -r '.endDate')
+          sh .github/scripts/energy-price-data-matrix.sh .config.json ./github-pages/api/energy-price/ | jq -rc '.[]' | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            ENDDATE=$(echo "$CONFIG" | jq -r '.endDate')
 
-            sh .github/scripts/energy-price-data-pull.sh $ZONE ${ENDDATE} > "${ZONE}.generated"
+            echo "Pull data for ${ZONE} until ${ENDDATE}..."
+            sh .github/scripts/energy-price-data-pull.sh $ZONE $ENDDATE > "${ZONE}.generated"
           done
 
       - shell: bash
         name: Write data
         run: |
           for GENERATED in *.generated; do
+            [ -f "$GENERATED" ] || continue
             ZONE=$(basename $GENERATED .generated)
             echo "Using generated data for ${ZONE}..."
-            sh .github/scripts/energy-price-data-write.sh $GENERATED ./gh-pages/api/energy-price/ $ZONE
+            sh .github/scripts/energy-price-data-write.sh $GENERATED ./github-pages/api/energy-price/ $ZONE
           done
 
       - shell: bash
         name: Index data
         run: |
-          sh .github/scripts/energy-price-data-write.sh .config.json ./gh-pages/api/energy-price/ /api/energy-price > ./gh-pages/api/energy-price/latest.json
+          sh .github/scripts/energy-price-data-index.sh .config.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/latest.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
         with:
-          cwd: gh-pages
-          add: data
-          push: true
+          cwd: github-pages
+          add: api/energy-price/
+          push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
-          message: Update new data to GitHub pages via workflow
+          message: Publish new data via workflow
