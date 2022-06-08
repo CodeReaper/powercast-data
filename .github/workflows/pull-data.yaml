@@ -23,7 +23,7 @@ jobs:
       - shell: bash
         name: Checkout or create github pages branch
         working-directory: gh-pages
-        run: git checkout gh-pages2 || git checkout -b gh-pages2 # TODO: after successful run on main, change to just: gh-pages
+        run: git checkout gh-pages2 > /dev/null || git checkout -b gh-pages2 # TODO: after successful run on main, change to just: gh-pages
 
       - shell: bash
         name: Pull data
@@ -34,7 +34,7 @@ jobs:
             ZONE=$(echo "$ITEM" | jq -r '.zone')
             ENDDATE=$(echo "$ITEM" | jq -r '.endDate')
 
-            sh .github/scripts/energy-price-data-pull.sh $ZONE ${ENDDATE} > "${ZONE}.generated"
+            sh .github/scripts/energy-price-data-pull.sh $ZONE $ENDDATE > "${ZONE}.generated"
           done
 
       - shell: bash
