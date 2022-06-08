@@ -49,7 +49,9 @@ set -e
 echo -n '[' > $DIR/output.json
 cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
     cd $FOLDER
+    echo "$ITEM" >&2
     AREA=$(echo $ITEM | jq -r '.zone')
+    find . -type f -name "${AREA}.json" | sort -r | tail -n1 >&2
     LATEST=$(find * -type f -name "${AREA}.json" | sort -r | tail -n1)
     cd - > /dev/null
 
