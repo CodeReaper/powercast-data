@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+		<title>Energy Prices</title>
+        <style>
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        </style>
+	</head>
+	<body>
+		<div class="container">
+            <canvas id="graph"></canvas>
+        </div>
+
+        <script type="text/javascript" src="data.js"></script>
+		<script type="text/javascript">
+            new Chart(document.getElementById('graph').getContext('2d'), {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            text: 'Energy Prices',
+                            display: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            display: true,
+                            time: {
+                                tooltipFormat: 'DD T', // Luxon format string
+                                unit: 'hour'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            },
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Cost/Euro'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 600
+                        }
+                    }
+                }
+            });
+        </script>
+	</body>
+</html>

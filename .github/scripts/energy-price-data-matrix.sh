@@ -55,6 +55,8 @@ cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM;
     if [ $DIFFERENCE -gt $DELAY ]; then
         echo -n "$ITEM" >> $DIR/matrix.json
         echo -n "," >> $DIR/matrix.json
+    else
+        echo "Skipping $AREA since difference is $DIFFERENCE" >&2
     fi
 done
 

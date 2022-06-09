@@ -150,3 +150,39 @@ jobs:
           set -e
           sh .github/scripts/energy-price-data-index.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ /data | jq -r '.' > result
           diff -q .github/resources/test/well-known/energy-price-data-index-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/energy-price-data-index-generated-output.json result; exit 1; }
+
+  test-energy-price-data-graph:
+    name: Test data graph
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        run: |
+          mkdir ./empty-data-folder
+
+      - name: Test non-existing file
+        run: |
+          set +e
+          sh .github/scripts/energy-price-data-graph.sh .non-existing-file.json ./empty-data-folder > /dev/null
+          [ $? -eq 1 ] || exit 1
+
+      - name: Test non-existing directory
+        run: |
+          set +e
+          sh .github/scripts/energy-price-data-graph.sh .config.json ./non-existing-directory/ > /dev/null
+          [ $? -eq 2 ] || exit 1
+
+      # - name: Test with no existing data that graph outputs no data
+      #   run: |
+      #     set -e
+      #     sh .github/scripts/energy-price-data-graph.sh .config.json ./empty-data-folder/ | jq -r '.' > result
+      #     echo '[]' > expected
+      #     diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      # - name: Test with existing data that graph outputs as expected
+      #   run: |
+      #     set -e
+      #     sh .github/scripts/energy-price-data-graph.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ > result
+      #     echo '[]' > expected # TODO: fix
+      #     diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
