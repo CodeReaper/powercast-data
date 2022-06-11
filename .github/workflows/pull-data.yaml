@@ -23,11 +23,16 @@ jobs:
           path: github-pages
 
       - shell: bash
+        id: update-energy-price-data
         name: Pull data
         run: |
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
+          echo "::set-output name=changed::false"
+
           sh .github/scripts/energy-price-data-matrix.sh .config.json ./github-pages/api/energy-price/ | jq -rc '.[]' | while read CONFIG; do
+            echo "::set-output name=changed::true"
+
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             ENDDATE=$(echo "$CONFIG" | jq -r '.endDate')
 
@@ -36,6 +41,7 @@ jobs:
           done
 
       - shell: bash
+        if: steps.update-energy-price-data.outputs.changed == 'true'
         name: Write data
         run: |
           for GENERATED in *.generated; do
@@ -46,11 +52,13 @@ jobs:
           done
 
       - shell: bash
+        if: steps.update-energy-price-data.outputs.changed == 'true'
         name: Index data
         run: |
           sh .github/scripts/energy-price-data-index.sh .config.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/latest.json
 
       - uses: EndBug/add-and-commit@v9
+        if: steps.update-energy-price-data.outputs.changed == 'true'
         name: Publish data
         with:
           cwd: github-pages
