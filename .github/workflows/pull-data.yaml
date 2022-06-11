@@ -92,10 +92,10 @@ jobs:
           message: Publish new data via workflow
 
   update-energy-price-visualization:
-    if: github.ref == 'refs/heads/main' && needs.update-energy-price-data.steps.update-energy-price-data.outputs.changed == 'true'
     runs-on: ubuntu-latest
     needs: update-energy-price-data
     name: Update energy price visualization
+    if: github.ref == 'refs/heads/main' && needs.update-energy-price-data.steps.update-energy-price-data.outputs.changed == 'true'
     steps:
       - uses: actions/checkout@v3
 
