@@ -26,7 +26,7 @@ which jq cat > /dev/null
 
 LATEST=$(cat "$FILE" | jq -r 'map(.timestamp | values) | max')
 
-if [ -z "$LATEST" ] || [ "null" == "$LATEST" ]; then
+if [ -z "$LATEST" ] || [ "null" = "$LATEST" ]; then
     echo $ENDDATE
     exit 0
 fi
