@@ -75,9 +75,9 @@ jobs:
       - name: Test with no existing data that matrix contains all items from the configuration
         run: |
           set -e
-          sh .github/scripts/energy-price-data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
-          jq -r '.[] |=(.latest = .endDate | del(.endDate))' .config.json > expected
-          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+          sh .github/scripts/energy-price-data-matrix.sh .config.json ./empty-data-folder/ | jq -rc '.' > result
+          grep -q 1654041600 result
+          [ $(grep 1654041600 result | wc -l) -eq $(jq -r '.' .config.json | grep zone |wc -l) ]
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
         run: |
