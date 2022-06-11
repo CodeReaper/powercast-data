@@ -113,7 +113,7 @@ jobs:
           [ -d ./github-pages/api/energy-price/ ] || exit 0
 
           cp .github/resources/energy-price-graph/index.html ./github-pages/
-          sh .github/scripts/energy-price-data-graph.sh .config.json ./github-pages/api/energy-price/ > ./github-pages/data.js
+          sh .github/scripts/energy-price-data-graph.sh .config.json ./github-pages/api/energy-price/ $(date -d -5days +"%s") > ./github-pages/data.js
 
       - uses: EndBug/add-and-commit@v9
         name: Publish graph

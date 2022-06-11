@@ -42,7 +42,7 @@
                 flippy = !flippy;
                 return {
                     type: 'box',
-                    backgroundColor: flippy ? '#EBEFFB' : '#C3CBCF',
+                    backgroundColor: flippy ? '#E4ECF1' : '#EBEBEB',
                     borderWidth: 0,
                     xMax: Math.max(...day),
                     xMin: Math.min(...day),
@@ -50,7 +50,7 @@
             });
 
             const now = new Date().getTime();
-            annotations.splice(0, 0, {
+            annotations.push({
                 type: 'line',
                 backgroundColor: 'black',
                 borderWidth: 1,
@@ -58,48 +58,53 @@
                 value: now,
             });
 
+            const options = {
+                responsive: true,
+                radius: 0,
+                hitRadius: 4,
+                tension: 0.2,
+                plugins: {
+                    title: {
+                        text: 'Energy Prices',
+                        display: true
+                    },
+                    annotation: {
+                        drawTime: 'beforeDraw',
+                        annotations: annotations
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        display: true,
+                        time: {
+                            unit: 'hour',
+                            tooltipFormat: 'YYYY-MM-DD HH:00',
+                            displayFormats: {
+                                hour: 'YYYY-MM-DD HH:00'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        },
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Cost | Euro'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 300
+                    }
+                }
+            };
+
             new Chart(document.getElementById('graph').getContext('2d'), {
                 type: 'line',
                 data: data,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            text: 'Energy Prices',
-                            display: true
-                        },
-                        annotation: {
-                            drawTime: 'beforeDraw',
-                            annotations: annotations
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            display: true,
-                            time: {
-                                unit: 'hour',
-                                tooltipFormat: 'YYYY-MM-DD HH',
-                                displayFormats: {
-                                    hour: 'YYYY-MM-DD HH'
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            },
-                        },
-                        y: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Cost/Euro'
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 600
-                        }
-                    }
-                }
+                options: options
             });
         </script>
 	</body>

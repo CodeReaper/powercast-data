@@ -11,20 +11,17 @@
 #       Examples:
 #           - ./
 #           - data/
-#   - data points:
-#       Will limit the output to this amount of data points per configured zone.
-#       Optional, will default to 500
-#       Must a positive number.
-#       Examples:
-#           - 10
-#           - 105
+#   - cut off date:
+#       Will limit the output to this date per configured zone.
+#       Must be a unix timestamp.
+#       Example: 1654012800
 
 # Output example:
 # "HTML" that can display graphs
 
 CONFIG=$1
 FOLDER=$2
-MAX_LENGTH=${3:-500}
+ENDDATE=$3
 DIR=/tmp/$$
 
 set -e
@@ -36,7 +33,7 @@ trap 'exit 2' 1 2 3 15
 
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
-[ 0 -lt "$MAX_LENGTH" ] || { echo "Not a valid number: $MAX_LENGTH"; exit 3; }
+[ -z "$ENDDATE" ] && { echo "Not a valid number: $ENDDATE"; exit 3; }
 
 echo "const data = { datasets: [" > $DIR/result.json
 
@@ -46,13 +43,13 @@ cat "$CONFIG" | jq -rc '.[]' | while read ITEM; do
 
     cd $FOLDER
     echo '[]' > $DIR/data.json
-    find * -type f -name "${AREA}.json" | sort | while read FILE; do
+    find * -type f -name "${AREA}.json" | sort -r | while read FILE; do
 
-        jq -s '.[0] + .[1]' $DIR/data.json $FILE > $DIR/data.combined.json
+        jq -s ".[0] + .[1] | map(select(.timestamp > $ENDDATE))" $DIR/data.json $FILE > $DIR/data.combined.json
         mv -f $DIR/data.combined.json $DIR/data.json
 
         LENGTH=$(cat $DIR/data.json | jq -r 'length')
-        if [ $LENGTH -gt $MAX_LENGTH ]; then
+        if [ $LENGTH -eq 0 ]; then
             break
         fi
 
@@ -67,9 +64,9 @@ cat "$CONFIG" | jq -rc '.[]' | while read ITEM; do
     echo "  {" >> $DIR/result.json
     echo "    label: \"${AREA}\"," >> $DIR/result.json
     echo -n "    data: " >> $DIR/result.json
-    cat $DIR/data.json | jq -rc ".[0:${MAX_LENGTH}] |= map(.x = .timestamp | .y = .euro | del(.timestamp, .euro))" | tr -d \\n >> $DIR/result.json
+    cat $DIR/data.json | jq -rc ". |= map(.x = .timestamp | .y = .euro | del(.timestamp, .euro)) | sort_by(.x)" | tr -d \\n >> $DIR/result.json
     echo ".map((e) => ({x:e.x *= 1000, y:e.y}))," >> $DIR/result.json
-    echo "    pointBackgroundColor: \"${COLOR}\", backgroundColor: \"${COLOR}\"," >> $DIR/result.json
+    echo "    pointBackgroundColor: \"${COLOR}\", backgroundColor: \"${COLOR}\", borderColor: \"${COLOR}\"," >> $DIR/result.json
     echo '  },' >> $DIR/result.json
 
 done
