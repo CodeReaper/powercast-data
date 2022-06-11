@@ -43,9 +43,11 @@ cat "$CONFIG" | jq -rc '.[]' | while read ITEM; do
 
     cd $FOLDER
     echo '[]' > $DIR/data.json
+    mkdir find-helper
     find * -type f -name "${AREA}.json" | sort -r | while read FILE; do
+        [ -f "$FILE" ] || continue
 
-        jq -s ".[0] + .[1] | map(select(.timestamp > $ENDDATE))" $DIR/data.json $FILE > $DIR/data.combined.json
+        jq -s ".[0] + .[1] | map(select(.timestamp >= $ENDDATE))" $DIR/data.json $FILE > $DIR/data.combined.json
         mv -f $DIR/data.combined.json $DIR/data.json
 
         LENGTH=$(cat $DIR/data.json | jq -r 'length')
@@ -54,6 +56,7 @@ cat "$CONFIG" | jq -rc '.[]' | while read ITEM; do
         fi
 
     done
+    rmdir find-helper
     cd - > /dev/null
 
     LENGTH=$(cat $DIR/data.json | jq -r 'length')

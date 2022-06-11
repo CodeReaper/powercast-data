@@ -51,8 +51,10 @@ cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM;
     [ -z "$ITEM" ] && continue
 
     cd $FOLDER
+    mkdir find-helper
     AREA=$(echo $ITEM | jq -r '.zone')
     LATEST=$(find * -type f -name "${AREA}.json" | sort | tail -n1)
+    rmdir find-helper
     cd - > /dev/null
 
     [ -z "$LATEST" ] && continue

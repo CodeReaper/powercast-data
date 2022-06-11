@@ -254,16 +254,15 @@ jobs:
           sh .github/scripts/energy-price-data-graph.sh .config.json ./empty-data-folder > /dev/null
           [ $? -eq 3 ] || exit 1
 
-      # - name: Test with no existing data that graph outputs no data
-      #   run: |
-      #     set -e
-      #     sh .github/scripts/energy-price-data-graph.sh .config.json ./empty-data-folder/ | jq -r '.' > result
-      #     echo '[]' > expected
-      #     diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+      - name: Test with no existing data that graph outputs no data
+        run: |
+          set -e
+          sh .github/scripts/energy-price-data-graph.sh .config.json ./empty-data-folder/ 0 | tr -d \\n > result
+          echo -n 'const data = { datasets: [] };' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
-      # - name: Test with existing data that graph outputs as expected
-      #   run: |
-      #     set -e
-      #     sh .github/scripts/energy-price-data-graph.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ > result
-      #     echo '[]' > expected # TODO: fix
-      #     diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+      - name: Test with existing data that graph outputs as expected
+        run: |
+          set -e
+          sh .github/scripts/energy-price-data-graph.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ 1654290000 > result
+          grep -q 1654290000 result
