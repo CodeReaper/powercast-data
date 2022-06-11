@@ -37,4 +37,9 @@ AREA=$(echo "$AREA" | tr [:lower:] [:upper:])
 
 LATEST=$(find "$FOLDER" -name "${AREA}.json" | sort | tail -n1)
 
+if [ -z "$LATEST" ]; then
+    echo $ENDDATE
+    exit 0
+fi
+
 echo $(sh "${SCRIPTS}/energy-price-data-freshness-file.sh" "$LATEST" "$ENDDATE")
