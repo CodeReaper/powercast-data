@@ -23,6 +23,41 @@
 
         <script type="text/javascript" src="data.js"></script>
 		<script type="text/javascript">
+            const stamps = Array.from(new Set(data.datasets.flatMap((set) => set.data.map((it) => it.x)))).sort((a, b) => a - b);
+            const groupByDay = (data) => {
+                const grouped = data.reduce((holder, item) => {
+                    const date = new Date(item).toDateString();
+                    if (!holder.hasOwnProperty(date)) {
+                        holder[date] = []
+                    }
+                    holder[date].push(item);
+                    return holder;
+                }, {});
+                return Object.keys(grouped).map((key) => grouped[key]);
+            }
+            const days = groupByDay(stamps);
+
+            var flippy = true;
+            var annotations = days.map((day) => {
+                flippy = !flippy;
+                return {
+                    type: 'box',
+                    backgroundColor: flippy ? '#EBEFFB' : '#C3CBCF',
+                    borderWidth: 0,
+                    xMax: Math.max(...day),
+                    xMin: Math.min(...day),
+                }
+            });
+
+            const now = new Date().getTime();
+            annotations.splice(0, 0, {
+                type: 'line',
+                backgroundColor: 'black',
+                borderWidth: 1,
+                scaleID: 'x',
+                value: now,
+            });
+
             new Chart(document.getElementById('graph').getContext('2d'), {
                 type: 'line',
                 data: data,
@@ -35,36 +70,7 @@
                         },
                         annotation: {
                             drawTime: 'beforeDraw',
-                            annotations: [
-                                {
-                                    type: 'line',
-                                    backgroundColor: 'black',
-                                    borderWidth: 1,
-                                    scaleID: 'x',
-                                    value: 1654293200000,
-                                    label: {
-                                        drawTime: 'afterDraw',
-                                        enabled: true,
-                                        content: 'Now',
-                                    }
-                                },
-                                {
-                                    type: 'box',
-                                    backgroundColor: 'rgba(255, 245, 157, 0.2)',
-                                    borderWidth: 0,
-                                    xMax: 1654297200000,
-                                    xMin: 1654214400000,
-                                    label: {
-                                        drawTime: 'afterDraw',
-                                        enabled: true,
-                                        content: 'Day something',
-                                        position: {
-                                            x: 'center',
-                                            y: 'start'
-                                        }
-                                    }
-                                },
-                            ]
+                            annotations: annotations
                         }
                     },
                     scales: {
