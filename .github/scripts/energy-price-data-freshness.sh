@@ -26,7 +26,9 @@ AREA=$2
 ENDDATE=$3
 
 set -e
-which find sort tail jq cat > /dev/null
+which dirname find sort tail jq > /dev/null
+
+SCRIPTS=$(dirname $0)
 
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 1; }
 AREA=$(echo "$AREA" | tr [:lower:] [:upper:])
@@ -35,9 +37,4 @@ AREA=$(echo "$AREA" | tr [:lower:] [:upper:])
 
 LATEST=$(find "$FOLDER" -name "${AREA}.json" | sort | tail -n1)
 
-if [ -z "$LATEST" ] || [ ! -f $LATEST ]; then
-    echo $ENDDATE
-    exit 0
-fi
-
-cat "$LATEST" | jq -r 'map(.timestamp | values) | max'
+echo $(sh "${SCRIPTS}/energy-price-data-freshness-file.sh" "$LATEST" "$ENDDATE")

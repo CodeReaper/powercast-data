@@ -23,21 +23,41 @@ jobs:
           path: github-pages
 
       - shell: bash
-        id: update-energy-price-data
+        name: Setup configuration
+        run: |
+          sh .github/scripts/energy-price-data-matrix.sh .config.json ./github-pages/api/energy-price/ | tee configuration.json
+
+      - shell: bash
         name: Pull data
         run: |
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
-          echo "::set-output name=changed::false"
-
-          sh .github/scripts/energy-price-data-matrix.sh .config.json ./github-pages/api/energy-price/ | jq -rc '.[]' | while read CONFIG; do
-            echo "::set-output name=changed::true"
-
+          jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             LATEST=$(echo "$CONFIG" | jq -r '.latest')
 
             echo "Pull data for ${ZONE} until ${LATEST}..."
             sh .github/scripts/energy-price-data-pull.sh $ZONE $LATEST > "${ZONE}.generated"
+          done
+
+      - shell: bash
+        id: update-energy-price-data
+        name: Write data
+        run: |
+          echo "::set-output name=changed::false"
+
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            GENERATED="${ZONE}.generated"
+
+            [ -f "$GENERATED" ] || continue
+
+            NEW=$(sh .github/scripts/energy-price-data-freshness-file.sh $GENERATED $LATEST)
+
+            if [ $NEW -gt $LATEST ]; then
+              echo "::set-output name=changed::true"
+            fi
           done
 
       - shell: bash

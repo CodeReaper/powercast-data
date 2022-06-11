@@ -147,6 +147,44 @@ jobs:
           sh .github/scripts/energy-price-data-pull.sh DK1 1654545600 http://localhost:8000/ > result
           diff -q .github/resources/test/well-known/energy-price-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/energy-price-data-pull-generated-output.json result; exit 1; }
 
+  test-energy-price-data-freshness-file:
+    name: Test data freshness-file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        run: |
+          echo '[]' > ./empty-file
+
+      - name: Test non-existing file
+        run: |
+          set +e
+          sh .github/scripts/energy-price-data-freshness-file.sh .non-existing-file.json 0 > /dev/null
+          [ $? -eq 1 ] || exit 1
+
+      - name: Test missing fall back date
+        run: |
+          set +e
+          sh .github/scripts/energy-price-data-freshness-file.sh empty-file > /dev/null
+          [ $? -eq 2 ] || exit 1
+
+      - name: Test freshness with no data will outout fall back date
+        run: |
+          set -e
+
+          sh .github/scripts/energy-price-data-freshness-file.sh empty-file 12345 > expected
+          echo '12345' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test freshness with existing data will outout as expected
+        run: |
+          set -e
+
+          sh .github/scripts/energy-price-data-freshness-file.sh .github/resources/test/well-known/energy-price-data-pull-generated-output.json 12345 > expected
+          echo '1654545600' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
   test-energy-price-data-index:
     name: Test data index
     runs-on: ubuntu-latest
