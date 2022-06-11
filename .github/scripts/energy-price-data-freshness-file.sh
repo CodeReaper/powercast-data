@@ -24,9 +24,9 @@ which jq cat > /dev/null
 [ -f "$FILE" ] || { echo "Not a FILE: $FILE"; exit 1; }
 [ -z $ENDDATE ] && { echo "Invalid/Missing ENDDATE."; exit 2; }
 
-LATEST=$(cat "$LATEST" | jq -r 'map(.timestamp | values) | max')
+LATEST=$(cat "$FILE" | jq -r 'map(.timestamp | values) | max')
 
-if [ -z "$LATEST" ]; then
+if [ -z "$LATEST" ] || [ "null" == "$LATEST" ]; then
     echo $ENDDATE
     exit 0
 fi
