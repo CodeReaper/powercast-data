@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Takes two arguments:
+# Takes three arguments:
 #   - config file:
-#       Will be used to generating graphs for all data.
+#       Will be used to determine what to generate graphs for.
 #       Examples:
 #           - .config.json
 #           - test.json
