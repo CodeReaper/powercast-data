@@ -2,7 +2,7 @@ name: Pull data
 
 on:
   schedule:
-    - cron: '5 12,13,14 * * *'
+    - cron: '5 0,4,8,12,16,10 * * *'
   workflow_dispatch: {}
 
 env:
@@ -23,21 +23,45 @@ jobs:
           path: github-pages
 
       - shell: bash
-        id: update-energy-price-data
+        name: Setup configuration
+        run: |
+          sh .github/scripts/energy-price-data-matrix.sh .config.json ./github-pages/api/energy-price/ | tee configuration.json
+
+      - shell: bash
         name: Pull data
         run: |
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+
+            echo "Pull data for ${ZONE} until ${LATEST}..."
+            sh .github/scripts/energy-price-data-pull.sh $ZONE $LATEST > "${ZONE}.generated"
+          done
+
+      - shell: bash
+        id: update-energy-price-data
+        name: Check for new data
+        run: |
           echo "::set-output name=changed::false"
 
-          sh .github/scripts/energy-price-data-matrix.sh .config.json ./github-pages/api/energy-price/ | jq -rc '.[]' | while read CONFIG; do
-            echo "::set-output name=changed::true"
-
+          jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            ENDDATE=$(echo "$CONFIG" | jq -r '.endDate')
+            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            GENERATED="${ZONE}.generated"
 
-            echo "Pull data for ${ZONE} until ${ENDDATE}..."
-            sh .github/scripts/energy-price-data-pull.sh $ZONE $ENDDATE > "${ZONE}.generated"
+            [ -f "$GENERATED" ] || continue
+
+            NEW=$(sh .github/scripts/energy-price-data-freshness-file.sh $GENERATED $LATEST)
+
+            echo "Checking data for ${ZONE}:"
+            echo " - ${LATEST} - current data"
+            echo " - ${NEW} - new data"
+
+            if [ $NEW -gt $LATEST ]; then
+              echo "::set-output name=changed::true"
+            fi
           done
 
       - shell: bash
