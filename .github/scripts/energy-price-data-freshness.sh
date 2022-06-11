@@ -29,10 +29,13 @@ set -e
 which find sort tail jq cat > /dev/null
 
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 1; }
+AREA=$(echo "$AREA" | tr [:lower:] [:upper:])
+[ -z $AREA ] && { echo "Invalid/Missing area."; exit 2; }
+[ -z $ENDDATE ] && { echo "Invalid/Missing ENDDATE."; exit 3; }
 
 LATEST=$(find "$FOLDER" -name "${AREA}.json" | sort | tail -n1)
 
-if [ -z $LATEST ]; then
+if [ ! -f $LATEST ]; then
     echo $ENDDATE
     exit 0
 fi

@@ -22,8 +22,7 @@
 # [
 #   {
 #     "zone": "DK2",
-#     "endDate": 1654041600,
-#     "expectedDelay": 286400
+#     "latest": 1654041600
 #   },
 #   ...
 # ]
@@ -49,15 +48,8 @@ echo -n '[' > $DIR/matrix.json
 cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
     AREA=$(echo $ITEM | jq -r '.zone')
     ENDDATE=$(echo $ITEM | jq -r '.endDate')
-    DELAY=$(echo $ITEM | jq -r '.expectedDelay')
     LATEST=$(sh "${SCRIPTS}/energy-price-data-freshness.sh" "$FOLDER" "$AREA" "$ENDDATE")
-    DIFFERENCE=$(($CURRENTDATE-$LATEST))
-    if [ $DIFFERENCE -gt $DELAY ]; then
-        echo -n "$ITEM" >> $DIR/matrix.json
-        echo -n "," >> $DIR/matrix.json
-    else
-        echo "Skipping $AREA since difference is $DIFFERENCE" >&2
-    fi
+    echo -n "{\"zone\":\"${AREA}\",\"latest\":${LATEST}}," >> $DIR/matrix.json
 done
 
 echo -n ']' >> $DIR/matrix.json

@@ -8,6 +8,48 @@ on:
       - main
 
 jobs:
+  test-energy-price-data-freshness:
+    name: Test data freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        run: |
+          mkdir ./empty-data-folder
+
+      - name: Test non-existing directory
+        run: |
+          set +e
+          sh .github/scripts/energy-price-data-freshness.sh ./non-existing-directory/ DK1 0 > /dev/null
+          [ $? -eq 1 ] || exit 1
+
+      - name: Test missing area
+        run: |
+          set +e
+          sh .github/scripts/energy-price-data-freshness.sh ./empty-data-folder/ 0 > /dev/null
+          [ $? -eq 2 ] || exit 1
+
+      - name: Test missing end date
+        run: |
+          set +e
+          sh .github/scripts/energy-price-data-freshness.sh ./empty-data-folder/ DK1 > /dev/null
+          [ $? -eq 3 ] || exit 1
+
+      - name: Test with no existing data that freshness outputs the fall back date
+        run: |
+          set -e
+          sh .github/scripts/energy-price-data-freshness.sh ./empty-data-folder/ DK1 12345 > result
+          echo '12345' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing well-known data that freshness outputs as expected
+        run: |
+          set -e
+          sh .github/scripts/energy-price-data-freshness.sh .github/resources/test/well-known/existing-energy-price-data-write-output/ DK1 12345 > result
+          echo '1654297200' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
   test-energy-price-data-matrix:
     name: Test data matrix
     runs-on: ubuntu-latest
