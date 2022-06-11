@@ -1,8 +1,8 @@
 name: Pull data
 
 on:
-  schedule:
-    - cron: '5 12,13,14 * * *'
+  # schedule:
+  #   - cron: '5 12,13,14 * * *'
   workflow_dispatch: {}
 
 env:
@@ -10,7 +10,7 @@ env:
 
 jobs:
   update-energy-price-data:
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     name: Update energy price data
     steps:
@@ -57,12 +57,12 @@ jobs:
         run: |
           sh .github/scripts/energy-price-data-index.sh .config.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/latest.json
 
-      - uses: EndBug/add-and-commit@v9
-        if: steps.update-energy-price-data.outputs.changed == 'true'
-        name: Publish data
-        with:
-          cwd: github-pages
-          add: api/energy-price/
-          push: --set-upstream origin ${{ env.publish-branch }}
-          default_author: github_actions
-          message: Publish new data via workflow
+      # - uses: EndBug/add-and-commit@v9
+      #   if: steps.update-energy-price-data.outputs.changed == 'true'
+      #   name: Publish data
+      #   with:
+      #     cwd: github-pages
+      #     add: api/energy-price/
+      #     push: --set-upstream origin ${{ env.publish-branch }}
+      #     default_author: github_actions
+      #     message: Publish new data via workflow
