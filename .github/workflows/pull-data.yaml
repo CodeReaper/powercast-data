@@ -55,7 +55,10 @@ jobs:
 
             NEW=$(sh .github/scripts/energy-price-data-freshness-file.sh $GENERATED $LATEST)
 
-            echo "Checking data for ${ZONE}:\n - ${LATEST} - current data\n - ${NEW} - new data"
+            echo "Checking data for ${ZONE}:"
+            echo " - ${LATEST} - current data"
+            echo " - ${NEW} - new data"
+
             if [ $NEW -gt $LATEST ]; then
               echo "::set-output name=changed::true"
             fi
