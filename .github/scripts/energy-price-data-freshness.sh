@@ -35,7 +35,7 @@ AREA=$(echo "$AREA" | tr [:lower:] [:upper:])
 
 LATEST=$(find "$FOLDER" -name "${AREA}.json" | sort | tail -n1)
 
-if [ ! -f $LATEST ]; then
+if [ -z "$LATEST" ] || [ ! -f $LATEST ]; then
     echo $ENDDATE
     exit 0
 fi

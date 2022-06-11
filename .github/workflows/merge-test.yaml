@@ -28,7 +28,7 @@ jobs:
         run: |
           set +e
           sh .github/scripts/energy-price-data-freshness.sh ./empty-data-folder/ 0 > /dev/null
-          [ $? -eq 2 ] || exit 1
+          [ $? -ne 0 ] || exit 1
 
       - name: Test missing end date
         run: |
@@ -76,20 +76,15 @@ jobs:
         run: |
           set -e
           sh .github/scripts/energy-price-data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
-          jq -r '.' .config.json > expected
+          jq -r '.[] |=(.latest = .endDate | del(.endDate))' .config.json > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
         run: |
           set -e
-          sh .github/scripts/energy-price-data-matrix.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ 1654300800 | jq -rc '.' > result
-          grep -vq DK1 result
-
-      - name: Test with existing well-known data when it was a day old that matrix does contain DK1 items from the configuration
-        run: |
-          set -e
-          sh .github/scripts/energy-price-data-matrix.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ 1654387200 | jq -rc '.' > result
-          grep -q DK1 result
+          sh .github/scripts/energy-price-data-matrix.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ | jq -rc '.' > result
+          grep -q 1654297200 result
+          grep -q 1654041600 result
 
   test-energy-price-data-write:
     name: Test data write
