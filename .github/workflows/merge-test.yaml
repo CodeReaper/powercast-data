@@ -182,7 +182,7 @@ jobs:
           set -e
 
           sh .github/scripts/energy-price-data-freshness-file.sh .github/resources/test/well-known/energy-price-data-pull-generated-output.json 12345 > result
-          echo '1654545600' > expected
+          echo '1654722000' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
   test-energy-price-data-index:
