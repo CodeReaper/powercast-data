@@ -328,7 +328,7 @@ jobs:
 
           echo 'const data = { datasets: [] };' > expected
           echo 'const displayGroups = [];' >> expected
-          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+          diff -q expected ./output-folder/data.js || { echo "Unexpected difference:"; diff expected ./output-folder/data.js; exit 1; }
           grep -qF "const baseUri = '/';" ./output-folder/index.html
 
           rm -rf ./output-folder
