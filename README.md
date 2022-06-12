@@ -46,7 +46,7 @@ The response is the cost over time using the following format:
 
 Go and check the [https://codereaper.github.io/powercast-data/](graph).
 
-## TODOs:
+## Future goals:
 
 - Add more zones
 - Add standalone graphs for each zone
