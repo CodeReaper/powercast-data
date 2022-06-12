@@ -129,7 +129,7 @@ jobs:
           [ -d ./github-pages/api/energy-price/ ] || exit 0
 
           DISPLAY_GROUPS=$(cat .config.json | jq -rcj '. | map(.display.zone=.zone) | map(.display) | group_by(.group) | map({ group: (.[0].group), country: (.[0].country), values: [.[] | del(.group, .country)] })')
-          sh .github/scripts/energy-price-data-graph-data.sh .config.json ./github-pages/api/energy-price/ $(date -d -5days +"%s") ./github-pages/energy-price/ '//codereaper.github.io/powercast-data/' '$DISPLAY_GROUPS'
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./github-pages/api/energy-price/ $(date -d -5days +"%s") ./github-pages/energy-price/ '//codereaper.github.io/powercast-data/' '$DISPLAY_GROUPS'
 
       - shell: bash
         name: Generate each country energy price visualization
@@ -145,7 +145,7 @@ jobs:
 
             cat .config.json | jq -r ". | map(select(.display.group == \"${GROUP}\"))" > group.json
 
-            sh .github/scripts/energy-price-data-graph-data.sh group.json ./github-pages/api/energy-price/ $DATE ./github-pages/energy-price/$group/
+            sh .github/scripts/energy-price-data-graph-directory.sh group.json ./github-pages/api/energy-price/ $DATE ./github-pages/energy-price/$group/
           done
 
       - shell: bash
@@ -160,7 +160,7 @@ jobs:
 
             cat .config.json | jq -r ". | map(select(.zone == \"${AREA}\"))" > area.json
 
-            sh .github/scripts/energy-price-data-graph-data.sh area.json ./github-pages/api/energy-price/ $DATE ./github-pages/energy-price/$area/
+            sh .github/scripts/energy-price-data-graph-directory.sh area.json ./github-pages/api/energy-price/ $DATE ./github-pages/energy-price/$area/
           done
 
       - uses: EndBug/add-and-commit@v9
