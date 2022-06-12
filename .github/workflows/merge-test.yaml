@@ -149,7 +149,7 @@ jobs:
 
       - name: Test pull makes a request with end date set to now
         run: |
-          set -e
+          set +e
           export PATH=.github/resources/test/mocks/:$PATH
           unset WGET_OVERRIDE
 
@@ -158,7 +158,7 @@ jobs:
 
       - name: Test pull makes no requests with end date far in the future
         run: |
-          set -e
+          set +e
           export PATH=.github/resources/test/mocks/:$PATH
           unset WGET_OVERRIDE
 
