@@ -17,7 +17,22 @@
 #       Example: 1654012800
 
 # Output example:
-# "Javascript data" that can display graphs
+# [
+#   {
+#     "label": "DK1",
+#     "data": [
+#       {
+#         "x": 1654290000000,
+#         "y": 154.46
+#       },
+#       // ...
+#     ],
+#     "pointBackgroundColor": "#D04D48",
+#     "backgroundColor": "#D04D48",
+#     "borderColor": "#D04D48"
+#   },
+#   // ...
+# ]
 
 CONFIG=$1
 FOLDER=$2
@@ -35,11 +50,11 @@ trap 'exit 2' 1 2 3 15
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
 [ -z "$ENDDATE" ] && { echo "Not a valid number: $ENDDATE"; exit 3; }
 
-echo "const data = { datasets: [" > $DIR/result.json
+echo '[' > $DIR/result.json
 
 cat "$CONFIG" | jq -rc '.[]' | while read ITEM; do
     AREA=$(echo $ITEM | jq -r '.zone')
-    COLOR=$(echo $ITEM | jq -r '.color')
+    COLOR=$(echo $ITEM | jq -r '.display.color')
 
     cd $FOLDER
     echo '[]' > $DIR/data.json
@@ -65,19 +80,15 @@ cat "$CONFIG" | jq -rc '.[]' | while read ITEM; do
     fi
 
     echo "  {" >> $DIR/result.json
-    echo "    label: \"${AREA}\"," >> $DIR/result.json
-    echo -n "    data: " >> $DIR/result.json
-    cat $DIR/data.json | jq -rc ". |= map(.x = .timestamp | .y = .euro | del(.timestamp, .euro)) | sort_by(.x)" | tr -d \\n >> $DIR/result.json
-    echo ".map((e) => ({x:e.x *= 1000, y:e.y}))," >> $DIR/result.json
-    echo "    pointBackgroundColor: \"${COLOR}\", backgroundColor: \"${COLOR}\", borderColor: \"${COLOR}\"," >> $DIR/result.json
-    echo '  },' >> $DIR/result.json
+    echo "    \"label\": \"${AREA}\"," >> $DIR/result.json
+    echo -n "    \"data\": " >> $DIR/result.json
+    cat $DIR/data.json | jq -rcj ". |= map(.x = (.timestamp * 1000) | .y = .euro | del(.timestamp, .euro)) | sort_by(.x)" | tr -d \\n >> $DIR/result.json
+    echo "," >> $DIR/result.json
+    echo "    \"pointBackgroundColor\": \"${COLOR}\", \"backgroundColor\": \"${COLOR}\", \"borderColor\": \"${COLOR}\"" >> $DIR/result.json
+    echo -n '  },' >> $DIR/result.json
 
 done
 
-echo '] };' >> $DIR/result.json
+echo -n ']' >> $DIR/result.json
 
-echo -n 'const groups = ' >> $DIR/result.json
-cat "$CONFIG" | jq -rc '. | map(.group) | unique | sort' >> $DIR/result.json
-echo ';' >> $DIR/result.json
-
-cat $DIR/result.json
+cat $DIR/result.json | sed 's|,]|]|g' | jq -r '.'
