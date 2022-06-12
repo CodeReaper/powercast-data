@@ -35,11 +35,11 @@ mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
 
-CURRENTDATE=$(date +"%s")
+CURSORDATE=$(date -d +14days +"%s")
 REQUEST=$(echo "{\"filters\":{\"PriceArea\":\"${AREA}\"}}" | jq -r "@uri \"${ENDPOINT}${QUERY}&filters=\(.filters)\"")
 
 echo '[]' > $DIR/data.json
-while [ $CURRENTDATE -gt $ENDDATE ]; do
+while [ $CURSORDATE -gt $ENDDATE ]; do
     wget -nv -O $DIR/request.json "${REQUEST}"
 
     TRANSFORMATION='.result.records |= map(.euro = .SpotPriceEUR | .timestamp = .HourUTC | del(.SpotPriceEUR, .HourUTC, .PriceArea)) | .result.records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .result.records'
@@ -47,7 +47,7 @@ while [ $CURRENTDATE -gt $ENDDATE ]; do
     jq -s '.[0] + .[1]' $DIR/data.json $DIR/data.new.json > $DIR/data.combined.json
     mv -f $DIR/data.combined.json $DIR/data.json
 
-    CURRENTDATE=$(cat $DIR/data.json | jq -r 'map(.timestamp | values) | min')
+    CURSORDATE=$(cat $DIR/data.json | jq -r 'map(.timestamp | values) | min')
     REQUEST=${ENDPOINT}$(cat $DIR/request.json | jq -r '.result._links.next')
 done
 
