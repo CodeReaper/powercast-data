@@ -276,8 +276,8 @@ jobs:
         run: |
           set -e
           sh .github/scripts/energy-price-data-graph.sh .config.json ./empty-data-folder/ 0 | tr -d \\n > result
-          greq -qF 'const data = { datasets: [] };' result
-          greq -qF 'const groups = [' result
+          grep -qF 'const data = { datasets: [] };' result
+          grep -qF 'const groups = [' result
 
       - name: Test with existing data that graph outputs as expected
         run: |
