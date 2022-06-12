@@ -4,7 +4,7 @@ Powercast aims to lower the boundary to query, view and understand energy pricin
 
 ## Quick look
 
-Go and check the [https://codereaper.github.io/powercast-data/](graph).
+Go and check the [graph](https://codereaper.github.io/powercast-data/).
 
 ## API usage
 
