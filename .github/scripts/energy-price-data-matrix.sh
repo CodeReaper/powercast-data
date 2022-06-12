@@ -45,7 +45,7 @@ SCRIPTS=$(dirname $0)
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
 
 echo -n '[' > $DIR/matrix.json
-cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
+cat "$CONFIG" | jq -rc '.[] | del(.display)' | while read ITEM; do
     AREA=$(echo $ITEM | jq -r '.zone')
     ENDDATE=$(echo $ITEM | jq -r '.endDate')
     LATEST=$(sh "${SCRIPTS}/energy-price-data-freshness.sh" "$FOLDER" "$AREA" "$ENDDATE")
