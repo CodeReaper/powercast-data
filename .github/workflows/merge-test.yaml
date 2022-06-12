@@ -76,7 +76,7 @@ jobs:
         run: |
           set -e
           sh .github/scripts/energy-price-data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
-          jq -r '.[] |=(.latest = .endDate | del(.endDate, .color))' .config.json > expected
+          jq -r '.[] |=(.latest = .endDate | del(.endDate, .color, .group))' .config.json > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
