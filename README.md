@@ -50,7 +50,6 @@ The response is the cost over time using the following format:
 
 ## Future goals:
 
-- Add more zones
 - Add standalone graphs for each zone
 - Add graphs for historical data
 - Add forecastable data for:
