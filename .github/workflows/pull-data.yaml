@@ -129,7 +129,7 @@ jobs:
           [ -d ./github-pages/api/energy-price/ ] || exit 0
 
           DISPLAY_GROUPS=$(cat .config.json | jq -rcj '. | map(.display.zone=.zone) | map(.display) | group_by(.group) | map({ group: (.[0].group), country: (.[0].country), values: [.[] | del(.group, .country)] })')
-          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./github-pages/api/energy-price/ $(date -d -5days +"%s") ./github-pages/energy-price/ '//codereaper.github.io/powercast-data/' '$DISPLAY_GROUPS'
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./github-pages/api/energy-price/ $(date -d -5days +"%s") ./github-pages/energy-price/ '//codereaper.github.io/powercast-data/' "$DISPLAY_GROUPS"
 
       - shell: bash
         name: Generate each country energy price visualization
