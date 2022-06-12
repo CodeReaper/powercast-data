@@ -299,37 +299,37 @@ jobs:
       - name: Test non-existing file
         run: |
           set +e
-          sh .github/scripts/energy-price-data-graph-data.sh .non-existing-file.json ./empty-data-folder 0 ./empty-output-folder > /dev/null
+          sh .github/scripts/energy-price-data-graph-directory.sh .non-existing-file.json ./empty-data-folder 0 ./empty-output-folder > /dev/null
           [ $? -eq 1 ] || exit 1
 
       - name: Test non-existing data directory
         run: |
           set +e
-          sh .github/scripts/energy-price-data-graph-data.sh .config.json ./non-existing-directory/ 0 ./empty-output-folder > /dev/null
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./non-existing-directory/ 0 ./empty-output-folder > /dev/null
           [ $? -eq 2 ] || exit 1
 
       - name: Test missing end date
         run: |
           set +e
-          sh .github/scripts/energy-price-data-graph-data.sh .config.json ./empty-data-folder '' ./empty-output-folder > /dev/null
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder '' ./empty-output-folder > /dev/null
           [ $? -eq 3 ] || exit 1
 
       - name: Test non-existing output directory
         run: |
           set +e
-          sh .github/scripts/energy-price-data-graph-data.sh .config.json ./empty-data-folder 0 ./non-existing-directory/ > /dev/null
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder 0 ./non-existing-directory/ > /dev/null
           [ $? -eq 4 ] || exit 1
 
       - name: Test missing base url
         run: |
           set +e
-          sh .github/scripts/energy-price-data-graph-data.sh .config.json ./empty-data-folder 0 ./empty-output-folder '' > /dev/null
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder 0 ./empty-output-folder '' > /dev/null
           [ $? -eq 5 ] || exit 1
 
       - name: Test missing display groups
         run: |
           set +e
-          sh .github/scripts/energy-price-data-graph-data.sh .config.json ./empty-data-folder 0 ./empty-output-folder //example.com/ '' > /dev/null
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder 0 ./empty-output-folder //example.com/ '' > /dev/null
           [ $? -eq 6 ] || exit 1
 
       - name: Test with no existing data that graph directory create an empty graph

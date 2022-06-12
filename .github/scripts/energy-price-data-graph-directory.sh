@@ -54,9 +54,11 @@ SCRIPTS=$(dirname "$0")
 RESOURCES=$(dirname "$SCRIPTS")/resources
 
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
-[ -d "$OUTPUT_FOLDER" ] || { echo "Not a directory: $OUTPUT_FOLDER"; exit 2; }
+[ -d "$DATA_FOLDER" ] || { echo "Not a directory: $DATA_FOLDER"; exit 2; }
 [ -z $DATE ] && { echo "Invalid/Missing date."; exit 3; }
-[ -z $GROUPS ] && { echo "Invalid/Missing display groups."; exit 4; }
+[ -d "$OUTPUT_FOLDER" ] || { echo "Not a directory: $OUTPUT_FOLDER"; exit 4; }
+[ -z $BASE_URL ] && { echo "Invalid/Missing display groups."; exit 5; }
+[ -z $GROUPS ] && { echo "Invalid/Missing display groups."; exit 6; }
 
 mkdir -p "$OUTPUT_FOLDER" > /dev/null
 
