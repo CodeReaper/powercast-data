@@ -320,18 +320,6 @@ jobs:
           sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder 0 ./non-existing-directory/ > /dev/null
           [ $? -eq 4 ] || exit 1
 
-      - name: Test missing base url
-        run: |
-          set +e
-          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder 0 ./empty-output-folder '' > /dev/null
-          [ $? -eq 5 ] || exit 1
-
-      - name: Test missing display groups
-        run: |
-          set +e
-          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder 0 ./empty-output-folder //example.com/ '' > /dev/null
-          [ $? -eq 6 ] || exit 1
-
       - name: Test with no existing data that graph directory create an empty graph
         run: |
           set -e
@@ -341,7 +329,7 @@ jobs:
           echo 'const data = { datasets: [] };' > expected
           echo 'const displayGroups = [];' >> expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
-          grep -qF "const baseUri = '';" ./output-folder/index.html
+          grep -qF "const baseUri = '/';" ./output-folder/index.html
 
           rm -rf ./output-folder
 

@@ -39,7 +39,7 @@ CONFIG=$1
 DATA_FOLDER=$2
 DATE=$3
 OUTPUT_FOLDER=$4
-BASE_URL=${5:-''}
+BASE_URL=${5:-'/'}
 GROUPS=${6:-'[]'}
 DIR=/tmp/$$
 
@@ -57,8 +57,8 @@ RESOURCES=$(dirname "$SCRIPTS")/resources
 [ -d "$DATA_FOLDER" ] || { echo "Not a directory: $DATA_FOLDER"; exit 2; }
 [ -z $DATE ] && { echo "Invalid/Missing date."; exit 3; }
 [ -d "$OUTPUT_FOLDER" ] || { echo "Not a directory: $OUTPUT_FOLDER"; exit 4; }
-[ -z $BASE_URL ] && { echo "Invalid/Missing display groups."; exit 5; }
-[ -z $GROUPS ] && { echo "Invalid/Missing display groups."; exit 6; }
+[ -z "$BASE_URL" ] && { echo "Invalid/Missing base url."; exit 5; }
+[ -z "$GROUPS" ] && { echo "Invalid/Missing display groups."; exit 6; }
 
 mkdir -p "$OUTPUT_FOLDER" > /dev/null
 
