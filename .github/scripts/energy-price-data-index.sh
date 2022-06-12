@@ -47,7 +47,7 @@ echo "$PREFIX" | grep -vq /$
 set -e
 
 echo -n '[' > $DIR/output.json
-cat "$CONFIG" | jq -rc '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
+cat "$CONFIG" | jq -rc '.[] | del(.display)' | while read ITEM; do
     [ -z "$ITEM" ] && continue
 
     cd $FOLDER

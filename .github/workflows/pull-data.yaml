@@ -10,11 +10,11 @@ env:
 
 jobs:
   update-energy-price-data:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     name: Update energy price data
     outputs:
       changed: ${{ steps.update-energy-price-data.outputs.changed }}
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
 
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: update-energy-price-data
     name: Update energy price visualization
-    if: github.ref == 'refs/heads/main' && needs.update-energy-price-data.outputs.changed == 'true'
+    if: needs.update-energy-price-data.outputs.changed == 'true'
     steps:
       - uses: actions/checkout@v3
 
@@ -108,20 +108,66 @@ jobs:
           path: github-pages
 
       - shell: bash
-        name: Pull data
+        name: Clean up previous visualizations
+        run: |
+          set -e
+          cd ./github-pages/
+          ls -Q | grep -v ^\"api\"$ | xargs rm -rf
+
+      - shell: bash
+        name: Setup redirects
+        run: |
+          set -e
+
+          cat .github/resources/redirect.html | sed 's|REDIRECT_URL|//codereaper.github.io/powercast-data/energy-price/|g' > ./github-pages/index.html
+
+      - shell: bash
+        name: Generate combined energy price visualization
         run: |
           set -e
 
           [ -d ./github-pages/api/energy-price/ ] || exit 0
 
-          cp .github/resources/energy-price-graph/index.html ./github-pages/
-          sh .github/scripts/energy-price-data-graph.sh .config.json ./github-pages/api/energy-price/ $(date -d -5days +"%s") > ./github-pages/data.js
+          DISPLAY_GROUPS=$(cat .config.json | jq -rcj '. | map(.display.zone=.zone) | map(.display) | group_by(.group) | map({ group: (.[0].group), country: (.[0].country), values: [.[] | del(.group, .country)] })')
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./github-pages/api/energy-price/ $(date -d -5days +"%s") ./github-pages/energy-price/ '//codereaper.github.io/powercast-data/' "$DISPLAY_GROUPS"
+
+      - shell: bash
+        name: Generate each country energy price visualization
+        run: |
+          set -e
+
+          [ -d ./github-pages/api/energy-price/ ] || exit 0
+
+          DATE=$(date -d -5days +"%s")
+
+          cat .config.json | jq -r '. | map(.display.group) | unique | values[]' | while read GROUP; do
+            group=$(echo $GROUP | tr '[:upper:]' '[:lower:]')
+
+            cat .config.json | jq -r ". | map(select(.display.group == \"${GROUP}\"))" > group.json
+
+            sh .github/scripts/energy-price-data-graph-directory.sh group.json ./github-pages/api/energy-price/ $DATE ./github-pages/energy-price/$group/
+          done
+
+      - shell: bash
+        name: Generate each zone energy price visualization
+        run: |
+          set -e
+
+          DATE=$(date -d -5days +"%s")
+
+          cat .config.json | jq -r '.[].zone' | while read AREA; do
+            area=$(echo $AREA | tr '[:upper:]' '[:lower:]')
+
+            cat .config.json | jq -r ". | map(select(.zone == \"${AREA}\"))" > area.json
+
+            sh .github/scripts/energy-price-data-graph-directory.sh area.json ./github-pages/api/energy-price/ $DATE ./github-pages/energy-price/$area/
+          done
 
       - uses: EndBug/add-and-commit@v9
         name: Publish graph
         with:
           cwd: github-pages
-          add: "['index.html', 'data.js']"
+          add: "['index.html', 'data.js', 'energy-price']"
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
           message: Publish new graph via workflow

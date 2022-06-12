@@ -50,9 +50,10 @@ The response is the cost over time using the following format:
 
 ## Future goals:
 
+- Add custom 404 with a sitemap
 - Add standalone graphs for each zone
 - Add graphs for historical data
-- Add forecastable data for:
-  - CO2 emission
-  - Renewables
+- Add forecastable data ([multi axis might be useful](https://www.chartjs.org/docs/3.2.1/samples/line/multi-axis.html)) for:
+  - [CO2 emission](https://www.energidataservice.dk/tso-electricity/co2emisprog)
+  - [Renewables](https://www.energidataservice.dk/tso-electricity/forecasts_hour)
 - Add ability to easily run all unit tests locally
