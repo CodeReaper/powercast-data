@@ -56,7 +56,7 @@ RESOURCES=$(dirname "$SCRIPTS")/resources
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
 [ -d "$DATA_FOLDER" ] || { echo "Not a directory: $DATA_FOLDER"; exit 2; }
 [ -z $DATE ] && { echo "Invalid/Missing date."; exit 3; }
-[ -z "$OUTPUT_FOLDER" ] || { echo "Invalid/Missing output directory"; exit 4; }
+[ -z "$OUTPUT_FOLDER" ] && { echo "Invalid/Missing output directory"; exit 4; }
 [ -z "$BASE_URL" ] && { echo "Invalid/Missing base url."; exit 5; }
 [ -z "$GROUPS" ] && { echo "Invalid/Missing display groups."; exit 6; }
 
