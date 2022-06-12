@@ -1,4 +1,10 @@
-# powercast-data
+# Powercast
+
+Powercast aims to lower the boundary to query, view and understand energy pricing.
+
+## Quick look
+
+Go and check the [https://codereaper.github.io/powercast-data/](graph).
 
 ## API usage
 
@@ -12,13 +18,13 @@ curl -v https://codereaper.github.io/powercast-data/api/energy-price/latest.json
 
 The response will contain paths to latest available data points for each zone using the following format:
 
-```json
+```jsonc
 [
   {
     "latest": "/api/energy-price/<yyyy>/<MM>/<dd>/<zone>.json",
     "zone": "<zone>"
   },
-  ...
+  // ...
 ]
 ```
 
@@ -32,19 +38,15 @@ curl -v https://codereaper.github.io/powercast-data/api/energy-price/<yyyy>/<MM>
 
 The response is the cost over time using the following format:
 
-```json
+```jsonc
 [
   {
     "euro": <cost>, // of one MWh
     "timestamp": <unix timestamp>
   },
-  ...
+  // ...
 ]
 ```
-
-## Quick look
-
-Go and check the [https://codereaper.github.io/powercast-data/](graph).
 
 ## Future goals:
 
