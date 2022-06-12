@@ -314,16 +314,15 @@ jobs:
           sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder '' ./empty-output-folder > /dev/null
           [ $? -eq 3 ] || exit 1
 
-      - name: Test non-existing output directory
+      - name: Test missing output directory
         run: |
           set +e
-          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder 0 ./non-existing-directory/ > /dev/null
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder 0 '' > /dev/null
           [ $? -eq 4 ] || exit 1
 
       - name: Test with no existing data that graph directory create an empty graph
         run: |
           set -e
-          mkdir ./output-folder
           sh .github/scripts/energy-price-data-graph-directory.sh .config.json ./empty-data-folder/ 0 ./output-folder
 
           echo 'const data = { datasets: [] };' > expected
@@ -336,7 +335,6 @@ jobs:
       - name: Test with existing data that graph directory outputs as expected
         run: |
           set -e
-          mkdir ./output-folder
           sh .github/scripts/energy-price-data-graph-directory.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ 1654290000 ./output-folder //example.com/path/ '[{"this":"that"}]'
 
           grep -q 1654290000 ./output-folder/data.js
