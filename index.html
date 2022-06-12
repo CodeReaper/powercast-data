@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.3.1"></script>
+        <title>Energy Prices</title>
+        <style>
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <canvas id="graph"></canvas>
+        </div>
+
+        <script type="text/javascript" src="data.js"></script>
+        <script type="text/javascript">
+            const stamps = Array.from(new Set(data.datasets.flatMap((set) => set.data.map((it) => it.x)))).sort((a, b) => a - b);
+            const groupByDay = (data) => {
+                const grouped = data.reduce((holder, item) => {
+                    const date = new Date(item).toDateString();
+                    if (!holder.hasOwnProperty(date)) {
+                        holder[date] = []
+                    }
+                    holder[date].push(item);
+                    return holder;
+                }, {});
+                return Object.keys(grouped).map((key) => grouped[key]);
+            }
+            const days = groupByDay(stamps);
+
+            var flippy = true;
+            var annotations = days.map((day) => {
+                flippy = !flippy;
+                return {
+                    type: 'box',
+                    backgroundColor: flippy ? '#E4ECF1' : '#EBEBEB',
+                    borderWidth: 0,
+                    xMax: Math.max(...day),
+                    xMin: Math.min(...day),
+                }
+            });
+
+            const now = new Date().getTime();
+            annotations.push({
+                type: 'line',
+                backgroundColor: 'black',
+                borderWidth: 1,
+                scaleID: 'x',
+                value: now,
+            });
+
+            const options = {
+                responsive: true,
+                radius: 0,
+                hitRadius: 4,
+                tension: 0.2,
+                plugins: {
+                    title: {
+                        text: 'Energy Prices',
+                        display: true
+                    },
+                    annotation: {
+                        drawTime: 'beforeDraw',
+                        annotations: annotations
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        display: true,
+                        time: {
+                            unit: 'hour',
+                            tooltipFormat: 'YYYY-MM-DD HH:00',
+                            displayFormats: {
+                                hour: 'YYYY-MM-DD HH:00'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        },
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Cost | Euro'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 300
+                    }
+                }
+            };
+
+            new Chart(document.getElementById('graph').getContext('2d'), {
+                type: 'line',
+                data: data,
+                options: options
+            });
+        </script>
+    </body>
+</html>
