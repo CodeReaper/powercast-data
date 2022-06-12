@@ -17,7 +17,7 @@
 #       Example: 1654012800
 
 # Output example:
-# "HTML" that can display graphs
+# "Javascript data" that can display graphs
 
 CONFIG=$1
 FOLDER=$2
@@ -75,5 +75,9 @@ cat "$CONFIG" | jq -rc '.[]' | while read ITEM; do
 done
 
 echo '] };' >> $DIR/result.json
+
+echo -n 'const groups = ' >> $DIR/result.json
+cat "$CONFIG" | jq -rc '. | map(.group) | unique | sort' >> $DIR/result.json
+echo ';' >> $DIR/result.json
 
 cat $DIR/result.json

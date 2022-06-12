@@ -50,6 +50,7 @@ The response is the cost over time using the following format:
 
 ## Future goals:
 
+- Add custom 404 with a sitemap
 - Add standalone graphs for each zone
 - Add graphs for historical data
 - Add forecastable data for:
