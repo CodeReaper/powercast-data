@@ -342,3 +342,20 @@ jobs:
           grep -qF "const baseUri = '//example.com/path/';" ./output-folder/index.html
 
           rm -rf ./output-folder
+
+  test-run-tests:
+    name: Test run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Test non-existing file
+        run: |
+          set +e
+          sh ./scripts/run-tests.sh ./non-existing-file > /dev/null
+          [ $? -eq 1 ] || exit 1
+
+      - name: Test running tests
+        run: |
+          set -e
+          sh ./scripts/run-tests.sh .github/resources/test/test.yaml

@@ -22,7 +22,7 @@
 #           - ./
 #           - data/
 #   - base url:
-#       Optional, will default to ''.
+#       Optional, will default to '/'.
 #       Must be a valid url, protocol is omissable.
 #       Examples:
 #           - //example.com/path/
@@ -30,10 +30,9 @@
 #   - display groups:
 #       Optional, will default to '[]'.
 #       Must be valid Javascript
-#       Example: [{key: 1}]
+#       Example: [{"key": "value"}]
 
-# Output example:
-# None
+# There is no output, but files will be written in output directory.
 
 CONFIG=$1
 DATA_FOLDER=$2
@@ -44,7 +43,7 @@ GROUPS=${6:-'[]'}
 DIR=/tmp/$$
 
 set -e
-which mkdir dirname cat jq tr sed > /dev/null
+which mkdir dirname cat jq sed > /dev/null
 
 mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
