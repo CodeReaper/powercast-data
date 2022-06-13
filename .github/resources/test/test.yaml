@@ -16,4 +16,4 @@ jobs:
 
       - name: Test that passes
         run: |
-          echo Test-in-tests
+          echo 'Test-in-tests'
