@@ -95,6 +95,7 @@ jobs:
 
   update-renewables-data:
     runs-on: ubuntu-latest
+    needs: update-energy-price-visualization # TODO: change sequence once workflow is proven
     name: Update renewables data
     outputs:
       changed: ${{ steps.update-renewables-data.outputs.changed }}

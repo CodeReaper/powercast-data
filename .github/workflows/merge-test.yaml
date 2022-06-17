@@ -245,7 +245,7 @@ jobs:
           diff -q .github/resources/test/well-known/data-index-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/data-index-generated-output.json result; exit 1; }
 
   test-energy-price-data-graph-data:
-    name: Test data graph
+    name: Test energy price data graph
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -286,7 +286,7 @@ jobs:
           grep -q 1654290000 result
 
   test-energy-price-data-graph-directory:
-    name: Test data graph directory
+    name: Test energy price data graph directory
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
