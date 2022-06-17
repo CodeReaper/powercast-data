@@ -349,7 +349,7 @@ jobs:
   test-run-tests:
     name: Test run tests (always skipped on GitHub)
     runs-on: ubuntu-latest
-    if: ${{ env.run-local-test-runner }} == 'true'
+    if: env.run-local-test-runner == 'true'
     steps:
       - uses: actions/checkout@v3
 
