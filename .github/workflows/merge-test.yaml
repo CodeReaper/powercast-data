@@ -7,6 +7,9 @@ on:
     branches:
       - main
 
+env:
+  run-local-test-runner: false
+
 jobs:
   test-energy-price-data-freshness:
     name: Test data freshness
@@ -344,8 +347,9 @@ jobs:
           rm -rf ./output-folder
 
   test-run-tests:
-    name: Test run tests
+    name: Test run tests (always skipped on GitHub)
     runs-on: ubuntu-latest
+    if: ${{ env.run-local-test-runner }} == 'true'
     steps:
       - uses: actions/checkout@v3
 
