@@ -15,8 +15,14 @@
 # Output example:
 # [
 #   {
-#     "euro": 133.7, // cost per MWh
-#     "timestamp": 1654012800
+#     "timestamp": 1654012800,
+#     "sources": [
+#       {
+#         "type":"solar",
+#         "energy":3456.0 // MWh
+#       },
+#       ...
+#     ]
 #   },
 #   ...
 # ]
@@ -27,7 +33,7 @@ AREA=$1
 ENDDATE=$2
 DIR=/tmp/$$
 ENDPOINT=https://api.energidataservice.dk/
-QUERY="datastore_search?resource_id=elspotprices&limit=50&sort=HourUTC%20desc&fields=HourUTC,PriceArea,SpotPriceEUR&include_total=false&records_format=objects"
+QUERY="datastore_search?resource_id=forecasts_hour&limit=50&sort=HourUTC%20desc&fields=HourUTC,PriceArea,ForecastType,ForecastDayAhead&include_total=false&records_format=objects"
 
 which mkdir wget jq cat date > /dev/null
 
@@ -42,7 +48,7 @@ echo '[]' > $DIR/data.json
 while [ $CURSORDATE -gt $ENDDATE ]; do
     wget -nv -O $DIR/request.json "${REQUEST}"
 
-    TRANSFORMATION='.result.records |= map(.euro = .SpotPriceEUR | .timestamp = .HourUTC | del(.SpotPriceEUR, .HourUTC, .PriceArea)) | .result.records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .result.records'
+    TRANSFORMATION='.result.records |= map(.type = (.ForecastType | ascii_downcase) | .energy = (.ForecastDayAhead * 100 | round) / 100 | .timestamp = .HourUTC | del(.ForecastType, .ForecastDayAhead, .HourUTC, .PriceArea)) | .result.records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .result.records | group_by(.timestamp) | map({ timestamp: (.[0].timestamp), sources: [.[] | del(.timestamp)] })'
     cat $DIR/request.json | jq -r "$TRANSFORMATION" > $DIR/data.new.json
     jq -s '.[0] + .[1]' $DIR/data.json $DIR/data.new.json > $DIR/data.combined.json
     mv -f $DIR/data.combined.json $DIR/data.json

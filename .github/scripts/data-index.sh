@@ -7,7 +7,7 @@
 #           - .config.json
 #           - test.json
 #   - directory:
-#       Must be a valid path to a directory with data from `energy-price-data-write`.
+#       Must be a valid path to a directory with files that `data-freshness-file` can parse.
 #       Examples:
 #           - ./
 #           - data/

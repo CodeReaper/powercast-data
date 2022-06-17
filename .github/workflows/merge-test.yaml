@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  test-energy-price-data-freshness:
+  test-data-freshness:
     name: Test data freshness
     runs-on: ubuntu-latest
     steps:
@@ -21,36 +21,36 @@ jobs:
       - name: Test non-existing directory
         run: |
           set +e
-          sh .github/scripts/energy-price-data-freshness.sh ./non-existing-directory/ DK1 0 > /dev/null
+          sh .github/scripts/data-freshness.sh ./non-existing-directory/ DK1 0 > /dev/null
           [ $? -eq 1 ] || exit 1
 
       - name: Test missing area
         run: |
           set +e
-          sh .github/scripts/energy-price-data-freshness.sh ./empty-data-folder/ 0 > /dev/null
+          sh .github/scripts/data-freshness.sh ./empty-data-folder/ 0 > /dev/null
           [ $? -ne 0 ] || exit 1
 
       - name: Test missing end date
         run: |
           set +e
-          sh .github/scripts/energy-price-data-freshness.sh ./empty-data-folder/ DK1 > /dev/null
+          sh .github/scripts/data-freshness.sh ./empty-data-folder/ DK1 > /dev/null
           [ $? -eq 3 ] || exit 1
 
       - name: Test with no existing data that freshness outputs the fall back date
         run: |
           set -e
-          sh .github/scripts/energy-price-data-freshness.sh ./empty-data-folder/ DK1 12345 > result
+          sh .github/scripts/data-freshness.sh ./empty-data-folder/ DK1 12345 > result
           echo '12345' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data that freshness outputs as expected
         run: |
           set -e
-          sh .github/scripts/energy-price-data-freshness.sh .github/resources/test/well-known/existing-energy-price-data-write-output/ DK1 12345 > result
+          sh .github/scripts/data-freshness.sh .github/resources/test/well-known/existing-data-write-output/ DK1 12345 > result
           echo '1654297200' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
-  test-energy-price-data-matrix:
+  test-data-matrix:
     name: Test data matrix
     runs-on: ubuntu-latest
     steps:
@@ -63,30 +63,30 @@ jobs:
       - name: Test non-existing file
         run: |
           set +e
-          sh .github/scripts/energy-price-data-matrix.sh .non-existing-file.json ./data/ > /dev/null
+          sh .github/scripts/data-matrix.sh .non-existing-file.json ./data/ > /dev/null
           [ $? -eq 1 ] || exit 1
 
       - name: Test non-existing directory
         run: |
           set +e
-          sh .github/scripts/energy-price-data-matrix.sh .config.json ./non-existing-directory/ > /dev/null
+          sh .github/scripts/data-matrix.sh .config.json ./non-existing-directory/ > /dev/null
           [ $? -eq 2 ] || exit 1
 
       - name: Test with no existing data that matrix contains all items from the configuration
         run: |
           set -e
-          sh .github/scripts/energy-price-data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
+          sh .github/scripts/data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
           jq -r '.[] |=(.latest = .endDate | del(.endDate, .display))' .config.json > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
         run: |
           set -e
-          sh .github/scripts/energy-price-data-matrix.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ | jq -rc '.' > result
+          sh .github/scripts/data-matrix.sh .config.json .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
           grep -q 1654297200 result
           grep -q 1654041600 result
 
-  test-energy-price-data-write:
+  test-data-write:
     name: Test data write
     runs-on: ubuntu-latest
     steps:
@@ -100,19 +100,19 @@ jobs:
       - name: Test non-existing file
         run: |
           set +e
-          sh .github/scripts/energy-price-data-write.sh .non-existing-file.json ./empty-data-folder DK1 > /dev/null
+          sh .github/scripts/data-write.sh .non-existing-file.json ./empty-data-folder DK1 > /dev/null
           [ $? -eq 1 ] || exit 1
 
       - name: Test non-existing directory
         run: |
           set +e
-          sh .github/scripts/energy-price-data-write.sh .github/resources/test/well-known/existing-energy-price-data-write-output/2022/06/01/DK1.json ./non-existing-directory/ DK1 > /dev/null
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/existing-data-write-output/2022/06/01/DK1.json ./non-existing-directory/ DK1 > /dev/null
           [ $? -eq 2 ] || exit 1
 
       - name: Test when given no data that write outputs no files
         run: |
           set -e
-          sh .github/scripts/energy-price-data-write.sh ./empty-data-file ./empty-data-folder DK1
+          sh .github/scripts/data-write.sh ./empty-data-file ./empty-data-folder DK1
           [ -z "$(ls -1qA ./empty-data-folder)" ] || { echo "Unexpected files/folders:"; find ./empty-data-folder; exit 1; }
 
       - name: Test with existing well-known data that write actually writes output files as expected
@@ -120,11 +120,11 @@ jobs:
           set -e
           mkdir ./test
           trap "rm -rf ./test" EXIT
-          sh .github/scripts/energy-price-data-write.sh .github/resources/test/well-known/existing-energy-price-data-write-output/2022/06/01/DK1.json ./test DK1
-          diff -rq ./test .github/resources/test/well-known/energy-price-data-write-generated-output || { echo "Unexpected difference:"; diff -r ./test .github/resources/test/well-known/energy-price-data-write-generated-output; exit 1; }
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/existing-data-write-output/2022/06/01/DK1.json ./test DK1
+          diff -rq ./test .github/resources/test/well-known/data-write-generated-output || { echo "Unexpected difference:"; diff -r ./test .github/resources/test/well-known/data-write-generated-output; exit 1; }
 
   test-energy-price-data-pull:
-    name: Test data pull
+    name: Test energy price data pull
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -142,7 +142,7 @@ jobs:
         run: |
           set -e
           export PATH=.github/resources/test/mocks/:$PATH
-          export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/datastore_search
+          export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/elspotprices
 
           sh .github/scripts/energy-price-data-pull.sh DK1 1654545600 http://localhost:8000/ > result
           diff -q .github/resources/test/well-known/energy-price-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/energy-price-data-pull-generated-output.json result; exit 1; }
@@ -165,7 +165,7 @@ jobs:
           sh .github/scripts/energy-price-data-pull.sh DK1 $(date -d +5years +"%s") http://localhost:8000/ > /dev/null
           [ $? -eq 0 ] || exit 1
 
-  test-energy-price-data-freshness-file:
+  test-data-freshness-file:
     name: Test data freshness-file
     runs-on: ubuntu-latest
     steps:
@@ -178,32 +178,32 @@ jobs:
       - name: Test non-existing file
         run: |
           set +e
-          sh .github/scripts/energy-price-data-freshness-file.sh .non-existing-file.json 0 > /dev/null
+          sh .github/scripts/data-freshness-file.sh .non-existing-file.json 0 > /dev/null
           [ $? -eq 1 ] || exit 1
 
       - name: Test missing fall back date
         run: |
           set +e
-          sh .github/scripts/energy-price-data-freshness-file.sh empty-file > /dev/null
+          sh .github/scripts/data-freshness-file.sh empty-file > /dev/null
           [ $? -eq 2 ] || exit 1
 
       - name: Test freshness with no data will outout fall back date
         run: |
           set -e
 
-          sh .github/scripts/energy-price-data-freshness-file.sh empty-file 12345 > result
+          sh .github/scripts/data-freshness-file.sh empty-file 12345 > result
           echo '12345' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
-      - name: Test freshness with existing data will outout as expected
+      - name: Test freshness with existing data will output as expected
         run: |
           set -e
 
-          sh .github/scripts/energy-price-data-freshness-file.sh .github/resources/test/well-known/energy-price-data-pull-generated-output.json 12345 > result
+          sh .github/scripts/data-freshness-file.sh .github/resources/test/well-known/energy-price-data-pull-generated-output.json 12345 > result
           echo '1654722000' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
-  test-energy-price-data-index:
+  test-data-index:
     name: Test data index
     runs-on: ubuntu-latest
     steps:
@@ -216,33 +216,33 @@ jobs:
       - name: Test non-existing file
         run: |
           set +e
-          sh .github/scripts/energy-price-data-index.sh .non-existing-file.json ./empty-data-folder > /dev/null
+          sh .github/scripts/data-index.sh .non-existing-file.json ./empty-data-folder > /dev/null
           [ $? -eq 1 ] || exit 1
 
       - name: Test non-existing directory
         run: |
           set +e
-          sh .github/scripts/energy-price-data-index.sh .config.json ./non-existing-directory/ > /dev/null
+          sh .github/scripts/data-index.sh .config.json ./non-existing-directory/ > /dev/null
           [ $? -eq 2 ] || exit 1
 
       - name: Test incorrect prefix
         run: |
           set +e
-          sh .github/scripts/energy-price-data-index.sh .config.json ./empty-data-folder /prefix/ > /dev/null
+          sh .github/scripts/data-index.sh .config.json ./empty-data-folder /prefix/ > /dev/null
           [ $? -eq 3 ] || exit 1
 
       - name: Test with no existing data that index outputs no data
         run: |
           set -e
-          sh .github/scripts/energy-price-data-index.sh .config.json ./empty-data-folder/ | jq -r '.' > result
+          sh .github/scripts/data-index.sh .config.json ./empty-data-folder/ | jq -r '.' > result
           echo '[]' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data index outputs as expected
         run: |
           set -e
-          sh .github/scripts/energy-price-data-index.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ /data | jq -r '.' > result
-          diff -q .github/resources/test/well-known/energy-price-data-index-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/energy-price-data-index-generated-output.json result; exit 1; }
+          sh .github/scripts/data-index.sh .config.json .github/resources/test/well-known/existing-data-write-output/ /data | jq -r '.' > result
+          diff -q .github/resources/test/well-known/data-index-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/data-index-generated-output.json result; exit 1; }
 
   test-energy-price-data-graph-data:
     name: Test data graph
@@ -282,7 +282,7 @@ jobs:
       - name: Test with existing data that graph outputs as expected
         run: |
           set -e
-          sh .github/scripts/energy-price-data-graph-data.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ 1654290000 > result
+          sh .github/scripts/energy-price-data-graph-data.sh .config.json .github/resources/test/well-known/existing-data-write-output/ 1654290000 > result
           grep -q 1654290000 result
 
   test-energy-price-data-graph-directory:
@@ -335,13 +335,55 @@ jobs:
       - name: Test with existing data that graph directory outputs as expected
         run: |
           set -e
-          sh .github/scripts/energy-price-data-graph-directory.sh .config.json .github/resources/test/well-known/existing-energy-price-data-write-output/ 1654290000 ./output-folder //example.com/path/ '[{"this":"that"}]'
+          sh .github/scripts/energy-price-data-graph-directory.sh .config.json .github/resources/test/well-known/existing-data-write-output/ 1654290000 ./output-folder //example.com/path/ '[{"this":"that"}]'
 
           grep -q 1654290000 ./output-folder/data.js
           grep -qF 'const displayGroups = [{"this":"that"}];' ./output-folder/data.js
           grep -qF "const baseUri = '//example.com/path/';" ./output-folder/index.html
 
           rm -rf ./output-folder
+
+  test-renewables-data-pull:
+    name: Test renewables data pull
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Test if endpoints does not answer pull will fail
+        run: |
+          set +e
+          export PATH=.github/resources/test/mocks/:$PATH
+          unset WGET_OVERRIDE
+
+          sh .github/scripts/renewables-data-pull.sh DK1 1654545600 http://localhost:8000/
+          [ $? -ne 0 ] || exit 1
+
+      - name: Test with existing well-known data that pull outputs as expected
+        run: |
+          set -e
+          export PATH=.github/resources/test/mocks/:$PATH
+          export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/forecasts_hour
+
+          sh .github/scripts/renewables-data-pull.sh DK1 1655528400 http://localhost:8000/ > result
+          diff -q .github/resources/test/well-known/renewables-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/energy-price-data-pull-generated-output.json result; exit 1; }
+
+      - name: Test pull makes a request with end date set to now
+        run: |
+          set +e
+          export PATH=.github/resources/test/mocks/:$PATH
+          unset WGET_OVERRIDE
+
+          sh .github/scripts/renewables-data-pull.sh DK1 $(date +"%s") http://localhost:8000/ > /dev/null
+          [ $? -ne 0 ] || exit 1
+
+      - name: Test pull makes no requests with end date far in the future
+        run: |
+          set +e
+          export PATH=.github/resources/test/mocks/:$PATH
+          unset WGET_OVERRIDE
+
+          sh .github/scripts/renewables-data-pull.sh DK1 $(date -d +5years +"%s") http://localhost:8000/ > /dev/null
+          [ $? -eq 0 ] || exit 1
 
   test-run-tests:
     name: Test run tests (always skipped on GitHub)

@@ -8,7 +8,9 @@ Go and check the [graph](https://codereaper.github.io/powercast-data/).
 
 ## API usage
 
-### Consume every data point
+## Energy Price
+
+#### Consume every data point
 
 Begin here to load all data using the API:
 
@@ -28,7 +30,7 @@ The response will contain paths to latest available data points for each zone us
 ]
 ```
 
-### Consume data points for a specific date and zone
+#### Consume data points for a specific date and zone
 
 Request the specific data by replacing data and zone information in this request:
 
@@ -48,10 +50,61 @@ The response is the cost over time using the following format:
 ]
 ```
 
+## Renewables
+
+#### Consume every data point
+
+Begin here to load all data using the API:
+
+```sh
+curl -v https://codereaper.github.io/powercast-data/api/renewables/latest.json
+```
+
+The response will contain paths to latest available data points for each zone using the following format:
+
+```jsonc
+[
+  {
+    "latest": "/api/renewables/<yyyy>/<MM>/<dd>/<zone>.json",
+    "zone": "<zone>"
+  },
+  // ...
+]
+```
+
+#### Consume data points for a specific date and zone
+
+Request the specific data by replacing data and zone information in this request:
+
+```sh
+curl -v https://codereaper.github.io/powercast-data/api/renewables/<yyyy>/<MM>/<dd>/<zone>.json
+```
+
+The response is the cost over time using the following format:
+
+```jsonc
+[
+  {
+    "timestamp": <unix timestamp>,
+    "sources": [
+      {
+        "type": <generation-type>,
+        "energy": <MWh>
+      },
+      // ...
+    ],
+  },
+  // ...
+]
+```
+
 ## Future goals:
 
 - Add custom 404 with a sitemap
-- Add graphs for historical data
-- Add forecastable data ([multi axis might be useful](https://www.chartjs.org/docs/3.2.1/samples/line/multi-axis.html)) for:
+- Add historical graphs
+- Add graphs/graph-combinations ([multi axis might be useful](https://www.chartjs.org/docs/3.2.1/samples/line/multi-axis.html)) for:
+  - Energy prices
+  - Renewables
+  - Emissions
+- Add forecastable data for:
   - [CO2 emission](https://www.energidataservice.dk/tso-electricity/co2emisprog)
-  - [Renewables](https://www.energidataservice.dk/tso-electricity/forecasts_hour)

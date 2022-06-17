@@ -8,7 +8,7 @@
 #           - test.json
 #   - directory:
 #       Data will be used to evaluate how old the current data is.
-#       Must be a valid path to a directory with data from `energy-price-data-write`.
+#       Must be a valid path to a directory with files that `data-freshness-file` can parse.
 #       Examples:
 #           - ./
 #           - data/
@@ -48,7 +48,7 @@ echo -n '[' > $DIR/matrix.json
 cat "$CONFIG" | jq -rc '.[] | del(.display)' | while read ITEM; do
     AREA=$(echo $ITEM | jq -r '.zone')
     ENDDATE=$(echo $ITEM | jq -r '.endDate')
-    LATEST=$(sh "${SCRIPTS}/energy-price-data-freshness.sh" "$FOLDER" "$AREA" "$ENDDATE")
+    LATEST=$(sh "${SCRIPTS}/data-freshness.sh" "$FOLDER" "$AREA" "$ENDDATE")
     echo -n "{\"zone\":\"${AREA}\",\"latest\":${LATEST}}," >> $DIR/matrix.json
 done
 
