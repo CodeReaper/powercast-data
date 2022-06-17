@@ -3,7 +3,7 @@
 # Takes three arguments:
 #   - directory:
 #       The directory in which to find an end date.
-#       Must be a valid path to a directory with data from `energy-price-data-write`.
+#       Must be a valid path to a directory with files that `data-freshness-file` can parse.
 #       Examples:
 #           - ./
 #           - data/
@@ -42,4 +42,4 @@ if [ -z "$LATEST" ]; then
     exit 0
 fi
 
-echo $(sh "${SCRIPTS}/energy-price-data-freshness-file.sh" "$LATEST" "$ENDDATE")
+echo $(sh "${SCRIPTS}/data-freshness-file.sh" "$LATEST" "$ENDDATE")
