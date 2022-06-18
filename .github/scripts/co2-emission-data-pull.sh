@@ -16,13 +16,7 @@
 # [
 #   {
 #     "timestamp": 1654012800,
-#     "sources": [
-#       {
-#         "type":"solar",
-#         "energy":3456.0 // MWh
-#       },
-#       ...
-#     ]
+#     "co2": 42 // in g/kWh
 #   },
 #   ...
 # ]
