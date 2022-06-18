@@ -92,7 +92,7 @@ jobs:
           add: api/energy-price/
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
-          message: Publish new data via workflow
+          message: Publish energy price data via workflow
 
   update-renewables-data:
     runs-on: ubuntu-latest
@@ -177,7 +177,7 @@ jobs:
           add: api/renewables/
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
-          message: Publish new data via workflow
+          message: Publish renewables data via workflow
 
   update-co2-emission-data:
     runs-on: ubuntu-latest
@@ -197,9 +197,9 @@ jobs:
       - shell: bash
         name: Setup configuration
         run: |
-          mkdir -p ./github-pages/api/co2-emission/ > /dev/null
+          mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh .config.json ./github-pages/api/co2-emission/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh .config.json ./github-pages/api/emission/co2/ | tee configuration.json
 
       - shell: bash
         name: Pull data
@@ -244,24 +244,24 @@ jobs:
             [ -f "$GENERATED" ] || continue
             ZONE=$(basename $GENERATED .generated)
             echo "Using generated data for ${ZONE}..."
-            sh .github/scripts/data-write.sh $GENERATED ./github-pages/api/co2-emission/ $ZONE
+            sh .github/scripts/data-write.sh $GENERATED ./github-pages/api/emission/co2/ $ZONE
           done
 
       - shell: bash
         name: Index data
         if: steps.update-co2-emission-data.outputs.changed == 'true'
         run: |
-          sh .github/scripts/data-index.sh .config.json ./github-pages/api/co2-emission/ /api/co2-emission > ./github-pages/api/co2-emission/latest.json
+          sh .github/scripts/data-index.sh .config.json ./github-pages/api/emission/co2/ /api/emission/co2 > ./github-pages/api/emission/co2/latest.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
         if: steps.update-co2-emission-data.outputs.changed == 'true'
         with:
           cwd: github-pages
-          add: api/co2-emission/
+          add: api/emission/co2/
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
-          message: Publish new data via workflow
+          message: Publish co2 emission data via workflow
 
   update-energy-price-visualization:
     runs-on: ubuntu-latest
@@ -340,4 +340,4 @@ jobs:
           add: "['index.html', 'data.js', 'energy-price']"
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
-          message: Publish new graph via workflow
+          message: Publish energy price graphs via workflow
