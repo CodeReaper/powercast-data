@@ -115,13 +115,21 @@ jobs:
           sh .github/scripts/data-write.sh ./empty-data-file ./empty-data-folder DK1
           [ -z "$(ls -1qA ./empty-data-folder)" ] || { echo "Unexpected files/folders:"; find ./empty-data-folder; exit 1; }
 
-      - name: Test with existing well-known data that write actually writes output files as expected
+      - name: Test with existing well-known energy price data that write actually writes output files as expected
         run: |
           set -e
           mkdir ./test
           trap "rm -rf ./test" EXIT
           sh .github/scripts/data-write.sh .github/resources/test/well-known/existing-data-write-output/2022/06/01/DK1.json ./test DK1
-          diff -rq ./test .github/resources/test/well-known/data-write-generated-output || { echo "Unexpected difference:"; diff -r ./test .github/resources/test/well-known/data-write-generated-output; exit 1; }
+          diff -rq ./test .github/resources/test/well-known/data-write-generated-energy-price-output || { echo "Unexpected difference:"; diff -r ./test .github/resources/test/well-known/data-write-generated-energy-price-output; exit 1; }
+
+      - name: Test with existing well-known renewables data that write actually writes output files as expected
+        run: |
+          set -e
+          mkdir ./test
+          trap "rm -rf ./test" EXIT
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/renewables-data-pull-generated-output.json ./test DK1
+          diff -rq ./test .github/resources/test/well-known/data-write-generated-renewables-output || { echo "Unexpected difference:"; diff -r ./test .github/resources/test/well-known/data-write-generated-renewables-output; exit 1; }
 
   test-energy-price-data-pull:
     name: Test energy price data pull

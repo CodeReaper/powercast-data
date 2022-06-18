@@ -40,7 +40,7 @@ ENDDATE=$3
 DIR=/tmp/$$
 
 set -e
-which jq tr > /dev/null
+which jq tr sed > /dev/null
 
 mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
