@@ -25,7 +25,7 @@ FOLDER=$2
 AREA=$3
 DIR=/tmp/$$
 
-which mkdir jq cat tr sed cut dirname > /dev/null
+which mkdir jq cat tr cut dirname > /dev/null
 
 mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
@@ -36,7 +36,7 @@ trap 'exit 2' 1 2 3 15
 AREA=$(echo "$AREA" | tr [:lower:] [:upper:])
 [ -z $AREA ] && { echo "Invalid/Missing area."; exit 3; }
 
-cat $FILE | jq -r '.' | tr -d []\\n | sed 's|}\,*|}\n|g' | while read ITEM; do
+cat $FILE | jq -rc '.[]' | while read ITEM; do
     echo "[" > $DIR/item.json
     echo "$ITEM" >> $DIR/item.json
     echo "]" >> $DIR/item.json
