@@ -12,7 +12,7 @@ Go and check the [graph](https://codereaper.github.io/powercast-data/).
 
 ## API usage
 
-## Energy Price
+### Energy Price
 
 #### Consume every data point
 
@@ -54,7 +54,7 @@ The response is the cost over time using the following format:
 ]
 ```
 
-## Renewables
+### Renewables
 
 #### Consume every data point
 
@@ -84,7 +84,7 @@ Request the specific data by replacing data and zone information in this request
 curl -v https://codereaper.github.io/powercast-data/api/renewables/<yyyy>/<MM>/<dd>/<zone>.json
 ```
 
-The response is the cost over time using the following format:
+The response is the grouped energy amount over time using the following format:
 
 ```jsonc
 [
@@ -102,6 +102,47 @@ The response is the cost over time using the following format:
 ]
 ```
 
+### CO2 Emission
+
+#### Consume every data point
+
+Begin here to load all data using the API:
+
+```sh
+curl -v https://codereaper.github.io/powercast-data/api/emission/co2/latest.json
+```
+
+The response will contain paths to latest available data points for each zone using the following format:
+
+```jsonc
+[
+  {
+    "latest": "/api/emission/co2/<yyyy>/<MM>/<dd>/<zone>.json",
+    "zone": "<zone>"
+  },
+  // ...
+]
+```
+
+#### Consume data points for a specific date and zone
+
+Request the specific data by replacing data and zone information in this request:
+
+```sh
+curl -v https://codereaper.github.io/powercast-data/api/emission/co2/<yyyy>/<MM>/<dd>/<zone>.json
+```
+
+The response is the emission over time using the following format:
+
+```jsonc
+[
+  {
+    "timestamp": <unix timestamp>,
+    "co2": <amount>, // in g/kWh
+  },
+  // ...
+]
+```
 ## Future goals:
 
 - Add custom 404 with a sitemap
