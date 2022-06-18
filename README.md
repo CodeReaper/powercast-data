@@ -134,9 +134,6 @@ curl -v https://codereaper.github.io/powercast-data/api/emission/co2/<yyyy>/<MM>
 
 The response is the emission over time using the following format:
 
-g/kWh
-
-
 ```jsonc
 [
   {
