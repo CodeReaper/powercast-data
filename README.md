@@ -2,6 +2,10 @@
 
 Powercast aims to lower the boundary to query, view and understand energy pricing.
 
+## Data sources
+
+The energy prices, renewable energy production and CO2 emission forecast data is looked up in [Energi Data Service](https://www.energidataservice.dk/).
+
 ## Quick look
 
 Go and check the [graph](https://codereaper.github.io/powercast-data/).
@@ -106,5 +110,3 @@ The response is the cost over time using the following format:
   - Energy prices
   - Renewables
   - Emissions
-- Add forecastable data for:
-  - [CO2 emission](https://www.energidataservice.dk/tso-electricity/co2emisprog)

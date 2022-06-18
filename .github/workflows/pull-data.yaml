@@ -96,6 +96,7 @@ jobs:
 
   update-renewables-data:
     runs-on: ubuntu-latest
+    needs: update-co2-emission-data # TODO: change sequence once workflow is proven
     name: Update renewables data
     outputs:
       changed: ${{ steps.update-renewables-data.outputs.changed }}
@@ -174,6 +175,90 @@ jobs:
         with:
           cwd: github-pages
           add: api/renewables/
+          push: --set-upstream origin ${{ env.publish-branch }}
+          default_author: github_actions
+          message: Publish new data via workflow
+
+  update-co2-emission-data:
+    runs-on: ubuntu-latest
+    name: Update CO2 emission data
+    outputs:
+      changed: ${{ steps.update-co2-emission-data.outputs.changed }}
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.POWERCASTDEPLOY }}
+          ref: ${{ env.publish-branch }}
+          path: github-pages
+
+      - shell: bash
+        name: Setup configuration
+        run: |
+          mkdir -p ./github-pages/api/co2-emission/ > /dev/null
+
+          sh .github/scripts/data-matrix.sh .config.json ./github-pages/api/co2-emission/ | tee configuration.json
+
+      - shell: bash
+        name: Pull data
+        run: |
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+
+            echo "Pull data for ${ZONE} until ${LATEST}..."
+            sh .github/scripts/co2-emission-data-pull.sh $ZONE $LATEST > "${ZONE}.generated"
+          done
+
+      - shell: bash
+        id: update-co2-emission-data
+        name: Check for new data
+        run: |
+          echo "::set-output name=changed::false"
+
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            GENERATED="${ZONE}.generated"
+
+            [ -f "$GENERATED" ] || continue
+
+            NEW=$(sh .github/scripts/data-freshness-file.sh $GENERATED $LATEST)
+
+            echo "Checking data for ${ZONE}:"
+            echo " - ${LATEST} - current data"
+            echo " - ${NEW} - new data"
+
+            if [ $NEW -gt $LATEST ]; then
+              echo "::set-output name=changed::true"
+            fi
+          done
+
+      - shell: bash
+        name: Write data
+        if: steps.update-co2-emission-data.outputs.changed == 'true'
+        run: |
+          for GENERATED in *.generated; do
+            [ -f "$GENERATED" ] || continue
+            ZONE=$(basename $GENERATED .generated)
+            echo "Using generated data for ${ZONE}..."
+            sh .github/scripts/data-write.sh $GENERATED ./github-pages/api/co2-emission/ $ZONE
+          done
+
+      - shell: bash
+        name: Index data
+        if: steps.update-co2-emission-data.outputs.changed == 'true'
+        run: |
+          sh .github/scripts/data-index.sh .config.json ./github-pages/api/co2-emission/ /api/co2-emission > ./github-pages/api/co2-emission/latest.json
+
+      - uses: EndBug/add-and-commit@v9
+        name: Publish data
+        if: steps.update-co2-emission-data.outputs.changed == 'true'
+        with:
+          cwd: github-pages
+          add: api/co2-emission/
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
           message: Publish new data via workflow
