@@ -50,7 +50,7 @@ while [ $CURSORDATE -gt $ENDDATE ]; do
     CURSORDATE=$(cat $DIR/data.json | jq -r 'map(.timestamp | values) | min')
     REQUEST=${ENDPOINT}$(cat $DIR/request.json | jq -r '.result._links.next')
 
-    if [ "$CURSORDATE" == "null" ]; then
+    if [ "$CURSORDATE" = "null" ]; then
         CURSORDATE=0
     fi
 done

@@ -173,6 +173,16 @@ jobs:
           sh .github/scripts/energy-price-data-pull.sh DK1 $(date -d +5years +"%s") http://localhost:8000/ > /dev/null
           [ $? -eq 0 ] || exit 1
 
+      - name: Test with existing well-known empty data that pull outputs as expected
+        run: |
+          set -e
+          export PATH=.github/resources/test/mocks/:$PATH
+          export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/elspotprices_empty
+
+          sh .github/scripts/energy-price-data-pull.sh DK1 1654545600 http://localhost:8000/ > result
+          echo '[]' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
   test-data-freshness-file:
     name: Test data freshness-file
     runs-on: ubuntu-latest
