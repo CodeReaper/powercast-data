@@ -131,13 +131,49 @@ jobs:
           sh .github/scripts/data-write.sh .github/resources/test/well-known/renewables-data-pull-generated-output.json ./test DK1
           diff -rq ./test .github/resources/test/well-known/data-write-generated-renewables-output || { echo "Unexpected difference:"; diff -r ./test .github/resources/test/well-known/data-write-generated-renewables-output; exit 1; }
 
-      - name: Test with existing well-known co emission data that write actually writes output files as expected
+      - name: Test with existing well-known co2 emission data that write actually writes output files as expected
         run: |
           set -e
           mkdir ./test
           trap "rm -rf ./test" EXIT
           sh .github/scripts/data-write.sh .github/resources/test/well-known/co2-emission-data-pull-generated-output.json ./test DK1
           diff -rq ./test .github/resources/test/well-known/data-write-generated-co2-emission-output || { echo "Unexpected difference:"; diff -r ./test .github/resources/test/well-known/data-write-generated-co2-emission-output; exit 1; }
+
+      - name: Test that write outputs uniquely with energy price data
+        run: |
+          set -e
+          mkdir ./test
+          mkdir ./test2
+          trap "rm -rf ./test; rm -rf ./test2; rm changed 2>/dev/null" EXIT
+          jq -r '. | map(.euro = 0)' .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json > changed
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json ./test2 DK1
+          sh .github/scripts/data-write.sh changed ./test2 DK1
+          diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
+
+      - name: Test that write outputs uniquely with renewables data
+        run: |
+          set -e
+          mkdir ./test
+          mkdir ./test2
+          trap "rm -rf ./test; rm -rf ./test2; rm changed 2>/dev/null" EXIT
+          jq -r '. | map(.sources[].energy = 0)' .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json > changed
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json ./test2 DK1
+          sh .github/scripts/data-write.sh changed ./test2 DK1
+          diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
+
+      - name: Test that write outputs uniquely with co2 emission data
+        run: |
+          set -e
+          mkdir ./test
+          mkdir ./test2
+          trap "rm -rf ./test; rm -rf ./test2; rm changed 2>/dev/null" EXIT
+          jq -r '. | map(.co2 = 0)' .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json > changed
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json ./test2 DK1
+          sh .github/scripts/data-write.sh changed ./test2 DK1
+          diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
 
   test-energy-price-data-pull:
     name: Test energy price data pull

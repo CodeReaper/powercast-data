@@ -51,6 +51,6 @@ cat $FILE | jq -rc '.[]' | while read ITEM; do
     if [ ! -f $DESTINATION ]; then
         echo '[]' > $DESTINATION
     fi
-    jq -s '.[0] + .[1] | unique | sort_by(.timestamp)' $DIR/item.json $DESTINATION > $DIR/combined.json
+    jq -s '.[1] + .[0] | unique_by(.timestamp) | sort_by(.timestamp)' $DIR/item.json $DESTINATION > $DIR/combined.json
     mv -f $DIR/combined.json $DESTINATION
 done
