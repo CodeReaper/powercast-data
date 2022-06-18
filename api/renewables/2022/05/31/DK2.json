@@ -1,0 +1,62 @@
+[
+  {
+    "timestamp": 1654027200,
+    "sources": [
+      {
+        "type": "solar",
+        "energy": 0
+      }
+    ]
+  },
+  {
+    "timestamp": 1654030800,
+    "sources": [
+      {
+        "type": "solar",
+        "energy": 0
+      },
+      {
+        "type": "onshore wind",
+        "energy": 3
+      },
+      {
+        "type": "offshore wind",
+        "energy": 1
+      }
+    ]
+  },
+  {
+    "timestamp": 1654034400,
+    "sources": [
+      {
+        "type": "onshore wind",
+        "energy": 18.04
+      },
+      {
+        "type": "offshore wind",
+        "energy": 1.04
+      },
+      {
+        "type": "solar",
+        "energy": 2.53
+      }
+    ]
+  },
+  {
+    "timestamp": 1654038000,
+    "sources": [
+      {
+        "type": "onshore wind",
+        "energy": 17.33
+      },
+      {
+        "type": "offshore wind",
+        "energy": 2
+      },
+      {
+        "type": "solar",
+        "energy": 0.21
+      }
+    ]
+  }
+]
