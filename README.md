@@ -146,7 +146,6 @@ The response is the emission over time using the following format:
 ## Future goals:
 
 - Add custom 404 with a sitemap
-- Add historical graphs
 - Add graphs/graph-combinations ([multi axis might be useful](https://www.chartjs.org/docs/3.2.1/samples/line/multi-axis.html)) for:
   - Energy prices
   - Renewables
