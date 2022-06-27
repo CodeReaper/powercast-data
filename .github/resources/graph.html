@@ -23,8 +23,10 @@
             h1 {
                 font-size: 150%;
             }
-            span.bi-calendar-range {
+            span.bi-calendar-range, span.bi-calendar {
                 float: right;
+                margin-left: 0.66em;
+                cursor: pointer;
             }
         </style>
 
@@ -32,10 +34,10 @@
     </head>
     <body>
         <div class="container">
-            <h1>Energy Prices Overview <span class='bi bi-calendar-range' name="datefilter"></span></h1>
+            <h1>Energy Prices Overview <span class='bi bi-calendar-range' name="datefilter"></span> <span class='bi bi-calendar' name="dateclear"></span></h1>
             <canvas id="graph"></canvas>
             <hr />
-            <h2 id="links-title">Choose below for graphs for a country or of a specific zone</h2>
+            <h2 id="links-title">Choose below for graphs for a country or for a specific zone</h2>
             <div id="links">
                 <div class="link-group">
                     <ul>
@@ -129,7 +131,7 @@
                     flippy = !flippy;
                     return {
                         type: 'box',
-                        backgroundColor: flippy ? '#fafafa' : '#f7f7f7',
+                        backgroundColor: flippy ? '#fafafa' : '#fff',
                         borderWidth: 0,
                         xMax: Math.min(max, nextDay.getTime()),
                         xMin: Math.max(min, midnight.getTime()),
@@ -186,7 +188,7 @@
             const loadState = () => {
                 const now = moment();
                 const defaultState = {
-                    start: now.subtract(1, 'days').unix(),
+                    start: now.endOf('day').subtract(1, 'days').unix(),
                     end: now.add(2, 'days').unix(),
                     zones: ['DK1','DK2','NO2','SE3','SE4','DE']
                 };
@@ -201,7 +203,12 @@
 
             const setDateState = (start, end) => {
                 const state = loadState();
-                const hash = `#zones=${state.zones}&start=${start}&end=${end}`;
+                let hash;
+                if (start == undefined || end == undefined) {
+                    hash = `#zones=${state.zones}`;
+                } else {
+                    hash = `#zones=${state.zones}&start=${start}&end=${end}`;
+                }
                 window.location = hash;
             }
 
@@ -234,6 +241,9 @@
             $(window).on("hashchange", function() { main(); });
 
             (function() { // setup datepicker
+                $('span[name="dateclear"]').on('click', function() {
+                    setDateState();
+                });
                 const $element = $('span[name="datefilter"]');
                 $element.daterangepicker({
                     maxSpan: {
@@ -247,6 +257,9 @@
                 });
                 $element.on('apply.daterangepicker', function(ev, picker) {
                     setDateState(picker.startDate.subtract(1, 'day').endOf('day').unix(), picker.endDate.startOf('day').unix());
+                });
+                $element.on('cancel.daterangepicker', function(ev, picker) {
+                    $(this).val('');
                 });
             }());
 
