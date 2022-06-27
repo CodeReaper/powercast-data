@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '5 0,4,8,12,16,20 * * *'
   workflow_dispatch: {}
+  push:
+    branches:
+      - main
 
 env:
   publish-branch: gh-pages
@@ -317,7 +320,7 @@ jobs:
 
           mkdir -p ./github-pages/emission-co2/ 2>/dev/null
 
-          cat .github/resources/graph.html | sed 's|PAGE_TITLE|CO2 Emissions|g;s|//INJECT|const CATEGORY=`emission-co2`;|g' > ./github-pages/emission-co2/index.html
+          cat .github/resources/graph.html | sed 's|PAGE_TITLE|CO2 Emissions|g;s|//INJECT|const CATEGORY=`emission/co2`;|g' > ./github-pages/emission-co2/index.html
 
       - shell: bash
         name: Generate renewables visualization
