@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="refresh" content="300" />
+
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.3.1"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+        <style>
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            h1 {
+                font-size: 150%;
+            }
+            span.bi-calendar-range, span.bi-calendar {
+                float: right;
+                margin-left: 0.66em;
+                cursor: pointer;
+            }
+        </style>
+
+        <title>Energy Prices Overview</title>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Energy Prices Overview <span class='bi bi-calendar-range' name="datefilter"></span> <span class='bi bi-calendar' name="dateclear"></span></h1>
+            <canvas id="graph"></canvas>
+            <hr />
+            <h2 id="links-title">Choose below for graphs for a country or for a specific zone</h2>
+            <div id="links">
+                <div class="link-group">
+                    <ul>
+                        <li><a href="#">Overview</a></li>
+                        <li><a href="#zones=DK1,DK2">Denmark</a>, specifically <a href="#zones=DK1">DK1</a> or <a href="#zones=DK2">DK2</a></li>
+                        <li><a href="#zones=DE">Germany</a></li>
+                        <li><a href="#zones=NO2">Norway</a></li>
+                        <li><a href="#zones=SE3,SE4">Sweden</a>, specifically <a href="#zones=SE3">SE3</a> or <a href="#zones=SE4">SE4</a></li>
+                    </ul>
+                </div>
+            </div>
+            <noscript>You will need javascript to view data.</noscript>
+        </div>
+
+        <script type="text/javascript">
+            const chart = function() {
+                const options = {
+                    responsive: true,
+                    radius: 0,
+                    hitRadius: 4,
+                    tension: 0.2,
+                    plugins: {
+                        title: {
+                            display: false
+                        },
+                        annotation: {
+                            drawTime: 'beforeDraw',
+                            annotations: []
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            display: true,
+                            time: {
+                                unit: 'hour',
+                                stepSize: 1,
+                                tooltipFormat: 'HH:00',
+                                displayFormats: {
+                                    hour: 'HH:00'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            },
+                            ticks: {
+                                major: {
+                                    enabled: true
+                                },
+                                callback: function(value, index, values) {
+                                    if (values[index] !== undefined) {
+                                        if(values[index].major==true) {
+                                            return moment(values[index].value).format('YYYY-MM-DD');
+                                        } else {
+                                            return value;
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Cost | Euro'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 300
+                        }
+                    }
+                };
+
+                return new Chart(document.getElementById('graph').getContext('2d'), {
+                    type: 'line',
+                    data: { datasets: [] },
+                    options: options
+                });
+            }();
+
+            const endpoint = 'https://codereaper.github.io/powercast-data';
+
+            const generateAnnotations = (days, datasets) => {
+                const points = datasets.flatMap(it => it.data.flatMap(it => it.x));
+                const max = Math.max(...points);
+                const min = Math.min(...points);
+                var flippy = true;
+                var annotations = days.map(day => {
+                    const midnight = new Date(day);
+                    const nextDay = new Date(midnight.getTime() + (24 * 60 * 60 * 1000));
+                    flippy = !flippy;
+                    return {
+                        type: 'box',
+                        backgroundColor: flippy ? '#fafafa' : '#fff',
+                        borderWidth: 0,
+                        xMax: Math.min(max, nextDay.getTime()),
+                        xMin: Math.max(min, midnight.getTime()),
+                    }
+                });
+                const now = new Date().getTime();
+                if (now >= min && now <= max) {
+                    annotations.push({
+                        type: 'line',
+                        backgroundColor: 'black',
+                        borderWidth: 1,
+                        scaleID: 'x',
+                        value: now,
+                    });
+                }
+                return annotations;
+            }
+
+            const generateDays = (start, end) => {
+                if (start > end) return Array();
+
+                let dates = Array();
+                let date = moment(start * 1000);
+                const finish = moment(end * 1000);
+                while (date.isSameOrBefore(finish)) {
+                    dates.push(date.format('YYYY/MM/DD'));
+                    date = date.add(1, 'days');
+                }
+
+                return dates;
+            };
+
+            const load = async (category, date, zone) => {
+                try {
+                    let response = await fetch(`${endpoint}/api/${category}/${date}/${zone}.json`);
+                    if (response.status == 404) {
+                        return [];
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.log(error);
+                    return [];
+                }
+            };
+
+            const loadPrices = async (date, zone) => {
+                return await load('energy-price', date, zone)
+                .then((items) => items
+                    .map((item) => { return { x: item.timestamp * 1000, y: item.euro } })
+                    .sort((a, b) => a.x - b.x)
+                );
+            };
+
+            const loadState = () => {
+                const now = moment();
+                const defaultState = {
+                    start: now.endOf('day').subtract(1, 'days').unix(),
+                    end: now.add(2, 'days').unix(),
+                    zones: ['DK1','DK2','NO2','SE3','SE4','DE']
+                };
+
+                let state = Object.fromEntries(new URLSearchParams(window.location.hash.substring(1)));
+                if (typeof state.zones === 'string' || state.zones instanceof String) { state.zones = state.zones.split(',') }
+                if (typeof state.start === 'string' || state.start instanceof String) { state.start = Number(state.start) }
+                if (typeof state.end === 'string' || state.end instanceof String) { state.end = Number(state.end) }
+
+                return {...defaultState, ...state};
+            };
+
+            const setDateState = (start, end) => {
+                const state = loadState();
+                let hash;
+                if (start == undefined || end == undefined) {
+                    hash = `#zones=${state.zones}`;
+                } else {
+                    hash = `#zones=${state.zones}&start=${start}&end=${end}`;
+                }
+                window.location = hash;
+            }
+
+            const main = async function () {
+                const state = loadState();
+                const days = generateDays(state.start, state.end);
+                const colors = ["#467A56", "#EA665C", "#DF59A2", "#FFDE91", "#5C7CA7", "#8F9AA5"]
+                const start = state.start * 1000;
+                const end = state.end * 1000;
+
+                Promise.all(
+                    state.zones.map(zone => Promise.all(
+                        days.map(day => loadPrices(day, zone)).flatMap(it => it)).then(data => {
+                            return {
+                                data: data.flatMap(it => it).filter(it => it.x >= start && it.x <= end).sort((a, b) => a.x - b.x),
+                                label: zone,
+                                backgroundColor: colors,
+                                pointBackgroundColor: colors,
+                                borderColor: colors
+                            }
+                        })
+                    )
+                ).then(datasets => {
+                    chart.data.datasets = datasets;
+                    chart.options.plugins.annotation.annotations = generateAnnotations(days, datasets);
+                    chart.update();
+                });
+            };
+
+            $(window).on("hashchange", function() { main(); });
+
+            (function() { // setup datepicker
+                $('span[name="dateclear"]').on('click', function() {
+                    setDateState();
+                });
+                const $element = $('span[name="datefilter"]');
+                $element.daterangepicker({
+                    maxSpan: {
+                        days: 31
+                    },
+                    linkedCalendars: true,
+                    autoUpdateInput: false,
+                    timePicker: false,
+                    minDate: "05/30/2022",
+                    opens: "left"
+                });
+                $element.on('apply.daterangepicker', function(ev, picker) {
+                    setDateState(picker.startDate.subtract(1, 'day').endOf('day').unix(), picker.endDate.startOf('day').unix());
+                });
+                $element.on('cancel.daterangepicker', function(ev, picker) {
+                    $(this).val('');
+                });
+            }());
+
+            main();
+        </script>
+    </body>
+</html>
