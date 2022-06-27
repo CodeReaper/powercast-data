@@ -300,7 +300,7 @@ jobs:
 
           mkdir -p ./github-pages/energy-price/ 2>/dev/null
 
-          cp .github/resources/graph.html ./github-pages/energy-price/index.html
+          cp .github/resources/energy-price.html ./github-pages/energy-price/index.html
 
       - uses: EndBug/add-and-commit@v9
         name: Publish graph
