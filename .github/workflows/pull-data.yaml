@@ -334,7 +334,7 @@ jobs:
         name: Publish graph
         with:
           cwd: github-pages
-          add: "['index.html', 'data.js', 'energy-price']"
+          add: "['index.html', '404.html', 'energy-price', 'emissions-co2', 'renewables']"
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
           message: Publish energy price graphs via workflow
