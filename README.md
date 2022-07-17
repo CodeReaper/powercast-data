@@ -22,15 +22,16 @@ Go and check the graphs:
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/energy-price/latest.json
+curl -v https://codereaper.github.io/powercast-data/api/energy-price/index.json
 ```
 
-The response will contain paths to latest available data points for each zone using the following format:
+The response will contain paths to latest and oldest available data points for each zone using the following format:
 
 ```jsonc
 [
   {
     "latest": "/api/energy-price/<yyyy>/<MM>/<dd>/<zone>.json",
+    "oldest": "/api/energy-price/<yyyy>/<MM>/<dd>/<zone>.json",
     "zone": "<zone>"
   },
   // ...
@@ -64,15 +65,16 @@ The response is the cost over time using the following format:
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/renewables/latest.json
+curl -v https://codereaper.github.io/powercast-data/api/renewables/index.json
 ```
 
-The response will contain paths to latest available data points for each zone using the following format:
+The response will contain paths to latest and oldest available data points for each zone using the following format:
 
 ```jsonc
 [
   {
     "latest": "/api/renewables/<yyyy>/<MM>/<dd>/<zone>.json",
+    "oldest": "/api/renewables/<yyyy>/<MM>/<dd>/<zone>.json",
     "zone": "<zone>"
   },
   // ...
@@ -112,15 +114,16 @@ The response is the grouped energy amount over time using the following format:
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/emission/co2/latest.json
+curl -v https://codereaper.github.io/powercast-data/api/emission/co2/index.json
 ```
 
-The response will contain paths to latest available data points for each zone using the following format:
+The response will contain paths to latest and oldest available data points for each zone using the following format:
 
 ```jsonc
 [
   {
     "latest": "/api/emission/co2/<yyyy>/<MM>/<dd>/<zone>.json",
+    "oldest": "/api/emission/co2/<yyyy>/<MM>/<dd>/<zone>.json",
     "zone": "<zone>"
   },
   // ...

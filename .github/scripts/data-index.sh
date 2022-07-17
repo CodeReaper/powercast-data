@@ -7,14 +7,16 @@
 #           - .config.json
 #           - test.json
 #   - directory:
-#       Must be a valid path to a directory with files that `data-freshness-file` can parse.
+#       Must be a valid path to a directory with data files.
 #       Examples:
 #           - ./
 #           - data/
 #   - prefix:
-#       Optional, will be used to prefix each latest link.
-#       Default is '/'. Must not end on '/'.
-#       Example: /data
+#       Will be used to prefix each latest link.
+#       Must not end on '/'.
+#       Example:
+#           - /
+#           - /data
 
 # Output example:
 # [
@@ -42,26 +44,30 @@ trap 'exit 2' 1 2 3 15
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
 
 set +e
+[ -z "$PREFIX" ] && { echo "Prefix missing"; exit 3; }
 echo "$PREFIX" | grep -vq /$
 [ $? -eq 0 ] || { echo "Prefix cannot end on a '/'. Given: $PREFIX"; exit 3; }
 set -e
 
-echo -n '[' > $DIR/output.json
+printf '[' > $DIR/output.json
 cat "$CONFIG" | jq -rc '.[] | del(.display)' | while read ITEM; do
     [ -z "$ITEM" ] && continue
 
     cd $FOLDER
     mkdir find-helper
     AREA=$(echo $ITEM | jq -r '.zone')
-    LATEST=$(find * -type f -name "${AREA}.json" | sort | tail -n1)
+    find * -type f -name "${AREA}.json" | sort > $DIR/found
+    LATEST=$(tail -n1 < $DIR/found)
+    OLDEST=$(head -n1 < $DIR/found)
     rmdir find-helper
     cd - > /dev/null
 
     [ -z "$LATEST" ] && continue
+    [ -z "$OLDEST" ] && continue
 
-    echo -n "{\"latest\":\"${PREFIX}/${LATEST}\",\"zone\":\"${AREA}\"}," >> $DIR/output.json
+    printf "{\"latest\":\"${PREFIX}/${LATEST}\",\"oldest\":\"${PREFIX}/${OLDEST}\",\"zone\":\"${AREA}\"}," >> $DIR/output.json
 done
 
-echo -n ']' >> $DIR/output.json
+printf ']' >> $DIR/output.json
 
 cat $DIR/output.json | sed 's|,]|]|g' | jq -r '.'
