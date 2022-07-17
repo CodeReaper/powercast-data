@@ -376,7 +376,7 @@ jobs:
           export PATH=.github/resources/test/mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/co2emisprog
 
-          sh .github/scripts/co2-emission-data-pull.sh DK1 1655661000 > result
+          sh .github/scripts/co2-emission-data-pull.sh DK1 1658318400 > result
           diff -q .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result; exit 1; }
 
       - name: Test pull makes a request with end date set to now
