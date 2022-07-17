@@ -1,1 +1,33 @@
-{"help": "https://api.energidataservice.dk/help_show?name=datastore_search", "success": true, "result": {"sort": "HourUTC desc", "include_total": false, "resource_id": "c86859d2-942e-4029-aec1-32d56f1a2e5d", "fields": [{"type": "int", "id": "_id"}, {"type": "timestamptz", "id": "HourUTC"}, {"type": "timestamp", "id": "HourDK"}, {"type": "text", "id": "PriceArea"}, {"type": "float8", "id": "SpotPriceDKK"}, {"type": "float8", "id": "SpotPriceEUR"}], "records_format": "objects", "records": [{"HourUTC":"2022-06-08T21:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":176.09},{"HourUTC":"2022-06-08T20:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":211},{"HourUTC":"2022-06-08T19:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":211.98},{"HourUTC":"2022-06-08T18:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":212.36},{"HourUTC":"2022-06-08T17:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":227.2},{"HourUTC":"2022-06-08T16:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":209.69},{"HourUTC":"2022-06-08T15:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":199.66},{"HourUTC":"2022-06-08T14:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":181.73},{"HourUTC":"2022-06-08T13:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":177.35},{"HourUTC":"2022-06-08T12:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":176.07},{"HourUTC":"2022-06-08T11:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":174.07},{"HourUTC":"2022-06-08T10:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":180.21},{"HourUTC":"2022-06-08T09:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":183.2},{"HourUTC":"2022-06-08T08:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":191},{"HourUTC":"2022-06-08T07:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":205.29},{"HourUTC":"2022-06-08T06:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":215.01},{"HourUTC":"2022-06-08T05:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":213.93},{"HourUTC":"2022-06-08T04:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":197.42},{"HourUTC":"2022-06-08T03:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":175},{"HourUTC":"2022-06-08T02:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":164.92},{"HourUTC":"2022-06-08T01:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":162.96},{"HourUTC":"2022-06-08T00:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":165.1},{"HourUTC":"2022-06-07T23:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":168.95},{"HourUTC":"2022-06-07T22:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":185.05},{"HourUTC":"2022-06-07T21:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":210.97},{"HourUTC":"2022-06-07T20:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":220.26},{"HourUTC":"2022-06-07T19:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":228.81},{"HourUTC":"2022-06-07T18:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":227.46},{"HourUTC":"2022-06-07T17:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":218.04},{"HourUTC":"2022-06-07T16:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":200},{"HourUTC":"2022-06-07T15:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":173.1},{"HourUTC":"2022-06-07T14:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":164.07},{"HourUTC":"2022-06-07T13:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":163.87},{"HourUTC":"2022-06-07T12:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":165.52},{"HourUTC":"2022-06-07T11:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":168.7},{"HourUTC":"2022-06-07T10:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":168.7},{"HourUTC":"2022-06-07T09:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":173.32},{"HourUTC":"2022-06-07T08:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":191},{"HourUTC":"2022-06-07T07:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":210.99},{"HourUTC":"2022-06-07T06:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":220.12},{"HourUTC":"2022-06-07T05:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":216.93},{"HourUTC":"2022-06-07T04:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":175.7},{"HourUTC":"2022-06-07T03:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":153.53},{"HourUTC":"2022-06-07T02:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":146.88},{"HourUTC":"2022-06-07T01:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":145.72},{"HourUTC":"2022-06-07T00:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":150.61},{"HourUTC":"2022-06-06T23:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":154.02},{"HourUTC":"2022-06-06T22:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":163.39},{"HourUTC":"2022-06-06T21:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":189.7},{"HourUTC":"2022-06-06T20:00:00+00:00","PriceArea":"DK1","SpotPriceEUR":217.42}], "limit": 50, "filters": {"PriceArea": "DK1"}, "_links": {"start": "/datastore_search?sort=HourUTC+desc&limit=50&filters=%7B%22PriceArea%22%3A%22DK1%22%7D&include_total=false&resource_id=elspotprices&fields=HourUTC%2CPriceArea%2CSpotPriceEUR&records_format=objects", "next": "/datastore_search?sort=HourUTC+desc&limit=50&filters=%7B%22PriceArea%22%3A%22DK1%22%7D&include_total=false&resource_id=elspotprices&fields=HourUTC%2CPriceArea%2CSpotPriceEUR&offset=50&records_format=objects"}}}
+{
+    "total": 1616558,
+    "sort": "HourUTC desc",
+    "limit": 5,
+    "dataset": "Elspotprices",
+    "records": [
+        {
+            "HourUTC": "2022-07-18T21:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 469.859985
+        },
+        {
+            "HourUTC": "2022-07-18T20:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 451.5
+        },
+        {
+            "HourUTC": "2022-07-18T19:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 342.429993
+        },
+        {
+            "HourUTC": "2022-07-18T18:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 53.669998
+        },
+        {
+            "HourUTC": "2022-07-18T17:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 53.669998
+        }
+    ]
+}
