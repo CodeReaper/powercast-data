@@ -334,7 +334,7 @@ jobs:
           export PATH=.github/resources/test/mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/forecasts_hour
 
-          sh .github/scripts/renewables-data-pull.sh DK1 1655528400 > result
+          sh .github/scripts/renewables-data-pull.sh DK1 1658318400 > result
           diff -q .github/resources/test/well-known/renewables-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/renewables-data-pull-generated-output.json result; exit 1; }
 
       - name: Test pull makes a request with end date set to now

@@ -38,7 +38,7 @@ trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
 
 CURSORDATE=$(date -d +14days +"%s")
-TEMPLATE=$(echo "{\"PriceArea\":\"${AREA}\"}" | jq -r "@uri \"${ENDPOINT}${QUERY}&filters=\(.filters)\"")
+TEMPLATE=$(echo "{\"PriceArea\":\"${AREA}\"}" | jq -r "@uri \"${ENDPOINT}${QUERY}&filter=\(.)\"")
 
 echo '[]' > $DIR/data.json
 while [ $CURSORDATE -gt $ENDDATE ]; do
