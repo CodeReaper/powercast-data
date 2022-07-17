@@ -22,7 +22,7 @@ Go and check the graphs:
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/energy-price/latest.json
+curl -v https://codereaper.github.io/powercast-data/api/energy-price/index.json
 ```
 
 The response will contain paths to latest and oldest available data points for each zone using the following format:
@@ -65,7 +65,7 @@ The response is the cost over time using the following format:
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/renewables/latest.json
+curl -v https://codereaper.github.io/powercast-data/api/renewables/index.json
 ```
 
 The response will contain paths to latest and oldest available data points for each zone using the following format:
@@ -114,7 +114,7 @@ The response is the grouped energy amount over time using the following format:
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/emission/co2/latest.json
+curl -v https://codereaper.github.io/powercast-data/api/emission/co2/index.json
 ```
 
 The response will contain paths to latest and oldest available data points for each zone using the following format:

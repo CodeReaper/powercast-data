@@ -84,7 +84,8 @@ jobs:
         name: Index data
         if: steps.update-energy-price-data.outputs.changed == 'true'
         run: |
-          sh .github/scripts/data-index.sh .config.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/latest.json
+          rm ./github-pages/api/energy-price/latest.json || true
+          sh .github/scripts/data-index.sh .config.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
@@ -169,7 +170,8 @@ jobs:
         name: Index data
         if: steps.update-renewables-data.outputs.changed == 'true'
         run: |
-          sh .github/scripts/data-index.sh .config.json ./github-pages/api/renewables/ /api/renewables > ./github-pages/api/renewables/latest.json
+          rm ./github-pages/api/renewables/latest.json || true
+          sh .github/scripts/data-index.sh .config.json ./github-pages/api/renewables/ /api/renewables > ./github-pages/api/renewables/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
@@ -254,7 +256,8 @@ jobs:
         name: Index data
         if: steps.update-co2-emission-data.outputs.changed == 'true'
         run: |
-          sh .github/scripts/data-index.sh .config.json ./github-pages/api/emission/co2/ /api/emission/co2 > ./github-pages/api/emission/co2/latest.json
+          rm ./github-pages/api/emission/co2/latest.json || true
+          sh .github/scripts/data-index.sh .config.json ./github-pages/api/emission/co2/ /api/emission/co2 > ./github-pages/api/emission/co2/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
