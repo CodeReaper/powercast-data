@@ -35,7 +35,7 @@ AREA=$1
 ENDDATE=$2
 DIR=/tmp/$$
 ENDPOINT=https://api.energidataservice.dk/
-QUERY="dataset/forecasts_Hour?limit=${LIMIT}&sort=HourUTC%20desc&columns=HourUTC,PriceArea,ForecastType,ForecastDayAhead"
+QUERY="dataset/forecasts_hour?limit=${LIMIT}&sort=HourUTC%20desc&columns=HourUTC,PriceArea,ForecastType,ForecastDayAhead"
 
 which mkdir wget jq cat date > /dev/null
 

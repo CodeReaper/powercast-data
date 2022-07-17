@@ -157,9 +157,9 @@ jobs:
           mkdir ./test
           mkdir ./test2
           trap "rm -rf ./test; rm -rf ./test2; rm changed 2>/dev/null" EXIT
-          jq -r '. | map(.sources[].energy = 0)' .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json > changed
-          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json ./test DK1
-          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json ./test2 DK1
+          jq -r '. | map(.sources[].energy = 0)' .github/resources/test/well-known/data-write-generated-renewables-output/2022/07/17/DK1.json > changed
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/07/17/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/07/17/DK1.json ./test2 DK1
           sh .github/scripts/data-write.sh changed ./test2 DK1
           diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
 
@@ -169,9 +169,9 @@ jobs:
           mkdir ./test
           mkdir ./test2
           trap "rm -rf ./test; rm -rf ./test2; rm changed 2>/dev/null" EXIT
-          jq -r '. | map(.co2 = 0)' .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json > changed
-          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json ./test DK1
-          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json ./test2 DK1
+          jq -r '. | map(.co2 = 0)' .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/07/17/DK1.json > changed
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/07/17/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/07/17/DK1.json ./test2 DK1
           sh .github/scripts/data-write.sh changed ./test2 DK1
           diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
 
