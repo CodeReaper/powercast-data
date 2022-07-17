@@ -157,9 +157,9 @@ jobs:
           mkdir ./test
           mkdir ./test2
           trap "rm -rf ./test; rm -rf ./test2; rm changed 2>/dev/null" EXIT
-          jq -r '. | map(.sources[].energy = 0)' .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json > changed
-          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json ./test DK1
-          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/06/18/DK1.json ./test2 DK1
+          jq -r '. | map(.sources[].energy = 0)' .github/resources/test/well-known/data-write-generated-renewables-output/2022/07/17/DK1.json > changed
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/07/17/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-renewables-output/2022/07/17/DK1.json ./test2 DK1
           sh .github/scripts/data-write.sh changed ./test2 DK1
           diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
 
@@ -169,9 +169,9 @@ jobs:
           mkdir ./test
           mkdir ./test2
           trap "rm -rf ./test; rm -rf ./test2; rm changed 2>/dev/null" EXIT
-          jq -r '. | map(.co2 = 0)' .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json > changed
-          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json ./test DK1
-          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/06/19/DK1.json ./test2 DK1
+          jq -r '. | map(.co2 = 0)' .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/07/17/DK1.json > changed
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/07/17/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/07/17/DK1.json ./test2 DK1
           sh .github/scripts/data-write.sh changed ./test2 DK1
           diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
 
@@ -187,7 +187,7 @@ jobs:
           export PATH=.github/resources/test/mocks/:$PATH
           unset WGET_OVERRIDE
 
-          sh .github/scripts/energy-price-data-pull.sh DK1 1654545600
+          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400
           [ $? -ne 0 ] || exit 1
 
       - name: Test with existing well-known data that pull outputs as expected
@@ -196,7 +196,8 @@ jobs:
           export PATH=.github/resources/test/mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/elspotprices
 
-          sh .github/scripts/energy-price-data-pull.sh DK1 1654545600 > result
+          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400 > result
+          cat result
           diff -q .github/resources/test/well-known/energy-price-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/energy-price-data-pull-generated-output.json result; exit 1; }
 
       - name: Test pull makes a request with end date set to now
@@ -223,7 +224,7 @@ jobs:
           export PATH=.github/resources/test/mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/elspotprices_empty
 
-          sh .github/scripts/energy-price-data-pull.sh DK1 1654545600 > result
+          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400 > result
           echo '[]' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -262,7 +263,7 @@ jobs:
           set -e
 
           sh .github/scripts/data-freshness-file.sh .github/resources/test/well-known/energy-price-data-pull-generated-output.json 12345 > result
-          echo '1654722000' > expected
+          echo '1658178000' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
   test-data-index:
@@ -333,7 +334,7 @@ jobs:
           export PATH=.github/resources/test/mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/forecasts_hour
 
-          sh .github/scripts/renewables-data-pull.sh DK1 1655528400 > result
+          sh .github/scripts/renewables-data-pull.sh DK1 1658318400 > result
           diff -q .github/resources/test/well-known/renewables-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/renewables-data-pull-generated-output.json result; exit 1; }
 
       - name: Test pull makes a request with end date set to now
@@ -375,7 +376,7 @@ jobs:
           export PATH=.github/resources/test/mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/co2emisprog
 
-          sh .github/scripts/co2-emission-data-pull.sh DK1 1655661000 > result
+          sh .github/scripts/co2-emission-data-pull.sh DK1 1658318400 > result
           diff -q .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result; exit 1; }
 
       - name: Test pull makes a request with end date set to now
@@ -395,21 +396,3 @@ jobs:
 
           sh .github/scripts/co2-emission-data-pull.sh DK1 $(date -d +5years +"%s") > /dev/null
           [ $? -eq 0 ] || exit 1
-
-  test-run-tests:
-    name: Test run tests (always skipped on GitHub)
-    runs-on: ubuntu-latest
-    if: ${{ false }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Test non-existing file
-        run: |
-          set +e
-          sh ./scripts/run-tests.sh ./non-existing-file > /dev/null
-          [ $? -eq 1 ] || exit 1
-
-      - name: Test running tests
-        run: |
-          set -e
-          sh ./scripts/run-tests.sh .github/resources/test/test.yaml

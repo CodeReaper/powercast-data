@@ -1,1 +1,7 @@
-{"help": "https://api.energidataservice.dk/help_show?name=datastore_search", "success": true, "result": {"sort": "HourUTC desc", "include_total": false, "resource_id": "c86859d2-942e-4029-aec1-32d56f1a2e5d", "fields": [{"type": "int", "id": "_id"}, {"type": "timestamptz", "id": "HourUTC"}, {"type": "timestamp", "id": "HourDK"}, {"type": "text", "id": "PriceArea"}, {"type": "float8", "id": "SpotPriceDKK"}, {"type": "float8", "id": "SpotPriceEUR"}], "records_format": "objects", "records": [], "limit": 50, "filters": {"PriceArea": "DK1"}, "_links": {"start": "/datastore_search?sort=HourUTC+desc&limit=50&filters=%7B%22PriceArea%22%3A%22DK1%22%7D&include_total=false&resource_id=elspotprices&fields=HourUTC%2CPriceArea%2CSpotPriceEUR&records_format=objects", "next": "/datastore_search?sort=HourUTC+desc&limit=50&filters=%7B%22PriceArea%22%3A%22DK1%22%7D&include_total=false&resource_id=elspotprices&fields=HourUTC%2CPriceArea%2CSpotPriceEUR&offset=50&records_format=objects"}}}
+{
+    "total": 1616558,
+    "sort": "HourUTC desc",
+    "limit": 5,
+    "dataset": "Elspotprices",
+    "records": []
+}
