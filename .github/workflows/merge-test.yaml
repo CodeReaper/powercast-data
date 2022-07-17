@@ -287,6 +287,12 @@ jobs:
           sh .github/scripts/data-index.sh .config.json ./non-existing-directory/ > /dev/null
           [ $? -eq 2 ] || exit 1
 
+      - name: Test missing prefix
+        run: |
+          set +e
+          sh .github/scripts/data-index.sh .config.json ./empty-data-folder > /dev/null
+          [ $? -eq 3 ] || exit 1
+
       - name: Test incorrect prefix
         run: |
           set +e
@@ -296,7 +302,7 @@ jobs:
       - name: Test with no existing data that index outputs no data
         run: |
           set -e
-          sh .github/scripts/data-index.sh .config.json ./empty-data-folder/ | jq -r '.' > result
+          sh .github/scripts/data-index.sh .config.json ./empty-data-folder/ /prefix | jq -r '.' > result
           echo '[]' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 

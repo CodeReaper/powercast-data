@@ -25,12 +25,13 @@ Begin here to load all data using the API:
 curl -v https://codereaper.github.io/powercast-data/api/energy-price/latest.json
 ```
 
-The response will contain paths to latest available data points for each zone using the following format:
+The response will contain paths to latest and oldest available data points for each zone using the following format:
 
 ```jsonc
 [
   {
     "latest": "/api/energy-price/<yyyy>/<MM>/<dd>/<zone>.json",
+    "oldest": "/api/energy-price/<yyyy>/<MM>/<dd>/<zone>.json",
     "zone": "<zone>"
   },
   // ...
@@ -67,12 +68,13 @@ Begin here to load all data using the API:
 curl -v https://codereaper.github.io/powercast-data/api/renewables/latest.json
 ```
 
-The response will contain paths to latest available data points for each zone using the following format:
+The response will contain paths to latest and oldest available data points for each zone using the following format:
 
 ```jsonc
 [
   {
     "latest": "/api/renewables/<yyyy>/<MM>/<dd>/<zone>.json",
+    "oldest": "/api/renewables/<yyyy>/<MM>/<dd>/<zone>.json",
     "zone": "<zone>"
   },
   // ...
@@ -115,12 +117,13 @@ Begin here to load all data using the API:
 curl -v https://codereaper.github.io/powercast-data/api/emission/co2/latest.json
 ```
 
-The response will contain paths to latest available data points for each zone using the following format:
+The response will contain paths to latest and oldest available data points for each zone using the following format:
 
 ```jsonc
 [
   {
     "latest": "/api/emission/co2/<yyyy>/<MM>/<dd>/<zone>.json",
+    "oldest": "/api/emission/co2/<yyyy>/<MM>/<dd>/<zone>.json",
     "zone": "<zone>"
   },
   // ...
