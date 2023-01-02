@@ -52,7 +52,7 @@ while [ $CURSORDATE -gt $ENDDATE ]; do
 
     wget -nv -O $DIR/request.json "${REQUEST}"
 
-    TRANSFORMATION='.records |= map(.type = (.ForecastType | ascii_downcase) | .energy = (.ForecastDayAhead * 100 | round) / 100 | .timestamp = .HourUTC | del(.ForecastType, .ForecastDayAhead, .HourUTC, .PriceArea)) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records | group_by(.timestamp) | map({ timestamp: (.[0].timestamp), sources: [.[] | del(.timestamp)] })'
+    TRANSFORMATION='.records |= map(.type = (.ForecastType | ascii_downcase) | .energy = if (.ForecastDayAhead == null) then 0 else (.ForecastDayAhead * 100 | round) / 100 end | .timestamp = .HourUTC | del(.ForecastType, .ForecastDayAhead, .HourUTC, .PriceArea)) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records | group_by(.timestamp) | map({ timestamp: (.[0].timestamp), sources: [.[] | del(.timestamp)] })'
     cat $DIR/request.json | jq -r "$TRANSFORMATION" > $DIR/data.new.json
     jq -s '.[0] + .[1]' $DIR/data.json $DIR/data.new.json > $DIR/data.combined.json
     mv -f $DIR/data.combined.json $DIR/data.json
