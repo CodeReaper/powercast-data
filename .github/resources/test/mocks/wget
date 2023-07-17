@@ -13,5 +13,5 @@ while getopts ":O:" OPTION; do
     esac
 done
 
-echo "-O not provided among: $@"
+echo "-O not provided among: $*"
 exit 1
