@@ -12,11 +12,6 @@
 #       Examples:
 #           - ./
 #           - data/
-#   - date:
-#       Optional, will default to now.
-#       Script will believe that "date" is now.
-#       Must be a unix timestamp.
-#       Example: 1654012800
 
 # Output example:
 # [
@@ -29,7 +24,6 @@
 
 CONFIG=$1
 FOLDER=$2
-CURRENTDATE=${3:-$(date +"%s")}
 DIR=/tmp/$$
 
 set -e
@@ -39,19 +33,19 @@ mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
 
-SCRIPTS=$(dirname $0)
+SCRIPTS=$(dirname "$0")
 
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
 
-echo -n '[' > $DIR/matrix.json
-cat "$CONFIG" | jq -rc '.[] | del(.display)' | while read ITEM; do
-    AREA=$(echo $ITEM | jq -r '.zone')
-    ENDDATE=$(echo $ITEM | jq -r '.endDate')
+printf '[' > $DIR/matrix.json
+jq -rc '.[] | del(.display)' "$CONFIG" | while read -r ITEM; do
+    AREA=$(echo "$ITEM" | jq -r '.zone')
+    ENDDATE=$(echo "$ITEM" | jq -r '.endDate')
     LATEST=$(sh "${SCRIPTS}/data-freshness.sh" "$FOLDER" "$AREA" "$ENDDATE")
-    echo -n "{\"zone\":\"${AREA}\",\"latest\":${LATEST}}," >> $DIR/matrix.json
+    printf "{\"zone\":\"%s\",\"latest\":%s}," "$AREA" "$LATEST" >> "$DIR/matrix.json"
 done
 
-echo -n ']' >> $DIR/matrix.json
+printf ']' >> $DIR/matrix.json
 
 cat $DIR/matrix.json | sed 's|,]|]|g' | jq -r '.'

@@ -22,13 +22,13 @@ set -e
 which jq cat > /dev/null
 
 [ -f "$FILE" ] || { echo "Not a FILE: $FILE"; exit 1; }
-[ -z $ENDDATE ] && { echo "Invalid/Missing ENDDATE."; exit 2; }
+[ -z "$ENDDATE" ] && { echo "Invalid/Missing ENDDATE."; exit 2; }
 
-LATEST=$(cat "$FILE" | jq -r 'map(.timestamp | values) | max')
+LATEST=$(jq -r 'map(.timestamp | values) | max' "$FILE")
 
 if [ -z "$LATEST" ] || [ "null" = "$LATEST" ]; then
-    echo $ENDDATE
+    echo "$ENDDATE"
     exit 0
 fi
 
-echo $LATEST
+echo "$LATEST"

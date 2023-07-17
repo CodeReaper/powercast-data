@@ -16,15 +16,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - uses: editorconfig-checker/action-editorconfig-checker@main
-
       - run: editorconfig-checker
+
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ludeeus/action-shellcheck@master
 
   tests-succeeded:
     name: Tests Succeeded
     needs:
       - unit-tests
+      - shellcheck
       - editorconfig-check
 
     runs-on: ubuntu-latest
