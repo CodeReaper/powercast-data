@@ -45,18 +45,20 @@ trap 'exit 2' 1 2 3 15
 
 set +e
 [ -z "$PREFIX" ] && { echo "Prefix missing"; exit 3; }
-echo "$PREFIX" | grep -vq /$
-[ $? -eq 0 ] || { echo "Prefix cannot end on a '/'. Given: $PREFIX"; exit 3; }
+if ! echo "$PREFIX" | grep -vq /$; then
+    echo "Prefix cannot end on a '/'. Given: $PREFIX";
+    exit 3;
+fi
 set -e
 
 printf '[' > $DIR/output.json
-cat "$CONFIG" | jq -rc '.[] | del(.display)' | while read ITEM; do
+jq -rc '.[] | del(.display)' "$CONFIG" | while read -r ITEM; do
     [ -z "$ITEM" ] && continue
 
-    cd $FOLDER
+    cd "$FOLDER"
     mkdir find-helper
-    AREA=$(echo $ITEM | jq -r '.zone')
-    find * -type f -name "${AREA}.json" | sort > $DIR/found
+    AREA=$(echo "$ITEM" | jq -r '.zone')
+    find -- * -type f -name "${AREA}.json" | sort > "$DIR/found"
     LATEST=$(tail -n1 < $DIR/found)
     OLDEST=$(head -n1 < $DIR/found)
     rmdir find-helper
@@ -65,7 +67,7 @@ cat "$CONFIG" | jq -rc '.[] | del(.display)' | while read ITEM; do
     [ -z "$LATEST" ] && continue
     [ -z "$OLDEST" ] && continue
 
-    printf "{\"latest\":\"${PREFIX}/${LATEST}\",\"oldest\":\"${PREFIX}/${OLDEST}\",\"zone\":\"${AREA}\"}," >> $DIR/output.json
+    printf "{\"latest\":\"%s\",\"oldest\":\"%s\",\"zone\":\"%s\"}," "$PREFIX/$LATEST" "$PREFIX/$OLDEST" "$AREA" >> $DIR/output.json
 done
 
 printf ']' >> $DIR/output.json

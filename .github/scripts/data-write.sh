@@ -33,24 +33,24 @@ trap 'exit 2' 1 2 3 15
 
 [ -f "$FILE" ] || { echo "Not a file: $FILE"; exit 1; }
 [ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
-AREA=$(echo "$AREA" | tr [:lower:] [:upper:])
-[ -z $AREA ] && { echo "Invalid/Missing area."; exit 3; }
+AREA=$(echo "$AREA" | tr '[:lower:]' '[:upper:]')
+[ -z "$AREA" ] && { echo "Invalid/Missing area."; exit 3; }
 
-cat $FILE | jq -rc '.[]' | while read ITEM; do
+jq -rc '.[]' "$FILE" | while read -r ITEM; do
     echo "[" > $DIR/item.json
     echo "$ITEM" >> $DIR/item.json
     echo "]" >> $DIR/item.json
 
     DATE=$(echo "$ITEM" | jq -r '.timestamp | todate' | cut -dT -f1)
-    YEAR=$(echo "$DATE" | cut -d\- -f1)
-    MONTH=$(echo "$DATE" | cut -d\- -f2)
-    DAY=$(echo "$DATE" | cut -d\- -f3)
+    YEAR=$(echo "$DATE" | cut -d- -f1)
+    MONTH=$(echo "$DATE" | cut -d- -f2)
+    DAY=$(echo "$DATE" | cut -d- -f3)
     DESTINATION="${FOLDER}/${YEAR}/${MONTH}/${DAY}/${AREA}.json"
 
-    mkdir -p $(dirname $DESTINATION)
-    if [ ! -f $DESTINATION ]; then
-        echo '[]' > $DESTINATION
+    mkdir -p "$(dirname "$DESTINATION")"
+    if [ ! -f "$DESTINATION" ]; then
+        echo '[]' > "$DESTINATION"
     fi
-    jq -s '.[1] + .[0] | unique_by(.timestamp) | sort_by(.timestamp)' $DIR/item.json $DESTINATION > $DIR/combined.json
-    mv -f $DIR/combined.json $DESTINATION
+    jq -s '.[1] + .[0] | unique_by(.timestamp) | sort_by(.timestamp)' "$DIR/item.json" "$DESTINATION" > "$DIR/combined.json"
+    mv -f "$DIR/combined.json" "$DESTINATION"
 done

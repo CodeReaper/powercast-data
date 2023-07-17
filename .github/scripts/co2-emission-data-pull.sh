@@ -41,7 +41,7 @@ CURSORDATE=$(date -d +14days +"%s")
 TEMPLATE=$(echo "{\"PriceArea\":\"${AREA}\"}" | jq -r "@uri \"${ENDPOINT}${QUERY}&filter=\(.)\"")
 
 echo '[]' > $DIR/data.json
-while [ $CURSORDATE -gt $ENDDATE ]; do
+while [ "$CURSORDATE" -gt "$ENDDATE" ]; do
     REQUEST="${TEMPLATE}&offset=${OFFSET}"
 
     wget -nv -O $DIR/request.json "${REQUEST}"
