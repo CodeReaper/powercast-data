@@ -1,0 +1,87 @@
+name: Update visualization
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github
+
+env:
+  publish-branch: gh-pages
+
+jobs:
+  update-visualization:
+    runs-on: ubuntu-latest
+    name: Update visualization
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.POWERCASTDEPLOY }}
+          ref: ${{ env.publish-branch }}
+          path: github-pages
+
+      - shell: bash
+        name: Clean up previous visualizations
+        run: |
+          set -e
+          cd ./github-pages/
+          ls -Q | grep -v ^\"api\"$ | xargs rm -rf
+
+      - shell: bash
+        name: Setup pages configuration
+        run: |
+          set -e
+
+          cp .github/resources/404.html ./github-pages/
+
+      - shell: bash
+        name: Setup redirects
+        run: |
+          set -e
+
+          cat .github/resources/redirect.html | sed 's|REDIRECT_URL|//${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/energy-price/|g' > ./github-pages/index.html
+
+      - shell: bash
+        name: Generate energy price visualization
+        run: |
+          set -e
+
+          [ -d ./github-pages/api/energy-price/ ] || exit 0
+
+          mkdir -p ./github-pages/energy-price/ 2>/dev/null
+
+          cat .github/resources/graph.html | sed 's|PAGE_TITLE|Energy Prices Overview|g;s|//INJECT|const CATEGORY=`energy-price`;|g' > ./github-pages/energy-price/index.html
+
+      - shell: bash
+        name: Generate co2 emission visualization
+        run: |
+          set -e
+
+          [ -d ./github-pages/api/emission/co2/ ] || exit 0
+
+          mkdir -p ./github-pages/emission-co2/ 2>/dev/null
+
+          cat .github/resources/graph.html | sed 's|PAGE_TITLE|CO2 Emissions|g;s|//INJECT|const CATEGORY=`emission/co2`;|g' > ./github-pages/emission-co2/index.html
+
+      - shell: bash
+        name: Generate renewables visualization
+        run: |
+          set -e
+
+          [ -d ./github-pages/api/renewables/ ] || exit 0
+
+          mkdir -p ./github-pages/renewables/ 2>/dev/null
+
+          cat .github/resources/graph.html | sed 's|PAGE_TITLE|Renewable Energy Production|g;s|//INJECT|const CATEGORY=`renewables`;|g' > ./github-pages/renewables/index.html
+
+      - uses: EndBug/add-and-commit@v9
+        name: Publish graph
+        with:
+          cwd: github-pages
+          add: "['index.html', '404.html', 'energy-price', 'emission-co2', 'renewables']"
+          push: --set-upstream origin ${{ env.publish-branch }}
+          default_author: github_actions
+          message: Publish visualizations via workflow
