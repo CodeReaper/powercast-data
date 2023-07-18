@@ -37,5 +37,5 @@ jobs:
 
   content-fetch:
     needs: content-check
-    if: ${{ jobs.content-check.steps.content.available == 'true' }}
+    if: ${{ needs.content-check.steps.content.available == 'true' }}
     uses: ./.github/workflows/update-contents.yaml
