@@ -25,7 +25,7 @@ FOLDER=$2
 AREA=$3
 DIR=/tmp/$$
 
-which mkdir jq cat tr cut dirname > /dev/null
+which mkdir jq tr cut dirname > /dev/null
 
 mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0

@@ -19,7 +19,7 @@ FILE=$1
 ENDDATE=$2
 
 set -e
-which jq cat > /dev/null
+which jq > /dev/null
 
 [ -f "$FILE" ] || { echo "Not a FILE: $FILE"; exit 1; }
 [ -z "$ENDDATE" ] && { echo "Invalid/Missing ENDDATE."; exit 2; }
