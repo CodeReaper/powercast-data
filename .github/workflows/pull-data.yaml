@@ -25,16 +25,17 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+        id: content
         run: |
-          echo "CONTENTS_AVAILABLE=0" >> "$GITHUB_ENV"
+          echo "available=false" >> "$GITHUB_OUTPUT"
 
           lastChange=$(gh api "/repos/${{ github.repository }}/commits?path=api/energy-price/&sha=${{ env.publish-branch }}&per_page=1" | jq -r '.[0].commit.committer.date | fromdateiso8601')
 
           if [ $(($lastChange+(3600*23))) -gt $(date +%s) ]; then
-            echo "CONTENTS_AVAILABLE=1" >> "$GITHUB_ENV"
+            echo "available=true" >> "$GITHUB_OUTPUT"
           fi
 
   content-fetch:
     needs: content-check
-    if: ${{ jobs.content-check.env.CONTENTS_AVAILABLE != '0' }}
+    if: ${{ jobs.content-check.steps.content.available == 'true' }}
     uses: ./.github/workflows/update-contents.yaml
