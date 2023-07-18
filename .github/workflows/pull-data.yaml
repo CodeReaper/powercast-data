@@ -34,9 +34,7 @@ jobs:
             echo "CONTENTS_AVAILABLE=1" >> "$GITHUB_ENV"
           fi
 
-      - uses: actions/checkout@v3
-        if: ${{ env.CONTENTS_AVAILABLE != '0' }}
-
-      - name: Fetch contents
-        if: ${{ env.CONTENTS_AVAILABLE != '0' }}
-        uses: ./.github/workflows/update-contents.yaml
+  content-fetch:
+    needs: content-check
+    if: ${{ jobs.content-check.env.CONTENTS_AVAILABLE != '0' }}
+    uses: ./.github/workflows/update-contents.yaml
