@@ -1,7 +1,6 @@
 name: Update visualization
 
 on:
-  pull_request: {}
   push:
     branches:
       - main
@@ -91,11 +90,11 @@ jobs:
 
           cat .github/resources/graph.html | sed 's|PAGE_TITLE|Renewable Energy Production|g;s|//INJECT|const CATEGORY=`renewables`;|g' > ./github-pages/renewables/index.html
 
-      # - uses: EndBug/add-and-commit@v9
-      #   name: Publish graph
-      #   with:
-      #     cwd: github-pages
-      #     add: "['index.html', '404.html', 'energy-price', 'emission-co2', 'renewables']"
-      #     push: --set-upstream origin ${{ env.publish-branch }}
-      #     default_author: github_actions
-      #     message: Publish visualizations via workflow
+      - uses: EndBug/add-and-commit@v9
+        name: Publish graph
+        with:
+          cwd: github-pages
+          add: "['index.html', '404.html', 'energy-price', 'emission-co2', 'renewables']"
+          push: --set-upstream origin ${{ env.publish-branch }}
+          default_author: github_actions
+          message: Publish visualizations via workflow
