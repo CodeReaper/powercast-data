@@ -35,5 +35,5 @@ jobs:
           fi
 
       - name: Fetch contents
-        if: ${{ env.CONTENTS_AVAILABLE =! '0' }}
+        if: ${{ env.CONTENTS_AVAILABLE != '0' }}
         uses: ./.github/workflows/update-contents.yaml
