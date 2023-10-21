@@ -32,7 +32,7 @@ The electricity charge is defined by law.
 
 #### Euro exchange rates
 
--  Danish krone is pegged to a rate of [7.46](https://www.investopedia.com/terms/d/dkk.asp) Euro to 100 krones.
+-  Danish krone is pegged to a rate of [7.46](https://www.investopedia.com/terms/d/dkk.asp) krones per Euro.
 
 #### VAT
 

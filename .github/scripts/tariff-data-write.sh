@@ -43,18 +43,13 @@
 
 set -e
 
-DIR=/tmp/$$
 INPUT=$1
 CONFIG=$2
 
 [ -f "$INPUT" ] || { echo "Not a file: $INPUT"; exit 1; }
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 2; }
 
-which mkdir jq > /dev/null
-
-mkdir -p $DIR
-trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
-trap 'exit 2' 1 2 3 15
+which jq > /dev/null
 
 VAT=0.25
 RATE=746
