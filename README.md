@@ -175,13 +175,13 @@ The response is the emission over time using the following format:
 ]
 ```
 
-### Energy Charges - FIXME
+### Energy Charges
 
 #### Consume data points for a specific zone
 
-_Note that only DK is available_
+_Note that only DK zones are available_
 
-Begin here to load all data using the API:
+All data for a zone is available on a single endpoint:
 
 ```sh
 curl -v https://codereaper.github.io/powercast-data/api/energy-charges/<zone>.json
@@ -191,24 +191,26 @@ The response will contain conversion rates, taxes, tariffs and other charges:
 
 ```jsonc
 {
-  "valueAddedTaxRate": 0.25, // value between 0 and 1
-  "euroExchangeRate": 746,
-  "electricityNetwork": { // time variant too
-    transmissionTarrif
-    systemTarrif
-    "electricityCharge": 69.7,
-  }
-  "networkCompanies": [
+  "vat": <percent>, // given as a fraction between 0 and 1
+  "exchangeRate": <amount>, // of local currency per Euro
+  "electricityNetwork": [
     {
-      "name": "N1 A/S",
-      "tariffs": [
-        {
-          "from": <unix timestamp>,
-          "to": <unix timestamp>,
-          [0.1101, ...] // 24 entries with hourly tariff in local currency
-        }
-      ]
-    }
-  ]
+      "from": <unix timestamp>,
+      "to": <unix timestamp>,
+      "electricityCharge": <local currency>,
+      "transmissionTarrif": <local currency>,
+      "systemTarrif": <local currency>
+    },
+  ],
+  "networkCompanies": {
+    "name": <name>,
+    "tariffs": [
+      {
+        "from": <unix timestamp>,
+        "to": <optional unix timestamp>,
+        "tariffs": [<local currency>, ...] // 24 entries with hourly tariff
+      }
+    ]
+  }
 }
 ```

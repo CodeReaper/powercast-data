@@ -277,7 +277,7 @@ jobs:
   update-tariff-data:
     runs-on: ubuntu-latest
     name: Update tariff data
-    if: github.ref == 'refs/heads/main' && github.event.schedule == '0 0 1 * *'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
 
@@ -298,17 +298,19 @@ jobs:
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
 
             echo "Filtering data for ${ZONE}..."
-            sh .github/scripts/tariff-data-filter.sh data.json .config.json $ZONE > "${$ZONE}.filtered"
+            sh .github/scripts/tariff-data-filter.sh data.json .config.json $ZONE > "${ZONE}.filtered"
           done
 
       - shell: bash
         name: Write data
         run: |
+          mkdir -p ./github-pages/api/energy-charges/ > /dev/null
+
           jq -rc '.[] | select(.networkCompanies | length > 0)' .config.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
 
             echo "Write data for ${ZONE}..."
-            sh .github/scripts/tariff-data-write.sh "${$ZONE}.filtered" ".config.${$ZONE}.json" > "./github-pages/api/energy-charges/${$ZONE}.json"
+            sh .github/scripts/tariff-data-write.sh "${ZONE}.filtered" ".config.${ZONE}.json" > "./github-pages/api/energy-charges/${ZONE}.json"
           done
 
       - uses: EndBug/add-and-commit@v9
