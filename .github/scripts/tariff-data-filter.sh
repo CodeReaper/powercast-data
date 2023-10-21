@@ -45,31 +45,27 @@ AREA=$3
 AREA=$(echo "$AREA" | tr '[:lower:]' '[:upper:]')
 [ -z "$AREA" ] && { echo "Invalid/Missing area."; exit 3; }
 
-which mkdir jq cat > /dev/null
+which mkdir jq > /dev/null
 
 mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
 
-exit 1 # FIXME below
+echo '[' > $DIR/output.json
+jq -rc --arg zone "$AREA" '.[] | select(.zone == $zone) | .networkCompanies[]' < "$CONFIG" | while read -r ITEM; do
+    [ -z "$ITEM" ] && continue
 
-echo '[]' > $DIR/data.json
-while [ "$CURSORDATE" -gt "$ENDDATE" ]; do
-    REQUEST="${TEMPLATE}&offset=${OFFSET}"
+    id=$(echo "$ITEM" | jq -r '.gln')
+    type=$(echo "$ITEM" | jq -r '.type')
+    code=$(echo "$ITEM" | jq -r '.code')
+    name=$(echo "$ITEM" | jq -r '.name')
 
-    wget -nv -O $DIR/request.json "${REQUEST}"
+    [ -z "$id" ] && continue
+    [ -z "$type" ] && continue
+    [ -z "$code" ] && continue
+    [ -z "$name" ] && continue
 
-    TRANSFORMATION='.records |= map(.type = (.ForecastType | ascii_downcase) | .energy = if (.ForecastDayAhead == null) then 0 else (.ForecastDayAhead * 100 | round) / 100 end | .timestamp = .HourUTC | del(.ForecastType, .ForecastDayAhead, .HourUTC, .PriceArea)) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records | group_by(.timestamp) | map({ timestamp: (.[0].timestamp), sources: [.[] | del(.timestamp)] })'
-    cat $DIR/request.json | jq -r "$TRANSFORMATION" > $DIR/data.new.json
-    jq -s '.[0] + .[1]' $DIR/data.json $DIR/data.new.json > $DIR/data.combined.json
-    mv -f $DIR/data.combined.json $DIR/data.json
+    # jq -r ''
 
-    CURSORDATE=$(cat $DIR/data.json | jq -r 'map(.timestamp | values) | min')
-    OFFSET=$((OFFSET+LIMIT))
-
-    if [ "$CURSORDATE" = "null" ]; then
-        CURSORDATE=0
-    fi
 done
-
-cat $DIR/data.json
+echo ']' >> $DIR/output.json
