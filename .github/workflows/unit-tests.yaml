@@ -72,7 +72,7 @@ jobs:
         run: |
           set -e
           sh .github/scripts/data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
-          jq -r '.[] |=(.latest = .endDate | del(.endDate, .display))' .config.json > expected
+          jq -r '.[] |=(.latest = .endDate | del(.endDate, .display, .networkCompanies))' .config.json > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
@@ -392,3 +392,97 @@ jobs:
 
           sh .github/scripts/co2-emission-data-pull.sh DK1 $(date -d +5years +"%s") > /dev/null
           [ $? -eq 0 ] || exit 1
+
+  test-tariff-data-filter:
+    name: Test tariff data filter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        run: |
+          touch data.json
+          touch config.json
+
+      - name: Test with too few arguments
+        run: |
+          set +e
+
+          sh .github/scripts/tariff-data-filter.sh
+          [ $? -ne 0 ] || exit 1
+
+          sh .github/scripts/tariff-data-filter.sh data.json
+          [ $? -ne 0 ] || exit 1
+
+          sh .github/scripts/tariff-data-filter.sh data.json config.json
+          [ $? -ne 0 ] || exit 1
+
+      # - name: Test with existing well-known data that pull outputs as expected
+      #   run: |
+      #     set -e
+      #     export PATH=.github/resources/test/mocks/:$PATH
+      #     export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/co2emisprog
+
+      #     sh .github/scripts/co2-emission-data-pull.sh DK1 1658318400 > result
+      #     diff -q .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result; exit 1; }
+
+      # - name: Test pull makes a request with end date set to now
+      #   run: |
+      #     set +e
+      #     export PATH=.github/resources/test/mocks/:$PATH
+      #     unset WGET_OVERRIDE
+
+      #     sh .github/scripts/co2-emission-data-pull.sh DK1 $(date +"%s") > /dev/null
+      #     [ $? -ne 0 ] || exit 1
+
+      # - name: Test pull makes no requests with end date far in the future
+      #   run: |
+      #     set +e
+      #     export PATH=.github/resources/test/mocks/:$PATH
+      #     unset WGET_OVERRIDE
+
+      #     sh .github/scripts/co2-emission-data-pull.sh DK1 $(date -d +5years +"%s") > /dev/null
+      #     [ $? -eq 0 ] || exit 1
+
+  test-tariff-data-write:
+    name: Test tariff data write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # - name: Test if endpoints does not answer pull will fail
+      #   run: |
+      #     exit 1
+      #     set +e
+      #     export PATH=.github/resources/test/mocks/:$PATH
+      #     unset WGET_OVERRIDE
+
+      #     sh .github/scripts/co2-emission-data-pull.sh DK1 1654545600
+      #     [ $? -ne 0 ] || exit 1
+
+      # - name: Test with existing well-known data that pull outputs as expected
+      #   run: |
+      #     set -e
+      #     export PATH=.github/resources/test/mocks/:$PATH
+      #     export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/co2emisprog
+
+      #     sh .github/scripts/co2-emission-data-pull.sh DK1 1658318400 > result
+      #     diff -q .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result; exit 1; }
+
+      # - name: Test pull makes a request with end date set to now
+      #   run: |
+      #     set +e
+      #     export PATH=.github/resources/test/mocks/:$PATH
+      #     unset WGET_OVERRIDE
+
+      #     sh .github/scripts/co2-emission-data-pull.sh DK1 $(date +"%s") > /dev/null
+      #     [ $? -ne 0 ] || exit 1
+
+      # - name: Test pull makes no requests with end date far in the future
+      #   run: |
+      #     set +e
+      #     export PATH=.github/resources/test/mocks/:$PATH
+      #     unset WGET_OVERRIDE
+
+      #     sh .github/scripts/co2-emission-data-pull.sh DK1 $(date -d +5years +"%s") > /dev/null
+      #     [ $? -eq 0 ] || exit 1
