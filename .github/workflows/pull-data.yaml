@@ -316,7 +316,7 @@ jobs:
         name: Publish data
         with:
           cwd: github-pages
-          add: api/energy-charge/
+          add: api/energy-charges/
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
           message: Publish energy charge data via workflow
