@@ -443,11 +443,11 @@ jobs:
           set -e
 
           cp .github/resources/test/well-known/tariff-data-filter-input.json known-data.json
-          cp .github/resources/test/well-known/tariff-data-filter-output.json expected.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
           sh .github/scripts/tariff-data-filter.sh known-data.json .config.json DK1 > result
 
-          diff -q expected.json result || { echo "Unexpected difference:"; diff expected.json result; exit 1; }
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
   test-tariff-data-write:
     name: Test tariff data write
@@ -459,6 +459,7 @@ jobs:
         run: |
           touch data.json
           touch config.json
+          cp .github/resources/test/well-known/tariff-data-write-config.json config.WK.json
 
       - name: Test with too few arguments
         run: |
@@ -484,20 +485,20 @@ jobs:
         run: |
           set -e
 
-          printf '[]' > empty.json
+          cp .github/resources/test/well-known/tariff-data-write-empty-input.json empty.json
+          cp .github/resources/test/well-known/tariff-data-write-empty-output.json expected
 
-          sh .github/scripts/tariff-data-write.sh empty.json .config.json DK1 > result
+          sh .github/scripts/tariff-data-write.sh empty.json config.WK.json > result
 
-          printf '[]' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing data that write outputs as expected
         run: |
           set -e
 
-          cp .github/resources/test/well-known/tariff-data-write-input.json known-data.json
-          cp .github/resources/test/well-known/tariff-data-write-output.json expected.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-write-output.json expected
 
-          sh .github/scripts/tariff-data-write.sh known-data.json .config.json DK1 > result
+          sh .github/scripts/tariff-data-write.sh known-data.json config.WK.json > result
 
-          diff -q expected.json result || { echo "Unexpected difference:"; diff expected.json result; exit 1; }
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }

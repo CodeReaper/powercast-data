@@ -14,8 +14,8 @@
 
 # Output example:
 # {
-#   "valueAddedTaxRate": 0.25,
-#   "euroExchangeRate": 746,
+#   "vat": 0.25,
+#   "exchangeRate": 746,
 #   "electricityNetwork": [
 #     {
 #       "from": 1293836400,
@@ -29,11 +29,11 @@
 #   "networkCompanies": [
 #     {
 #       "name": "N1 A/S",
-#       tariffs: [
+#       "tariffs": [
 #         {
 #           "from": 1293836400,
 #           "to": 1325372400,
-#           [0.1101, ...] // 24 entries with hourly tariffs
+#           "tariffs": [0.1101, ...] // 24 entries with hourly tariffs
 #         }
 #       ]
 #     },
@@ -50,10 +50,13 @@ CONFIG=$2
 [ -f "$INPUT" ] || { echo "Not a file: $INPUT"; exit 1; }
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 2; }
 
-which mkdir jq cat > /dev/null
+which mkdir jq > /dev/null
 
 mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
 
-exit 1 # FIXME below
+VAT=0.25
+RATE=746
+
+jq -r --arg vat "$VAT" --arg rate "$RATE" -s '{vat: $vat|tonumber, exchangeRate: $rate|tonumber, electricityNetwork: .[0], networkCompanies: .[1]}' "$CONFIG" "$INPUT"
