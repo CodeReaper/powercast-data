@@ -409,40 +409,45 @@ jobs:
           set +e
 
           sh .github/scripts/tariff-data-filter.sh
-          [ $? -ne 0 ] || exit 1
+          [ $? -eq 1 ] || exit 1
 
           sh .github/scripts/tariff-data-filter.sh data.json
-          [ $? -ne 0 ] || exit 1
+          [ $? -eq 2 ] || exit 1
 
           sh .github/scripts/tariff-data-filter.sh data.json config.json
-          [ $? -ne 0 ] || exit 1
+          [ $? -eq 3 ] || exit 1
 
-      # - name: Test with existing well-known data that pull outputs as expected
-      #   run: |
-      #     set -e
-      #     export PATH=.github/resources/test/mocks/:$PATH
-      #     export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/co2emisprog
+      - name: Test with non-existing files
+        run: |
+          set +e
 
-      #     sh .github/scripts/co2-emission-data-pull.sh DK1 1658318400 > result
-      #     diff -q .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result; exit 1; }
+          sh .github/scripts/tariff-data-filter.sh not-found.json config.json DK1
+          [ $? -eq 1 ] || exit 1
 
-      # - name: Test pull makes a request with end date set to now
-      #   run: |
-      #     set +e
-      #     export PATH=.github/resources/test/mocks/:$PATH
-      #     unset WGET_OVERRIDE
+          sh .github/scripts/tariff-data-filter.sh data.json not-found.json DK1
+          [ $? -eq 2 ] || exit 1
 
-      #     sh .github/scripts/co2-emission-data-pull.sh DK1 $(date +"%s") > /dev/null
-      #     [ $? -ne 0 ] || exit 1
+      - name: Test with no existing data that filter outputs no data
+        run: |
+          set -e
 
-      # - name: Test pull makes no requests with end date far in the future
-      #   run: |
-      #     set +e
-      #     export PATH=.github/resources/test/mocks/:$PATH
-      #     unset WGET_OVERRIDE
+          printf '[]' > empty.json
 
-      #     sh .github/scripts/co2-emission-data-pull.sh DK1 $(date -d +5years +"%s") > /dev/null
-      #     [ $? -eq 0 ] || exit 1
+          sh .github/scripts/tariff-data-filter.sh empty.json .config.json DK1 > result
+
+          printf '[]' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing data that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json expected.json
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json .config.json DK1 > result
+
+          diff -q expected.json result || { echo "Unexpected difference:"; diff expected.json result; exit 1; }
 
   test-tariff-data-write:
     name: Test tariff data write
