@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Takes three arguments:
+# Takes two arguments:
 #   - filtered data file:
 #       Must contain pricing data for network companies.
 #       Examples:
