@@ -431,11 +431,11 @@ jobs:
         run: |
           set -e
 
-          printf '[]' > empty.json
+          echo '[]' > empty.json
 
           sh .github/scripts/tariff-data-filter.sh empty.json .config.json DK1 > result
 
-          printf '[]' > expected
+          echo '{"name": "N1 A/S","tariffs": []}' | jq -r > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing data that filter outputs as expected
