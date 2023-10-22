@@ -198,8 +198,8 @@ The response will contain conversion rates, taxes, tariffs and other charges:
       "from": <unix timestamp>,
       "to": <unix timestamp>,
       "electricityCharge": <local currency>,
-      "transmissionTarrif": <local currency>,
-      "systemTarrif": <local currency>
+      "transmissionTariff": <local currency>,
+      "systemTariff": <local currency>
     },
   ],
   "networkCompanies": {
