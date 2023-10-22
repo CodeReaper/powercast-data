@@ -21,8 +21,8 @@
 #       "from": 1293836400,
 #       "to": 1325372400,
 #       "electricityCharge": 73.0,
-#       "transmissionTarrif": 4.5,
-#       "systemTarrif": 2.9
+#       "transmissionTariff": 4.5,
+#       "systemTariff": 2.9
 #     },
 #     ...
 #   ]
