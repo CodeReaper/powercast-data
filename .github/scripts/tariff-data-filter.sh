@@ -52,7 +52,7 @@ mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
 
-jq -rc --arg zone "$AREA" '.[] | select(.zone == $zone) | .networkCompanies[]' < "$CONFIG" | while read -r ITEM; do
+jq -rc --arg zone "$AREA" '.[] | select(.zone == $zone) | .networks[]' < "$CONFIG" | while read -r ITEM; do
     [ -z "$ITEM" ] && continue
 
     id=$(echo "$ITEM" | jq -r '.gln')
@@ -75,7 +75,7 @@ jq -rc --arg zone "$AREA" '.[] | select(.zone == $zone) | .networkCompanies[]' <
     jq -r "$TRANSFORMATION" | \
     jq -r "$UPDATE" | \
     jq -r "$MERGE" | \
-    jq -r --arg id "$id" --arg name "$name" '{id: $id|tonumber, name: $name, tariffs: .}' > "$DIR/$id.json"
+    jq -r --arg id "$id" --arg name "$name" '[{id: $id|tonumber, name: $name, tariffs: .}]' > "$DIR/$id.json"
 done
 
 jq -s add $DIR/*.json | jq -r

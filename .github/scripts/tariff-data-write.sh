@@ -16,7 +16,7 @@
 # {
 #   "vat": 0.25,
 #   "exchangeRate": 746,
-#   "electricityNetwork": [
+#   "grid": [
 #     {
 #       "from": 1293836400,
 #       "to": 1325372400,
@@ -26,7 +26,7 @@
 #     },
 #     ...
 #   ]
-#   "networkCompanies": [
+#   "network": [
 #     {
 #       "id": 4992492444,
 #       "name": "N1 A/S",
@@ -55,4 +55,4 @@ which jq > /dev/null
 VAT=0.25
 RATE=746
 
-jq -r --arg vat "$VAT" --arg rate "$RATE" -s '{vat: $vat|tonumber, exchangeRate: $rate|tonumber, electricityNetwork: .[0], networkCompanies: .[1]}' "$CONFIG" "$INPUT"
+jq -r --arg vat "$VAT" --arg rate "$RATE" -s '{vat: $vat|tonumber, exchangeRate: $rate|tonumber, grid: .[0], network: .[1]}' "$CONFIG" "$INPUT"

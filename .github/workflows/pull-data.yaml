@@ -295,7 +295,7 @@ jobs:
       - shell: bash
         name: Filter data
         run: |
-          jq -rc '.[] | select(.networkCompanies | length > 0)' .config.json | while read CONFIG; do
+          jq -rc '.[] | select(.networks | length > 0)' .config.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
 
             echo "Filtering data for ${ZONE}..."
@@ -307,7 +307,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/energy-charges/ > /dev/null
 
-          jq -rc '.[] | select(.networkCompanies | length > 0)' .config.json | while read CONFIG; do
+          jq -rc '.[] | select(.networks | length > 0)' .config.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
 
             echo "Write data for ${ZONE}..."

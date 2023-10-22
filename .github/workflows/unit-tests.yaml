@@ -72,7 +72,7 @@ jobs:
         run: |
           set -e
           sh .github/scripts/data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
-          jq -r '.[] |=(.latest = .endDate | del(.endDate, .display, .networkCompanies))' .config.json > expected
+          jq -r '.[] |=(.latest = .endDate | del(.endDate, .display, .networks))' .config.json > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
@@ -435,7 +435,7 @@ jobs:
 
           sh .github/scripts/tariff-data-filter.sh empty.json .config.json DK1 > result
 
-          echo '{"id": 5790001089030, "name": "N1 A/S","tariffs": []}' | jq -r > expected
+          echo '[{"id": 5790001089030, "name": "N1 A/S","tariffs": []}]' | jq -r > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing data that filter outputs as expected
