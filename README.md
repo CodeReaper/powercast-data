@@ -203,6 +203,7 @@ The response will contain conversion rates, taxes, tariffs and other charges:
     },
   ],
   "networkCompanies": {
+    "id": <id>,
     "name": <name>,
     "tariffs": [
       {

@@ -28,6 +28,7 @@
 #   ]
 #   "networkCompanies": [
 #     {
+#       "id": 4992492444,
 #       "name": "N1 A/S",
 #       "tariffs": [
 #         {

@@ -21,6 +21,7 @@
 # Output example:
 # [
 #   {
+#     "id": 4992492444,
 #     "name": "N1 A/S",
 #     "tariffs": [
 #       {
@@ -74,7 +75,7 @@ jq -rc --arg zone "$AREA" '.[] | select(.zone == $zone) | .networkCompanies[]' <
     jq -r "$TRANSFORMATION" | \
     jq -r "$UPDATE" | \
     jq -r "$MERGE" | \
-    jq -r --arg name "$name" '{name: $name, tariffs: .}' > "$DIR/$id.json"
+    jq -r --arg id "$id" --arg name "$name" '{id: $id|tonumber, name: $name, tariffs: .}' > "$DIR/$id.json"
 done
 
 jq -s add $DIR/*.json | jq -r
