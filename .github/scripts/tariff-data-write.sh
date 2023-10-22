@@ -16,7 +16,7 @@
 # {
 #   "vat": 0.25,
 #   "exchangeRate": 746,
-#   "electricityNetwork": [
+#   "grid": [
 #     {
 #       "from": 1293836400,
 #       "to": 1325372400,
@@ -26,7 +26,7 @@
 #     },
 #     ...
 #   ]
-#   "networkCompanies": [
+#   "network": [
 #     {
 #       "id": 4992492444,
 #       "name": "N1 A/S",

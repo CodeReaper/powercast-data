@@ -193,7 +193,7 @@ The response will contain conversion rates, taxes, tariffs and other charges:
 {
   "vat": <percent>, // given as a fraction between 0 and 1
   "exchangeRate": <amount>, // of local currency per Euro
-  "electricityNetwork": [
+  "grid": [
     {
       "from": <unix timestamp>,
       "to": <unix timestamp>,
@@ -202,7 +202,7 @@ The response will contain conversion rates, taxes, tariffs and other charges:
       "systemTariff": <local currency>
     },
   ],
-  "networkCompanies": {
+  "network": {
     "id": <id>,
     "name": <name>,
     "tariffs": [
