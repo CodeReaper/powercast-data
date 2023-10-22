@@ -55,4 +55,4 @@ which jq > /dev/null
 VAT=0.25
 RATE=746
 
-jq -r --arg vat "$VAT" --arg rate "$RATE" -s '{vat: $vat|tonumber, exchangeRate: $rate|tonumber, electricityNetwork: .[0], networkCompanies: .[1]}' "$CONFIG" "$INPUT"
+jq -r --arg vat "$VAT" --arg rate "$RATE" -s '{vat: $vat|tonumber, exchangeRate: $rate|tonumber, grid: .[0], network: .[1]}' "$CONFIG" "$INPUT"

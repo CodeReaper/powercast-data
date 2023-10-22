@@ -435,7 +435,7 @@ jobs:
 
           sh .github/scripts/tariff-data-filter.sh empty.json .config.json DK1 > result
 
-          echo '{"id": 5790001089030, "name": "N1 A/S","tariffs": []}' | jq -r > expected
+          echo '[{"id": 5790001089030, "name": "N1 A/S","tariffs": []}]' | jq -r > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing data that filter outputs as expected

@@ -75,7 +75,7 @@ jq -rc --arg zone "$AREA" '.[] | select(.zone == $zone) | .networkCompanies[]' <
     jq -r "$TRANSFORMATION" | \
     jq -r "$UPDATE" | \
     jq -r "$MERGE" | \
-    jq -r --arg id "$id" --arg name "$name" '{id: $id|tonumber, name: $name, tariffs: .}' > "$DIR/$id.json"
+    jq -r --arg id "$id" --arg name "$name" '[{id: $id|tonumber, name: $name, tariffs: .}]' > "$DIR/$id.json"
 done
 
 jq -s add $DIR/*.json | jq -r
