@@ -13,6 +13,18 @@
             "gln": 5790001089030,
             "type": "D03",
             "code": "CD"
+          },
+          {
+            "name": "Elinord A/S",
+            "gln": 5790001095277,
+            "type": "D03",
+            "code": "43300"
+          },
+          {
+            "name": "Læsø Elnet A/S",
+            "gln": 5790001103460,
+            "type": "D03",
+            "code": "43100"
           }
         ]
     },
@@ -26,10 +38,22 @@
         "endDate": 1654041600,
         "networks": [
           {
-            "name": "N1 A/S",
-            "gln": 5790001089030,
+            "name": "Cerius A/S",
+            "gln": 5790000705184,
             "type": "D03",
-            "code": "CD"
+            "code": "30TR_C_ET"
+          },
+          {
+            "name": "Radius A/S",
+            "gln": 5790000705689,
+            "type": "D03",
+            "code": "DT_C_01"
+          },
+          {
+            "name": "Nakskov Elnet A/S",
+            "gln": 5790001088460,
+            "type": "D03",
+            "code": "92TR_C_ET"
           }
         ]
     },
