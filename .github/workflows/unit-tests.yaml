@@ -402,7 +402,34 @@ jobs:
       - name: Setup
         run: |
           touch data.json
-          touch config.json
+
+          cat << EOF > config.json
+          [
+              {
+                  "zone": "DK1",
+                  "networks": [
+                    {
+                      "name": "N1 A/S",
+                      "gln": 5790001089030,
+                      "type": "D03",
+                      "code": "CD"
+                    }
+                  ]
+              },
+              {
+                  "zone": "DK2",
+                  "networks": [
+                    {
+                      "name": "N1 A/S",
+                      "gln": 5790001089030,
+                      "type": "D03",
+                      "code": "CD"
+                    }
+                  ]
+              }
+          ]
+          EOF
+
 
       - name: Test with too few arguments
         run: |
@@ -433,7 +460,7 @@ jobs:
 
           echo '[]' > empty.json
 
-          sh .github/scripts/tariff-data-filter.sh empty.json .config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh empty.json config.json DK1 > result
 
           echo '[{"id": 5790001089030, "name": "N1 A/S","tariffs": []}]' | jq -r > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
@@ -445,7 +472,18 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json .config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing repeated data that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-repeated.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
