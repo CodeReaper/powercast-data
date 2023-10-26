@@ -1,168 +1,20 @@
 
-curl -v "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json" > short-list.json
-
-cat list.json | jq 'group_by(.GLN_Number) | map({gln: .[0].GLN_Number, name:.[0].ChargeOwner}) | unique' | tee gln-names.json
-
-# short - 5790000392261
-# N1 A/S - 344 - 5790000611003
-# N1 A/S - 131 - 5790001089030
-
-cat list.json | jq '[.[] | select(.GLN_Number == "5790000611003")] | .[0:10]'
-
-# TRANSFORMATION='.records |= map(.euro = .SpotPriceEUR | .timestamp = .HourUTC | del(.SpotPriceEUR, .HourUTC, .PriceArea)) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records'
-
-cat short-list.json | jq '. |= map(del(.Price1, .Price2, .Price3, .Price4, .Price5, .Price6, .Price7, .Price8, .Price9, .Price10, .Price11, .Price12, .Price13, .Price14, .Price15, .Price16, .Price17, .Price18, .Price19, .Price20, .Price21, .Price22, .Price24))'
-cat short-list.json | jq '[.[] | select(.GLN_Number == "5790000392261")]'
-cat short-list.json | jq '[.[] | select(.GLN_Number == "5790000392261")]' | jq '. |= map(del(.Price1, .Price2, .Price3, .Price4, .Price5, .Price6, .Price7, .Price8, .Price9, .Price10, .Price11, .Price12, .Price13, .Price14, .Price15, .Price16, .Price17, .Price18, .Price19, .Price20, .Price21, .Price22, .Price24))'
-
-cat list.json | jq '[.[] | select(.GLN_Number == "5790000611003")]' | jq '. |= map(del(.Price1, .Price2, .Price3, .Price4, .Price5, .Price6, .Price7, .Price8, .Price9, .Price10, .Price11, .Price12, .Price13, .Price14, .Price15, .Price16, .Price17, .Price18, .Price19, .Price20, .Price21, .Price22, .Price24))'
-
-cat short-list.json | jq '[.[] | select(.GLN_Number == "5790000392261") | select((.ValidFrom | startswith("2018")) or (.ValidFrom | startswith("2019")))]'
-
-cat list.json | jq '[.[] | select(.GLN_Number == "5790001089030") | select((.ValidFrom | startswith("2023")) or (.ValidFrom | startswith("2024")))]' | jq '. |= map(del(.Price1, .Price2, .Price3, .Price4, .Price5, .Price6, .Price7, .Price8, .Price9, .Price10, .Price11, .Price12, .Price13, .Price14, .Price15, .Price16, .Price17, .Price18, .Price19, .Price20, .Price21, .Price22, .Price23, .Price24))'
-
-cat list.json | jq '[.[] | select(.GLN_Number == "5790001089030") | select((.ValidFrom | startswith("2024")))]' | jq '. |= map(del(.Price1, .Price2, .Price3, .Price4, .Price5, .Price6, .Price7, .Price8, .Price9, .Price10, .Price11, .Price12, .Price13, .Price14, .Price15, .Price16, .Price17, .Price18, .Price19, .Price20, .Price21, .Price22, .Price23, .Price24))'
-
-cat list.json | jq '[.[] | select(.GLN_Number == "5790001089030") | select((.ValidFrom | startswith("2024")))]' | jq '. |= map({ChargeType, ChargeTypeCode, Note, Description, ValidFrom, ValidTo})' | tee wtf-131.json
-cat list.json | jq '[.[] | select(.GLN_Number == "5790000611003") | select((.ValidFrom | startswith("2024")))]' | jq '. |= map({ChargeType, ChargeTypeCode, Note, Description, ValidFrom, ValidTo})' | tee wtf-344.json
-cat list.json | jq '[.[] | select(.Price2 > 11)]'
-grep -E '"Price2": 0.1126' formatted.json
-
-cat list.json | jq '[.[] | select(.GLN_Number == "5790000611003") | select((.ValidFrom == "2024-01-01T00:00:00"))]'
-cat list.json | jq '[.[] | select(.GLN_Number == "5790001089030") | select((.ValidFrom == "2024-01-01T00:00:00"))]'
-
-cat list.json | jq '[.[] | select(.GLN_Number == "5790001089030") | select((.Note == "Nettarif C"))]' > this.json
-
-cat list.json | jq '[.[] | select(.GLN_Number == "5790001089030") | select(.ChargeType == "D03") | select(.ChargeTypeCode == "CD")]' > this-too.json
-
-
-# https://n1.dk/priser-og-vilkaar
-# https://n1.dk/priser-og-vilkaar/kommende-priser-1-1-2024
-
-
-    # "ChargeOwner": "N1 A/S - 131",
-    # "GLN_Number": "5790001089030",
-    # "ChargeType": "D03",
-    # "ChargeTypeCode": "CD",
-    # "Note": "Nettarif C",
-    # "Description": "Tarif, hvor aftagepunktet typisk er i 0,4 kV-nettet med timeaflæst måler\r\n",
-    # "ValidFrom": "2024-01-01T00:00:00",
-    # "ValidTo": {
-    #   "Data": null,
-    #   "UnityType": 2,
-    #   "AssemblyName": ""
-    # },
-    # "VATClass": "D02",
-
-    # "ChargeOwner": "N1 A/S - 344",
-    # "GLN_Number": "5790000611003",
-    # "ChargeType": "D03",
-    # "ChargeTypeCode": "T-C-F-T-TD",
-    # "Note": "Nettarif C time, tidsdifferentieret",
-    # "Description": "Tarif, hvor aftagepunktet typisk er i 0,4 kV-nettet med timeaflæst måler, tidsdifferentieret",
-    # "ValidFrom": "2024-01-01T00:00:00",
-    # "ValidTo": "2024-01-02T00:00:00",
-    # "VATClass": "D02",
-
-
-
-
-          load tariffs: Unique key
-            GLN_Number
-            ChargeType
-            ChargeTypeCode
-            ValidFrom
-
-          cat list.json | jq '[.[] | select(.GLN_Number == "5790001089030") | select(.ChargeType == "D03") | select(.ChargeTypeCode == "CD")]' > this-too.json
-
-          {
-            "valueAddedTaxRate": 0.25,
-            "euroExchangeRate": 746,
-            "electricityNetwork": { // time variant too
-              transmissionTarrif
-              systemTarrif
-              "electricityCharge": 69.7,
-            }
-            "networkCompanies": [
-              {
-                "name": "N1 A/S",
-                tariffs: [
-                  {
-                    "from": <unix timestamp>,
-                    "to": <unix timestamp>,
-                    [0.1101, ...] // 24 entries with hourly tariff in dkr øre
-                  }
-                ]
-              }
-            ]
-          }
-
-
-https://ens.dk/sites/ens.dk/files/Statistik/elnetgraenser_2023_04.pdf
-DK1:
-- N1:
-  - 131 5790001089030 D03 CD 2021-2024
-  - 344 5790000611003 D03 T-C-F-TIME 2016-2023
-- TREFOR
-  - . 5790000392261 D03 TTFC 2015-2020
-  - Øst (bornholm?) 5790000706686 D03 46 2021-2024
-- Vores elnet
-  - . 5790000610976 D03 ... (dubs i code)
-  - 512 5790001087975
-  - 552
-  - 553
-  - 554
-  - 587
-  - 588
-  - 590
-  - 592
-
-DK2:
-- Cerius
-  - . 5790000705184 D03 30TR_C_E 2015-2021
-  - Vordingborg 5790001088248 D03 97TR_C_E 2015-2020 (dubs i code)
-- Radius
-  - . 5790000836703 D03 CD - data for 2021/2022
-  - . 5790000705689 D03 DT_C_01 - data 2015-2024
-
-
-cat list.json | jq -r '.[] | select(.GLN_Number == "5790000681358") |select(.ChargeType == "D03") | {uniq: "\(.ChargeTypeCode) / \(.Note)"}' | sort -u
-
-cat list.json | jq -r '[.[] | select(.GLN_Number == "5790000681358") |select(.ChargeType == "D03")| select(.ChargeTypeCode == "TN1C")]'|less
-
-
-Missing:
-Hurup Elværk
-Kimbrer Elnet
-El-net Kongerslev
-NOE
-Forsyning Elnet
-L-Net x II
-Elnet Midt
-KONSTANT x II
-HammelElforsyning
-Vildbjerg Elnet
-Sunds net
-Dinel
-Ikast El net
-Rah net x II
-Videbæk elnet
-Tarm Elværk
-Aal El-net
-GEV Elnet
-Hjerting
-
-
-
 Lists of shame:
 ===============
 
 List of shame - every day:
-DK1:
+* DK1:
+Elnet Midt - 5790001100520 D03 T3002
+Hurup Elværk - 5790000610839 D03 HEV-NT-01T
 Netselskabet Elværk A/S - 042 - 5790000681358 D03 TN1C
+NOE - 5790000395620 D03 30030
 Nord Energi Net A/S - 5790000610877 D03 TAC
 TREFOR El-Net A/S - 5790000392261 D03 C
-DK2:
+Vildbjerg Elnet - 5790001095413 D03 VTV-NT-24
+Sunds net - 5790001095444 D03 SEF-NT-05
+RAH Net A/S - 5790000681327 D03 RAH-C
+KONSTANT - 5790000683345 D03 245-NT01T (every few days)
+* DK2:
 Elektrus A/S - 5790000836239 D03 6000091
 FLOW Elnet A/S - 5790000392551 D03 FE2 NT-01
 Midtfyns Elforsyning A.m.b.A - 5790001089023 D03 TNT15001
@@ -173,4 +25,16 @@ Ravdex A/S - 5790000836727 D03 NT-C
 Zeanet A/S - 5790001089375 D03 43110
 
 List of shame - incorrect prices:
+Elnet Midt - 5790001100520 D03 T3002
 NKE-Elnet A/S - 5790001088231 D03 94TR_C_ET
+KONSTANT - 5790000683345 D03 245-NT01T
+Vildbjerg Elnet - 5790001095413 D03 VTV-NT-24
+
+List of shame - does not publish prices:
+Ikast El net - 5790000682102 D03 ???
+
+Honorabel mentions:
+- Worst price list sheet:
+  https://www.sundsnet.dk/wp-content/uploads/Nettarif-og-Priser-01.08.2023.pdf
+- Changing their IDs:
+  Hjerting Transformatorforening - 5790001095376 D03 HE-NT-01 -> C-Tarif
