@@ -36,8 +36,8 @@ jobs:
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/energy-price/ | tee configuration.json
-          echo "stale=false" >> $GITHUB_OUTPUT
-          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "stale=false" >> $GITHUB_ENV
+          echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
         name: Check for stale data
@@ -55,7 +55,7 @@ jobs:
             echo " - ${HOURS} - hours"
 
             if [ $HOURS -le 12 ]; then
-              echo "stale=true" >> $GITHUB_OUTPUT
+              echo "stale=true" >> $GITHUB_ENV
             fi
           done
 
@@ -90,7 +90,7 @@ jobs:
             echo " - ${NEW} - new data"
 
             if [ $NEW -gt $LATEST ]; then
-              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "changed=true" >> $GITHUB_ENV
             fi
           done
 
@@ -142,8 +142,8 @@ jobs:
           mkdir -p ./github-pages/api/renewables/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/renewables/ | tee configuration.json
-          echo "stale=false" >> $GITHUB_OUTPUT
-          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "stale=false" >> $GITHUB_ENV
+          echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
         name: Check for stale data
@@ -161,7 +161,7 @@ jobs:
             echo " - ${HOURS} - hours"
 
             if [ $HOURS -le 12 ]; then
-              echo "stale=true" >> $GITHUB_OUTPUT
+              echo "stale=true" >> $GITHUB_ENV
             fi
           done
 
@@ -196,7 +196,7 @@ jobs:
             echo " - ${NEW} - new data"
 
             if [ $NEW -gt $LATEST ]; then
-              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "changed=true" >> $GITHUB_ENV
             fi
           done
 
@@ -248,8 +248,8 @@ jobs:
           mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/emission/co2/ | tee configuration.json
-          echo "stale=false" >> $GITHUB_OUTPUT
-          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "stale=false" >> $GITHUB_ENV
+          echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
         name: Check for stale data
@@ -267,7 +267,7 @@ jobs:
             echo " - ${HOURS} - hours"
 
             if [ $HOURS -le 12 ]; then
-              echo "stale=true" >> $GITHUB_OUTPUT
+              echo "stale=true" >> $GITHUB_ENV
             fi
           done
 
@@ -302,7 +302,7 @@ jobs:
             echo " - ${NEW} - new data"
 
             if [ $NEW -gt $LATEST ]; then
-              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "changed=true" >> $GITHUB_ENV
             fi
           done
 
