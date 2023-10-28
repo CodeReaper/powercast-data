@@ -37,7 +37,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh .config.json ./github-pages/api/energy-price/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/energy-price/ | tee configuration.json
 
       - shell: bash
         name: Pull data
@@ -90,7 +90,7 @@ jobs:
         if: steps.update-energy-price-data.outputs.changed == 'true'
         run: |
           rm ./github-pages/api/energy-price/latest.json || true
-          sh .github/scripts/data-index.sh .config.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/index.json
+          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
@@ -123,7 +123,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/renewables/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh .config.json ./github-pages/api/renewables/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/renewables/ | tee configuration.json
 
       - shell: bash
         name: Pull data
@@ -176,7 +176,7 @@ jobs:
         if: steps.update-renewables-data.outputs.changed == 'true'
         run: |
           rm ./github-pages/api/renewables/latest.json || true
-          sh .github/scripts/data-index.sh .config.json ./github-pages/api/renewables/ /api/renewables > ./github-pages/api/renewables/index.json
+          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables > ./github-pages/api/renewables/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
@@ -209,7 +209,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh .config.json ./github-pages/api/emission/co2/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/emission/co2/ | tee configuration.json
 
       - shell: bash
         name: Pull data
@@ -262,7 +262,7 @@ jobs:
         if: steps.update-co2-emission-data.outputs.changed == 'true'
         run: |
           rm ./github-pages/api/emission/co2/latest.json || true
-          sh .github/scripts/data-index.sh .config.json ./github-pages/api/emission/co2/ /api/emission/co2 > ./github-pages/api/emission/co2/index.json
+          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 > ./github-pages/api/emission/co2/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
@@ -295,11 +295,9 @@ jobs:
       - shell: bash
         name: Filter data
         run: |
-          jq -rc '.[] | select(.networks | length > 0)' .config.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-
+          jq -rc 'keys[]' < configuration/networks.json | while read ZONE; do
             echo "Filtering data for ${ZONE}..."
-            sh .github/scripts/tariff-data-filter.sh data.json .config.json $ZONE > "${ZONE}.filtered"
+            sh .github/scripts/tariff-data-filter.sh data.json configuration/networks.json $ZONE > "${ZONE}.filtered"
           done
 
       - shell: bash
@@ -307,11 +305,9 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/energy-charges/ > /dev/null
 
-          jq -rc '.[] | select(.networks | length > 0)' .config.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-
+          jq -rc 'keys[]' < configuration/networks.json | while read ZONE; do
             echo "Write data for ${ZONE}..."
-            sh .github/scripts/tariff-data-write.sh "${ZONE}.filtered" ".config.${ZONE}.json" > "./github-pages/api/energy-charges/${ZONE}.json"
+            sh .github/scripts/tariff-data-write.sh "${ZONE}.filtered" configuration/grid.json "$ZONE" > "./github-pages/api/energy-charges/${ZONE}.json"
           done
 
       - uses: EndBug/add-and-commit@v9
