@@ -1,0 +1,65 @@
+name: Update tariff data
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/pull-tariff-data.yaml
+      - .github/scripts/tariff-*.sh
+      - configuration/zones.json
+      - configuration/grid.json
+      - configuration/networks.json
+
+concurrency: commits-pages
+
+env:
+  publish-branch: gh-pages
+
+jobs:
+  update-tariff-data:
+    runs-on: ubuntu-latest
+    name: Update tariff data
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.POWERCASTDEPLOY }}
+          ref: ${{ env.publish-branch }}
+          path: github-pages
+
+      - shell: bash
+        name: Download data
+        run: wget -nv -O data.json "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0"
+
+      - shell: bash
+        name: Filter data
+        run: |
+          jq -rc 'keys[]' < configuration/networks.json | while read ZONE; do
+            echo "Filtering data for ${ZONE}..."
+            sh .github/scripts/tariff-data-filter.sh data.json configuration/networks.json $ZONE > "${ZONE}.filtered"
+          done
+
+      - shell: bash
+        name: Write data
+        run: |
+          mkdir -p ./github-pages/api/energy-charges/ > /dev/null
+
+          jq -rc 'keys[]' < configuration/networks.json | while read ZONE; do
+            echo "Write data for ${ZONE}..."
+            sh .github/scripts/tariff-data-write.sh "${ZONE}.filtered" configuration/grid.json "$ZONE" > "./github-pages/api/energy-charges/${ZONE}.json"
+          done
+
+      - uses: EndBug/add-and-commit@v9
+        name: Publish data
+        with:
+          cwd: github-pages
+          add: api/energy-charges/
+          push: --set-upstream origin ${{ env.publish-branch }}
+          default_author: github_actions
+          message: Publish energy charge data via workflow

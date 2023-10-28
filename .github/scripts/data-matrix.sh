@@ -23,29 +23,24 @@
 # ]
 
 CONFIG=$1
-FOLDER=$2
-DIR=/tmp/$$
+CATEGORY=$2
+FOLDER=$3
 
 set -e
-which mkdir dirname cat jq tr sed > /dev/null
-
-mkdir -p $DIR
-trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
-trap 'exit 2' 1 2 3 15
+which dirname jq sed > /dev/null
 
 SCRIPTS=$(dirname "$0")
 
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
-[ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 2; }
+[ -z "$CATEGORY" ] && { echo "Missing capability"; exit 2; }
+[ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 3; }
 
-printf '[' > $DIR/matrix.json
-jq -rc '.[] | del(.display)' "$CONFIG" | while read -r ITEM; do
-    AREA=$(echo "$ITEM" | jq -r '.zone')
-    ENDDATE=$(echo "$ITEM" | jq -r '.endDate')
-    LATEST=$(sh "${SCRIPTS}/data-freshness.sh" "$FOLDER" "$AREA" "$ENDDATE")
-    printf "{\"zone\":\"%s\",\"latest\":%s}," "$AREA" "$LATEST" >> "$DIR/matrix.json"
-done
-
-printf ']' >> $DIR/matrix.json
-
-cat $DIR/matrix.json | sed 's|,]|]|g' | jq -r '.'
+{
+  printf '['
+  jq -rc --arg category "$CATEGORY" '.[] | select(.capabilities | index($category) | .)' "$CONFIG" | while read -r ITEM; do
+      AREA=$(echo "$ITEM" | jq -r '.zone')
+      LATEST=$(sh "${SCRIPTS}/data-freshness.sh" "$FOLDER" "$AREA" 0)
+      printf "{\"zone\":\"%s\",\"latest\":%s}," "$AREA" "$LATEST"
+  done
+  printf ']'
+} | sed 's|,]|]|g' | jq -r '.'
