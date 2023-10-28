@@ -1,16 +1,22 @@
 #!/bin/sh
 
-# Takes two arguments:
+# Takes three arguments:
 #   - filtered data file:
 #       Must contain pricing data for network companies.
 #       Examples:
 #           - data.json
 #           - data-for-DE.json
-#   - zone config file:
-#       Must contain pricing data for zone.
+#   - grid config file:
+#       Must contain grid pricing data for zone.
 #       Examples:
 #           - .config.json
 #           - DE.json
+#   - price area:
+#       Data will be restricted to this price area.
+#       Must be a singular valid area.
+#       Examples:
+#           - DK1
+#           - DE
 
 # Output example:
 # {
@@ -46,13 +52,16 @@ set -e
 
 INPUT=$1
 CONFIG=$2
+AREA=$3
 
 [ -f "$INPUT" ] || { echo "Not a file: $INPUT"; exit 1; }
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 2; }
+AREA=$(echo "$AREA" | tr '[:lower:]' '[:upper:]')
+[ -z "$AREA" ] && { echo "Invalid/Missing area."; exit 3; }
 
 which jq > /dev/null
 
 VAT=0.25
 RATE=746
 
-jq -r --arg vat "$VAT" --arg rate "$RATE" -s '{vat: $vat|tonumber, exchangeRate: $rate|tonumber, grid: .[0], network: .[1]}' "$CONFIG" "$INPUT"
+jq -r --arg vat "$VAT" --arg rate "$RATE" --arg zone "$AREA" -s '{vat: $vat|tonumber, exchangeRate: $rate|tonumber, grid: .[0][$zone], network: .[1]}' "$CONFIG" "$INPUT"
