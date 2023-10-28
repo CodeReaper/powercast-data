@@ -10,10 +10,10 @@
 #       Examples:
 #           - DK1
 #           - DE
-#   - evaluation date:
+#   - evaluation date a:
 #       Must be a unix timestamp.
 #       Example: 1654012800
-#   - current date:
+#   - evaluation date b:
 #       Must be a unix timestamp.
 #       Example: 1654012800
 
@@ -22,8 +22,8 @@
 
 CONFIG=$1
 AREA=$2
-DATE=$3
-NOWDATE=$4
+ADATE=$3
+BDATE=$4
 
 set -e
 which jq > /dev/null
@@ -31,13 +31,12 @@ which jq > /dev/null
 [ -f "$CONFIG" ] || { echo "Not a file: $CONFIG"; exit 1; }
 AREA=$(echo "$AREA" | tr '[:lower:]' '[:upper:]')
 [ -z "$AREA" ] && { echo "Invalid/Missing area."; exit 2; }
-expr "$DATE" : "^[0-9]*$" > /dev/null || { echo "Not a number: $DATE"; exit 3; }
-expr "$NOWDATE" : "^[0-9]*$" > /dev/null || { echo "Not a number: $NOWDATE"; exit 4; }
-[ "$NOWDATE" -ge "$DATE" ] || { echo "Cannot handle dates in the future"; exit 5; }
+expr "$ADATE" : "^[0-9]*$" > /dev/null || { echo "Not a number: $ADATE"; exit 3; }
+expr "$BDATE" : "^[0-9]*$" > /dev/null || { echo "Not a number: $BDATE"; exit 4; }
 
 if [ "$(jq --arg zone "$AREA" '.[] | select(.zone == $zone) | if (.canBeStale == null or .canBeStale == true) then true else false end' "$CONFIG")" = "false" ]; then
   echo "0"
   exit 0
 fi
 
-echo $(((NOWDATE-DATE)/3600))
+echo $(((BDATE-ADATE)/3600))
