@@ -1,16 +1,18 @@
-[
-    {
-        "from": 1685570400,
-        "to": 1704063600,
-        "electricityCharge": 69.7,
-        "transmissionTariff": 5.8,
-        "systemTariff": 5.4
-    },
-    {
-        "from": 1704063600,
-        "to": 1735686000,
-        "electricityCharge": 76.1,
-        "transmissionTariff": 7.4,
-        "systemTariff": 5.1
-    }
-]
+{
+    "WK": [
+        {
+            "from": 1685570400,
+            "to": 1704063600,
+            "electricityCharge": 69.7,
+            "transmissionTariff": 5.8,
+            "systemTariff": 5.4
+        },
+        {
+            "from": 1704063600,
+            "to": 1735686000,
+            "electricityCharge": 76.1,
+            "transmissionTariff": 7.4,
+            "systemTariff": 5.1
+        }
+    ]
+}

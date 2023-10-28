@@ -59,28 +59,42 @@ jobs:
       - name: Test non-existing file
         run: |
           set +e
-          sh .github/scripts/data-matrix.sh .non-existing-file.json ./data/ > /dev/null
+          sh .github/scripts/data-matrix.sh .non-existing-file.json energy-price ./data/ > /dev/null
           [ $? -eq 1 ] || exit 1
+
+      - name: Test missing capabillity
+        run: |
+          set +e
+          sh .github/scripts/data-matrix.sh configuration/zones.json > /dev/null
+          [ $? -eq 2 ] || exit 1
 
       - name: Test non-existing directory
         run: |
           set +e
-          sh .github/scripts/data-matrix.sh .config.json ./non-existing-directory/ > /dev/null
-          [ $? -eq 2 ] || exit 1
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./non-existing-directory/ > /dev/null
+          [ $? -eq 3 ] || exit 1
 
       - name: Test with no existing data that matrix contains all items from the configuration
         run: |
           set -e
-          sh .github/scripts/data-matrix.sh .config.json ./empty-data-folder/ | jq -r '.' > result
-          jq -r '.[] |=(.latest = .endDate | del(.endDate, .display, .networks))' .config.json > expected
+          sh .github/scripts/data-matrix.sh configuration/zones.json  energy-price ./empty-data-folder/ | jq -r '.' > result
+          jq -r 'map(reduce . as $item ({}; .zone = $item.zone | .latest = 0))' configuration/zones.json > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with mismatched capabillity that matrix is empty
+        run: |
+          set -e
+          sh .github/scripts/data-matrix.sh configuration/zones.json not-a-thing .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
+          echo '[]' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
         run: |
           set -e
-          sh .github/scripts/data-matrix.sh .config.json .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
-          grep -q 1654297200 result
-          grep -q 1654041600 result
+          printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > config.json
+          printf '[{"zone":"DK1","latest":1654297200}]\n' > expected
+          sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
   test-data-write:
     name: Test data write
@@ -281,32 +295,32 @@ jobs:
       - name: Test non-existing directory
         run: |
           set +e
-          sh .github/scripts/data-index.sh .config.json ./non-existing-directory/ > /dev/null
+          sh .github/scripts/data-index.sh configuration/zones.json ./non-existing-directory/ > /dev/null
           [ $? -eq 2 ] || exit 1
 
       - name: Test missing prefix
         run: |
           set +e
-          sh .github/scripts/data-index.sh .config.json ./empty-data-folder > /dev/null
+          sh .github/scripts/data-index.sh configuration/zones.json ./empty-data-folder > /dev/null
           [ $? -eq 3 ] || exit 1
 
       - name: Test incorrect prefix
         run: |
           set +e
-          sh .github/scripts/data-index.sh .config.json ./empty-data-folder /prefix/ > /dev/null
+          sh .github/scripts/data-index.sh configuration/zones.json ./empty-data-folder /prefix/ > /dev/null
           [ $? -eq 3 ] || exit 1
 
       - name: Test with no existing data that index outputs no data
         run: |
           set -e
-          sh .github/scripts/data-index.sh .config.json ./empty-data-folder/ /prefix | jq -r '.' > result
+          sh .github/scripts/data-index.sh configuration/zones.json ./empty-data-folder/ /prefix | jq -r '.' > result
           echo '[]' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data index outputs as expected
         run: |
           set -e
-          sh .github/scripts/data-index.sh .config.json .github/resources/test/well-known/existing-data-write-output/ /data | jq -r '.' > result
+          sh .github/scripts/data-index.sh configuration/zones.json .github/resources/test/well-known/existing-data-write-output/ /data | jq -r '.' > result
           diff -q .github/resources/test/well-known/data-index-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/data-index-generated-output.json result; exit 1; }
 
   test-renewables-data-pull:
@@ -460,7 +474,7 @@ jobs:
 
           echo '[]' > empty.json
 
-          sh .github/scripts/tariff-data-filter.sh empty.json config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh empty.json configuration/networks.json DK1 > result
 
           echo '[{"id": 5790001089030, "name": "N1 A/S","tariffs": []}]' | jq -r > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
@@ -472,7 +486,7 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json configuration/networks.json DK1 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -483,7 +497,7 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input-repeated.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json configuration/networks.json DK1 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -509,14 +523,17 @@ jobs:
           sh .github/scripts/tariff-data-write.sh data.json
           [ $? -eq 2 ] || exit 1
 
+          sh .github/scripts/tariff-data-write.sh data.json config.json
+          [ $? -eq 3 ] || exit 1
+
       - name: Test with non-existing files
         run: |
           set +e
 
-          sh .github/scripts/tariff-data-write.sh not-found.json config.json
+          sh .github/scripts/tariff-data-write.sh not-found.json config.json WK
           [ $? -eq 1 ] || exit 1
 
-          sh .github/scripts/tariff-data-write.sh data.json not-found.json
+          sh .github/scripts/tariff-data-write.sh data.json not-found.json WK
           [ $? -eq 2 ] || exit 1
 
       - name: Test with no existing data that write outputs no data
@@ -526,7 +543,7 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-write-empty-input.json empty.json
           cp .github/resources/test/well-known/tariff-data-write-empty-output.json expected
 
-          sh .github/scripts/tariff-data-write.sh empty.json config.WK.json > result
+          sh .github/scripts/tariff-data-write.sh empty.json config.WK.json WK > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -537,6 +554,6 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-output.json known-data.json
           cp .github/resources/test/well-known/tariff-data-write-output.json expected
 
-          sh .github/scripts/tariff-data-write.sh known-data.json config.WK.json > result
+          sh .github/scripts/tariff-data-write.sh known-data.json config.WK.json WK > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }

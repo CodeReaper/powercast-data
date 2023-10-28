@@ -6,7 +6,7 @@
 #       Examples:
 #           - data.json
 #           - data-for-zone.json
-#   - config file:
+#   - network configuration file:
 #       Will be used to generate filters for network companies.
 #       Examples:
 #           - .config.json
@@ -52,7 +52,7 @@ mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
 
-jq -rc --arg zone "$AREA" '.[] | select(.zone == $zone) | .networks[]' < "$CONFIG" | while read -r ITEM; do
+jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
     [ -z "$ITEM" ] && continue
 
     id=$(echo "$ITEM" | jq -r '.gln')
