@@ -47,14 +47,14 @@ jobs:
             LATEST=$(echo "$CONFIG" | jq -r '.latest')
 
             NOW=$(date +%s)
-            AGE=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $LATEST $NOW)
+            HOURS=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $NOW $LATEST)
 
             echo "Checking stale data for ${ZONE}:"
             echo " - ${LATEST} - current data"
             echo " - ${NOW} - now"
-            echo " - ${DIFF} - hours"
+            echo " - ${HOURS} - hours"
 
-            if [ $AGE -ge 22 ]; then
+            if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_OUTPUT
             fi
           done
@@ -153,14 +153,14 @@ jobs:
             LATEST=$(echo "$CONFIG" | jq -r '.latest')
 
             NOW=$(date +%s)
-            AGE=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $LATEST $NOW)
+            HOURS=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $NOW $LATEST)
 
             echo "Checking stale data for ${ZONE}:"
             echo " - ${LATEST} - current data"
             echo " - ${NOW} - now"
-            echo " - ${DIFF} - hours"
+            echo " - ${HOURS} - hours"
 
-            if [ $AGE -ge 22 ]; then
+            if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_OUTPUT
             fi
           done
@@ -259,14 +259,14 @@ jobs:
             LATEST=$(echo "$CONFIG" | jq -r '.latest')
 
             NOW=$(date +%s)
-            AGE=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $LATEST $NOW)
+            HOURS=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $NOW $LATEST)
 
             echo "Checking stale data for ${ZONE}:"
             echo " - ${LATEST} - current data"
             echo " - ${NOW} - now"
-            echo " - ${DIFF} - hours"
+            echo " - ${HOURS} - hours"
 
-            if [ $AGE -ge 22 ]; then
+            if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_OUTPUT
             fi
           done
