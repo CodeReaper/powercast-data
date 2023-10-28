@@ -4,61 +4,6 @@ on:
   workflow_call: {}
 
 jobs:
-  test-date-freshness:
-    name: Test date freshness
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup
-        run: |
-          touch config.json
-
-      - name: Test non-existing file
-        run: |
-          set +e
-          sh .github/scripts/date-freshness.sh non-existing.json DK1 0 0 > /dev/null
-          [ $? -eq 1 ] || exit 1
-
-      - name: Test missing area
-        run: |
-          set +e
-          sh .github/scripts/date-freshness.sh config.json > /dev/null
-          [ $? -eq 2 ] || exit 1
-
-      - name: Test missing dates
-        run: |
-          set +e
-          sh .github/scripts/date-freshness.sh config.json DK1 > /dev/null
-          [ $? -eq 3 ] || exit 1
-          sh .github/scripts/date-freshness.sh config.json DK1 0 > /dev/null
-          [ $? -eq 4 ] || exit 1
-
-      - name: Test incorrect dates
-        run: |
-          set +e
-          sh .github/scripts/date-freshness.sh config.json DK1 A 0 > /dev/null
-          [ $? -eq 3 ] || exit 1
-          sh .github/scripts/date-freshness.sh config.json DK1 0 A > /dev/null
-          [ $? -eq 4 ] || exit 1
-
-      - name: Test with that zone DE cannot be stale
-        run: |
-          set -e
-          sh .github/scripts/date-freshness.sh configuration/zones.json DE 0 10000000 > result
-          echo '0' > expected
-          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
-
-      - name: Test with that freshness outputs as expected
-        run: |
-          set -e
-          sh .github/scripts/date-freshness.sh configuration/zones.json DK1 0 10000000 > result
-          echo '2777' > expected
-          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
-          sh .github/scripts/date-freshness.sh configuration/zones.json DK1 10000000 0 > result
-          echo '-2777' > expected
-          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
-
   test-data-freshness:
     name: Test data freshness
     runs-on: ubuntu-latest
@@ -114,28 +59,42 @@ jobs:
       - name: Test non-existing file
         run: |
           set +e
-          sh .github/scripts/data-matrix.sh .non-existing-file.json ./data/ > /dev/null
+          sh .github/scripts/data-matrix.sh .non-existing-file.json energy-price ./data/ > /dev/null
           [ $? -eq 1 ] || exit 1
+
+      - name: Test missing capabillity
+        run: |
+          set +e
+          sh .github/scripts/data-matrix.sh configuration/zones.json > /dev/null
+          [ $? -eq 2 ] || exit 1
 
       - name: Test non-existing directory
         run: |
           set +e
-          sh .github/scripts/data-matrix.sh configuration/zones.json ./non-existing-directory/ > /dev/null
-          [ $? -eq 2 ] || exit 1
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./non-existing-directory/ > /dev/null
+          [ $? -eq 3 ] || exit 1
 
       - name: Test with no existing data that matrix contains all items from the configuration
         run: |
           set -e
-          sh .github/scripts/data-matrix.sh configuration/zones.json ./empty-data-folder/ | jq -r '.' > result
-          jq -r 'map(reduce . as $item ({}; .zone = $item.zone | .latest = $item.endDate))' configuration/zones.json > expected
+          sh .github/scripts/data-matrix.sh configuration/zones.json  energy-price ./empty-data-folder/ | jq -r '.' > result
+          jq -r 'map(reduce . as $item ({}; .zone = $item.zone | .latest = 0))' configuration/zones.json > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with mismatched capabillity that matrix is empty
+        run: |
+          set -e
+          sh .github/scripts/data-matrix.sh configuration/zones.json not-a-thing .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
+          echo '[]' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
         run: |
           set -e
-          sh .github/scripts/data-matrix.sh configuration/zones.json .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
-          grep -q 1654297200 result
-          grep -q 1654041600 result
+          printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > config.json
+          printf '[{"zone":"DK1","latest":1654297200}]\n' > expected
+          sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
   test-data-write:
     name: Test data write
