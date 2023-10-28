@@ -4,6 +4,64 @@ on:
   workflow_call: {}
 
 jobs:
+  test-date-freshness:
+    name: Test date freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        run: |
+          touch config.json
+
+      - name: Test non-existing file
+        run: |
+          set +e
+          sh .github/scripts/date-freshness.sh non-existing.json DK1 0 0 > /dev/null
+          [ $? -eq 1 ] || exit 1
+
+      - name: Test missing area
+        run: |
+          set +e
+          sh .github/scripts/date-freshness.sh config.json > /dev/null
+          [ $? -eq 2 ] || exit 1
+
+      - name: Test missing dates
+        run: |
+          set +e
+          sh .github/scripts/date-freshness.sh config.json DK1 > /dev/null
+          [ $? -eq 3 ] || exit 1
+          sh .github/scripts/date-freshness.sh config.json DK1 0 > /dev/null
+          [ $? -eq 4 ] || exit 1
+
+      - name: Test incorrect dates
+        run: |
+          set +e
+          sh .github/scripts/date-freshness.sh config.json DK1 A 0 > /dev/null
+          [ $? -eq 3 ] || exit 1
+          sh .github/scripts/date-freshness.sh config.json DK1 0 A > /dev/null
+          [ $? -eq 4 ] || exit 1
+          sh .github/scripts/date-freshness.sh config.json DK1 10 1 > /dev/null
+          [ $? -eq 5 ] || exit 1
+          sh .github/scripts/date-freshness.sh configuration/zones.json DK1 1 1 > /dev/null
+          [ $? -eq 0 ] || exit 1
+          sh .github/scripts/date-freshness.sh configuration/zones.json DK1 1 10 > /dev/null
+          [ $? -eq 0 ] || exit 1
+
+      - name: Test with that zone DE cannot be stale
+        run: |
+          set -e
+          sh .github/scripts/date-freshness.sh configuration/zones.json DE 0 10000000 > result
+          echo '0' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with that freshness outputs as expected
+        run: |
+          set -e
+          sh .github/scripts/date-freshness.sh configuration/zones.json DK1 0 10000000 > result
+          echo '2777' > expected
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
   test-data-freshness:
     name: Test data freshness
     runs-on: ubuntu-latest
@@ -72,7 +130,7 @@ jobs:
         run: |
           set -e
           sh .github/scripts/data-matrix.sh configuration/zones.json ./empty-data-folder/ | jq -r '.' > result
-          jq -r '.[] |=(.latest = .endDate | del(.endDate))' configuration/zones.json > expected
+          jq -r 'map(reduce . as $item ({}; .zone = $item.zone | .latest = $item.endDate))' configuration/zones.json > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration

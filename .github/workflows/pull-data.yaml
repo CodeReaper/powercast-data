@@ -20,8 +20,6 @@ jobs:
   update-energy-price-data:
     runs-on: ubuntu-latest
     name: Update energy price data
-    outputs:
-      changed: ${{ steps.update-energy-price-data.outputs.changed }}
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
@@ -38,9 +36,32 @@ jobs:
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/energy-price/ | tee configuration.json
+          echo "stale=false" >> $GITHUB_OUTPUT
+          echo "changed=false" >> $GITHUB_OUTPUT
+
+      - shell: bash
+        name: Check for stale data
+        run: |
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+
+            NOW=$(date +%s)
+            AGE=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $LATEST $NOW)
+
+            echo "Checking stale data for ${ZONE}:"
+            echo " - ${LATEST} - current data"
+            echo " - ${NOW} - now"
+            echo " - ${DIFF} - hours"
+
+            if [ $AGE -ge 22 ]; then
+              echo "stale=true" >> $GITHUB_OUTPUT
+            fi
+          done
 
       - shell: bash
         name: Pull data
+        if: env.stale == 'true'
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
@@ -53,9 +74,8 @@ jobs:
       - shell: bash
         id: update-energy-price-data
         name: Check for new data
+        if: env.stale == 'true'
         run: |
-          echo "changed=false" >> $GITHUB_OUTPUT
-
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             LATEST=$(echo "$CONFIG" | jq -r '.latest')
@@ -76,7 +96,7 @@ jobs:
 
       - shell: bash
         name: Write data
-        if: steps.update-energy-price-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         run: |
           for GENERATED in *.generated; do
             [ -f "$GENERATED" ] || continue
@@ -87,14 +107,14 @@ jobs:
 
       - shell: bash
         name: Index data
-        if: steps.update-energy-price-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         run: |
           rm ./github-pages/api/energy-price/latest.json || true
           sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
-        if: steps.update-energy-price-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         with:
           cwd: github-pages
           add: api/energy-price/
@@ -106,8 +126,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: update-energy-price-data
     name: Update renewables data
-    outputs:
-      changed: ${{ steps.update-renewables-data.outputs.changed }}
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
@@ -124,9 +142,32 @@ jobs:
           mkdir -p ./github-pages/api/renewables/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/renewables/ | tee configuration.json
+          echo "stale=false" >> $GITHUB_OUTPUT
+          echo "changed=false" >> $GITHUB_OUTPUT
+
+      - shell: bash
+        name: Check for stale data
+        run: |
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+
+            NOW=$(date +%s)
+            AGE=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $LATEST $NOW)
+
+            echo "Checking stale data for ${ZONE}:"
+            echo " - ${LATEST} - current data"
+            echo " - ${NOW} - now"
+            echo " - ${DIFF} - hours"
+
+            if [ $AGE -ge 22 ]; then
+              echo "stale=true" >> $GITHUB_OUTPUT
+            fi
+          done
 
       - shell: bash
         name: Pull data
+        if: env.stale == 'true'
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
@@ -139,9 +180,8 @@ jobs:
       - shell: bash
         id: update-renewables-data
         name: Check for new data
+        if: env.stale == 'true'
         run: |
-          echo "changed=false" >> $GITHUB_OUTPUT
-
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             LATEST=$(echo "$CONFIG" | jq -r '.latest')
@@ -162,7 +202,7 @@ jobs:
 
       - shell: bash
         name: Write data
-        if: steps.update-renewables-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         run: |
           for GENERATED in *.generated; do
             [ -f "$GENERATED" ] || continue
@@ -173,14 +213,14 @@ jobs:
 
       - shell: bash
         name: Index data
-        if: steps.update-renewables-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         run: |
           rm ./github-pages/api/renewables/latest.json || true
           sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables > ./github-pages/api/renewables/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
-        if: steps.update-renewables-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         with:
           cwd: github-pages
           add: api/renewables/
@@ -192,8 +232,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: update-renewables-data
     name: Update CO2 emission data
-    outputs:
-      changed: ${{ steps.update-co2-emission-data.outputs.changed }}
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
@@ -210,9 +248,32 @@ jobs:
           mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json ./github-pages/api/emission/co2/ | tee configuration.json
+          echo "stale=false" >> $GITHUB_OUTPUT
+          echo "changed=false" >> $GITHUB_OUTPUT
+
+      - shell: bash
+        name: Check for stale data
+        run: |
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+
+            NOW=$(date +%s)
+            AGE=$(sh .github/scripts/date-freshness.sh configuration/zones.json $ZONE $LATEST $NOW)
+
+            echo "Checking stale data for ${ZONE}:"
+            echo " - ${LATEST} - current data"
+            echo " - ${NOW} - now"
+            echo " - ${DIFF} - hours"
+
+            if [ $AGE -ge 22 ]; then
+              echo "stale=true" >> $GITHUB_OUTPUT
+            fi
+          done
 
       - shell: bash
         name: Pull data
+        if: env.stale == 'true'
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
@@ -225,9 +286,8 @@ jobs:
       - shell: bash
         id: update-co2-emission-data
         name: Check for new data
+        if: env.stale == 'true'
         run: |
-          echo "changed=false" >> $GITHUB_OUTPUT
-
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             LATEST=$(echo "$CONFIG" | jq -r '.latest')
@@ -248,7 +308,7 @@ jobs:
 
       - shell: bash
         name: Write data
-        if: steps.update-co2-emission-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         run: |
           for GENERATED in *.generated; do
             [ -f "$GENERATED" ] || continue
@@ -259,14 +319,14 @@ jobs:
 
       - shell: bash
         name: Index data
-        if: steps.update-co2-emission-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         run: |
           rm ./github-pages/api/emission/co2/latest.json || true
           sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 > ./github-pages/api/emission/co2/index.json
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
-        if: steps.update-co2-emission-data.outputs.changed == 'true'
+        if: env.changed == 'true'
         with:
           cwd: github-pages
           add: api/emission/co2/
