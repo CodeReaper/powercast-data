@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - .github/workflows/update-visualization.yaml
+      - .github/resources/*.html
+      - configuration/zones.json
+      - configuration/displays.json
 
 concurrency: commits-pages
 
@@ -11,22 +16,9 @@ env:
   publish-branch: gh-pages
 
 jobs:
-  has-changes:
-    runs-on: ubuntu-latest
-    name: Check for relevant changes
-    outputs:
-      has-changes: ${{ steps.changes.outputs.matches }}
-    steps:
-      - uses: CodeReaper/find-diff-action@v3
-        id: changes
-        with:
-          paths: .github/ .config.json
-
   update-visualization:
     runs-on: ubuntu-latest
     name: Update visualization
-    needs: has-changes
-    if: needs.has-changes.outputs.has-changes == 'true'
     steps:
       - uses: actions/checkout@v3
 
