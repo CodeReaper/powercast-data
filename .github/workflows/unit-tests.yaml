@@ -492,6 +492,17 @@ jobs:
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
+      - name: Test with existing repeated data with set end date that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-repeated-nonnull.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output-nonnull.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
   test-tariff-data-write:
     name: Test tariff data write
     runs-on: ubuntu-latest
