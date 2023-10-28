@@ -56,12 +56,10 @@ jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
     [ -z "$ITEM" ] && continue
 
     id=$(echo "$ITEM" | jq -r '.gln')
-    type=$(echo "$ITEM" | jq -r '.type')
     code=$(echo "$ITEM" | jq -r '.code')
     name=$(echo "$ITEM" | jq -r '.name')
 
     [ -z "$id" ] && continue
-    [ -z "$type" ] && continue
     [ -z "$code" ] && continue
     [ -z "$name" ] && continue
 
@@ -72,7 +70,7 @@ jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
     # shellcheck disable=SC2016
     GROUP='group_by(.tariffs) | map(reduce .[] as $item ({}; .from = if (.from == null or $item.from < .from) then $item.from else .from end, .to = if (.to == null or $item.to > .to) then $item.to else .to end, .from = $item.from | .to = $item.to | .tariffs = $item.tariffs)) | if (. | length) > 0 then .[0].to = null else . end'
 
-    jq -r --arg id "$id" --arg type "$type" --arg code "$code" '[.[] | select(.GLN_Number == $id) | select(.ChargeType == $type) | select(.ChargeTypeCode == $code)]' < "$INPUT" | \
+    jq -r --arg id "$id" --arg code "$code" '[.[] | select(.GLN_Number == $id) | select(.ChargeType == "D03") | select(.ChargeTypeCode == $code)]' < "$INPUT" | \
     jq -r "$CLEANUP" | \
     jq -r "$TRANSFORMATION" | \
     jq -r "$UPDATE" | \
