@@ -52,7 +52,7 @@ fi
 set -e
 
 printf '[' > $DIR/output.json
-jq -rc '.[] | del(.display)' "$CONFIG" | while read -r ITEM; do
+jq -rc '.[]' "$CONFIG" | while read -r ITEM; do
     [ -z "$ITEM" ] && continue
 
     cd "$FOLDER"

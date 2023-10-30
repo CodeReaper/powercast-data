@@ -46,7 +46,8 @@ while [ "$CURSORDATE" -gt "$ENDDATE" ]; do
 
     wget -nv -O $DIR/request.json "${REQUEST}"
 
-    TRANSFORMATION='.records |= map(.euro = .SpotPriceEUR | .timestamp = .HourUTC | del(.SpotPriceEUR, .HourUTC, .PriceArea)) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records'
+    # shellcheck disable=SC2016
+    TRANSFORMATION='.records |= map(. as $item | {euro: $item.SpotPriceEUR, timestamp: $item.HourUTC}) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records'
     cat $DIR/request.json | jq -r "$TRANSFORMATION" > $DIR/data.new.json
     jq -s '.[0] + .[1]' $DIR/data.json $DIR/data.new.json > $DIR/data.combined.json
     mv -f $DIR/data.combined.json $DIR/data.json
