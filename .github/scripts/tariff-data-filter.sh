@@ -67,8 +67,6 @@ jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
     UPDATE='[.[] | if (.Price2 == 0 and .Price3 == 0 and .Price4 == 0 and .Price5 == 0 and .Price6 == 0 and .Price7 == 0 and .Price8 == 0 and .Price9 == 0 and .Price10 == 0 and .Price11 == 0 and .Price12 == 0 and .Price13 == 0 and .Price14 == 0 and .Price15 == 0 and .Price16 == 0 and .Price17 == 0 and .Price18 == 0 and .Price19 == 0 and .Price20 == 0 and .Price21 == 0 and .Price22 == 0 and .Price23 == 0 and .Price24 == 0) then (. | .Price2 = .Price1 | .Price3 = .Price1 | .Price4 = .Price1 | .Price5 = .Price1 | .Price6 = .Price1 | .Price7 = .Price1 | .Price8 = .Price1 | .Price9 = .Price1 | .Price10 = .Price1 | .Price11 = .Price1 | .Price12 = .Price1 | .Price13 = .Price1 | .Price14 = .Price1 | .Price15 = .Price1 | .Price16 = .Price1 | .Price17 = .Price1 | .Price18 = .Price1 | .Price19 = .Price1 | .Price20 = .Price1 | .Price21 = .Price1 | .Price22 = .Price1 | .Price23 = .Price1 | .Price24 = .Price1) else . end]'
     MERGE='. |= map(.tariffs = [.Price1, .Price2, .Price3, .Price4, .Price5, .Price6, .Price7, .Price8, .Price9, .Price10, .Price11, .Price12, .Price13, .Price14, .Price15, .Price16, .Price17, .Price18, .Price19, .Price20, .Price21, .Price22, .Price23, .Price24])'
     # shellcheck disable=SC2016
-    # GROUP='group_by(.tariffs) | . as $group | map(reduce .[] as $item ({}; .from = if (.from == null or $item.from < .from) then $item.from else .from end, .to = if (.to == null or $item.to > .to) then $item.to else .to end, .from = $item.from | .to = $item.to | .tariffs = $item.tariffs)) | if (. | length) > 0 then .[0].to = $group[0][0].to else . end'
-    # perhaps group_by with a year too?
     CREATE='map(. as $item | {from: $item.from, to: $item.to, tariffs: $item.tariffs})'
 
     jq -r --arg id "$id" --arg code "$code" '[.[] | select(.GLN_Number == $id) | select(.ChargeType == "D03") | select(.ChargeTypeCode == $code)]' < "$INPUT" | \
@@ -79,4 +77,34 @@ jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
     jq -r --arg id "$id" --arg name "$name" '[{id: $id|tonumber, name: $name, tariffs: .}]' > "$DIR/$id.json"
 done
 
-jq -s add $DIR/*.json | jq -r
+for file in "$DIR/"*.json; do
+  id=$(jq -r '.[0].id' < "$file")
+  name=$(jq -r '.[0].name' < "$file")
+
+  {
+    if [ "$(jq -r '.[0].tariffs | length' < "$file")" -eq 0 ]; then
+      printf '[]'
+    else
+      jq -rc '.[].tariffs | reverse | .[]' "$file" > "$DIR/$id.tmp"
+      printf '['
+      while read -r ITEM; do
+        from=$(echo "$ITEM" | jq -r '.from')
+        to=$(echo "$ITEM" | jq -r '.to')
+        indicator=$(echo "$ITEM" | jq -rc '.tariffs' | tr -d \[\]\,)
+
+        if [ "$previous" = "" ]; then
+          printf "{\"from\": %s," "$from"
+        elif [ ! "$previous" = "$indicator" ]; then
+          printf "\"to\": %s, \"tariffs\":%s}," "$from" "$tariffs"
+          printf "{\"from\": %s," "$from"
+        fi
+
+        tariffs=$(echo "$ITEM" | jq -rc '.tariffs')
+        previous=$indicator
+      done < "$DIR/$id.tmp"
+      printf "\"to\": %s, \"tariffs\":%s}]" "$to" "$tariffs"
+    fi
+  } | jq -r --arg id "$id" --arg name "$name" '[{id: $id|tonumber, name: $name, tariffs: (. | reverse)}]' > "$DIR/$id.packed"
+done
+
+jq -s add $DIR/*.packed | jq -r
