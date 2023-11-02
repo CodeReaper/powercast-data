@@ -1,6 +1,14 @@
 {
-  "vat": 0.25,
-  "exchangeRate": 746,
+  "vat": {
+    "from": 0,
+    "to": null,
+    "vat": 0.25
+  },
+  "exchange": {
+    "from": 0,
+    "to": null,
+    "rate": 746
+  },
   "grid": [
     {
       "from": 1685570400,
