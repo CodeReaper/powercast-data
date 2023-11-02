@@ -191,8 +191,20 @@ The response will contain conversion rates, taxes, tariffs and other charges:
 
 ```jsonc
 {
-  "vat": <percent>, // given as a fraction between 0 and 1
-  "exchangeRate": <amount>, // of local currency per Euro
+  "vat": [
+    {
+      "from": <unix timestamp>,
+      "to": <optional unix timestamp>,
+      "vat": <percent>, // given as a fraction between 0 and 1
+    }
+  ],
+  "exchange": [
+    {
+      "from": <unix timestamp>,
+      "to": <optional unix timestamp>,
+      "rate": <amount>, // of local currency per Euro
+    }
+  ],
   "grid": [
     {
       "from": <unix timestamp>,
