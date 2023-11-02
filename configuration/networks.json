@@ -3,16 +3,400 @@
     {
       "name": "N1 A/S",
       "gln": 5790001089030,
-      "type": "D03",
-      "code": "CD"
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "CD"
+        }
+      ]
+    },
+    {
+      "name": "Elinord A/S",
+      "gln": 5790001095277,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "43300"
+        }
+      ]
+    },
+    {
+      "name": "Læsø Elnet A/S",
+      "gln": 5790001103460,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "43110"
+        }
+      ]
+    },
+    {
+      "name": "Kimbrer Elnet A/S",
+      "gln": 5790001095239,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "C-Tarif"
+        }
+      ]
+    },
+    {
+      "name": "El-net Kongerslev A/S",
+      "gln": 5790002502699,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "C-Tarif"
+        }
+      ]
+    },
+    {
+      "name": "Forsyning Elnet A/S",
+      "gln": 5790001088309,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "STR-NT-03"
+        }
+      ]
+    },
+    {
+      "name": "L-Net A/S",
+      "gln": 5790001090111,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "4000"
+        }
+      ]
+    },
+    {
+      "name": "Hammel Elforsyning Net A/S",
+      "gln": 5790001090166,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "C-Tarif"
+        }
+      ]
+    },
+    {
+      "name": "Dinel A/S",
+      "gln": 5790000610099,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "TCL<100_02"
+        }
+      ]
+    },
+    {
+      "name": "Videbæk Elnet A/S",
+      "gln": 5790000610822,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "VE-NT-01"
+        }
+      ]
+    },
+    {
+      "name": "Tarm Elværk Net A/S",
+      "gln": 5790000706419,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "TEV-NT-01"
+        }
+      ]
+    },
+    {
+      "name": "Aal El-Net A M B A",
+      "gln": 5790001095451,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "AAL-NT-05"
+        }
+      ]
+    },
+    {
+      "name": "GEV Elnet A/S",
+      "gln": 5790000681105,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "GEV-NT-01"
+        }
+      ]
+    },
+    {
+      "name": "Elnet Midt A/S",
+      "gln": 5790001100520,
+      "codes": [
+        {
+          "from": 0,
+          "to": 1696024800,
+          "code": "T3002"
+        },
+        {
+          "from": 1696024800,
+          "to": null,
+          "code": "T3001"
+        }
+      ]
+    },
+    {
+      "name": "Hurup Elværk Net A/S",
+      "gln": 5790000610839,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "HEV-NT-01T"
+        }
+      ]
+    },
+    {
+      "name": "Netselskabet Elværk A/S",
+      "gln": 5790000681358,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "TN1C"
+        }
+      ]
+    },
+    {
+      "name": "NOE Net A/S",
+      "gln": 5790000395620,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "30030"
+        }
+      ]
+    },
+    {
+      "name": "Nord Energi Net A/S",
+      "gln": 5790000681105,
+      "type": "5790000610877",
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "TAC"
+        }
+      ]
+    },
+    {
+      "name": "TREFOR El-Net A/S",
+      "gln": 5790000392261,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "C"
+        }
+      ]
+    },
+    {
+      "name": "Vildbjerg Elnet A/S",
+      "gln": 5790001095413,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "VTV-NT-24"
+        }
+      ]
+    },
+    {
+      "name": "Sunds net",
+      "gln": 5790001095444,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "SEF-NT-05"
+        }
+      ]
+    },
+    {
+      "name": "RAH Net A/S",
+      "gln": 5790000681327,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "RAH-C"
+        }
+      ]
+    },
+    {
+      "name": "Konstant Net A/S",
+      "gln": 5790000683345,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "245-NT01T"
+        }
+      ]
+    },
+    {
+      "name": "Hjerting Transformatorforening",
+      "gln": 5790001095376,
+      "codes": [
+        {
+          "from": 0,
+          "to": 1690840800,
+          "code": "HE-NT-01"
+        },
+        {
+          "from": 1690840800,
+          "to": null,
+          "code": "C-Tarif"
+        }
+      ]
     }
   ],
   "DK2": [
     {
-      "name": "N1 A/S",
-      "gln": 5790001089030,
-      "type": "D03",
-      "code": "CD"
+      "name": "Cerius A/S",
+      "gln": 5790000705184,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "30TR_C_ET"
+        }
+      ]
+    },
+    {
+      "name": "Radius A/S",
+      "gln": 5790000705689,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "DT_C_01"
+        }
+      ]
+    },
+    {
+      "name": "Nakskov Elnet A/S",
+      "gln": 5790001088460,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "92TR_C_ET"
+        }
+      ]
+    },
+    {
+      "name": "Elektrus A/S",
+      "gln": 5790000836239,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "6000091"
+        }
+      ]
+    },
+    {
+      "name": "FLOW Elnet A/S",
+      "gln": 5790000392551,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "FE2 NT-01"
+        }
+      ]
+    },
+    {
+      "name": "Midtfyns Elforsyning A.m.b.A",
+      "gln": 5790001089023,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "TNT15001"
+        }
+      ]
+    },
+    {
+      "name": "Veksel A/S",
+      "gln": 5790001088217,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "NT-10"
+        }
+      ]
+    },
+    {
+      "name": "Vores Elnet A/S",
+      "gln": 5790000610976,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "TNT1011"
+        }
+      ]
+    },
+    {
+      "name": "TREFOR El-Net Øst A/S",
+      "gln": 5790000706686,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "46"
+        }
+      ]
+    },
+    {
+      "name": "Ravdex A/S",
+      "gln": 5790000836727,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "NT-C"
+        }
+      ]
+    },
+    {
+      "name": "Zeanet A/S",
+      "gln": 5790001089375,
+      "codes": [
+        {
+          "from": 0,
+          "to": null,
+          "code": "43110"
+        }
+      ]
     }
   ]
 }

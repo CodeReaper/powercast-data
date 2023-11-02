@@ -416,7 +416,73 @@ jobs:
       - name: Setup
         run: |
           touch data.json
-          touch config.json
+
+          cat << EOF > config.json
+          {
+            "DK1": [
+              {
+                "name": "N1 A/S",
+                "gln": 5790001089030,
+                "codes": [
+                  {
+                    "from": 0,
+                    "to": null,
+                    "code": "CD"
+                  }
+                ]
+              }
+            ],
+            "DK2": [
+              {
+                "name": "N1 A/S",
+                "gln": 5790001089030,
+                "codes": [
+                  {
+                    "from": 0,
+                    "to": null,
+                    "code": "CD"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+
+          cat << EOF > multi-code-config.json
+          {
+            "DK1": [
+              {
+                "name": "N1 A/S",
+                "gln": 5790001089030,
+                "codes": [
+                  {
+                    "from": 0,
+                    "to": 1704067200,
+                    "code": "DC"
+                  },
+                  {
+                    "from": 1704067200,
+                    "to": null,
+                    "code": "CD"
+                  }
+                ]
+              }
+            ],
+            "DK2": [
+              {
+                "name": "N1 A/S",
+                "gln": 5790001089030,
+                "codes": [
+                  {
+                    "from": 0,
+                    "to": null,
+                    "code": "CD"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
 
       - name: Test with too few arguments
         run: |
@@ -447,7 +513,7 @@ jobs:
 
           echo '[]' > empty.json
 
-          sh .github/scripts/tariff-data-filter.sh empty.json configuration/networks.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh empty.json config.json DK1 > result
 
           echo '[{"id": 5790001089030, "name": "N1 A/S","tariffs": []}]' | jq -r > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
@@ -459,7 +525,62 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json configuration/networks.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing repeated data that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-repeated.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing repeated data with set end date that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-repeated-nonnull.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output-nonnull.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing unpackable repeated data that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-repeated-unpackable.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output-unpackable.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with multi code network data that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-multi-code.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json DK1 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with multi code network data with none matching that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-multi-code-no-matches.json known-data.json
+          echo '[{"id": 5790001089030, "name": "N1 A/S","tariffs": []}]' | jq -r > expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json DK1 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
