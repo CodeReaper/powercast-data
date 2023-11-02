@@ -76,15 +76,12 @@ jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
 
       TRANSFORMATION='. |= map(.from = (.ValidFrom + "Z"|fromdateiso8601) | .to = if (.ValidTo|type) == "object" then null else (.ValidTo + "Z"|fromdateiso8601) end)'
       UPDATE='[.[] | if (.Price2 == 0 and .Price3 == 0 and .Price4 == 0 and .Price5 == 0 and .Price6 == 0 and .Price7 == 0 and .Price8 == 0 and .Price9 == 0 and .Price10 == 0 and .Price11 == 0 and .Price12 == 0 and .Price13 == 0 and .Price14 == 0 and .Price15 == 0 and .Price16 == 0 and .Price17 == 0 and .Price18 == 0 and .Price19 == 0 and .Price20 == 0 and .Price21 == 0 and .Price22 == 0 and .Price23 == 0 and .Price24 == 0) then (. | .Price2 = .Price1 | .Price3 = .Price1 | .Price4 = .Price1 | .Price5 = .Price1 | .Price6 = .Price1 | .Price7 = .Price1 | .Price8 = .Price1 | .Price9 = .Price1 | .Price10 = .Price1 | .Price11 = .Price1 | .Price12 = .Price1 | .Price13 = .Price1 | .Price14 = .Price1 | .Price15 = .Price1 | .Price16 = .Price1 | .Price17 = .Price1 | .Price18 = .Price1 | .Price19 = .Price1 | .Price20 = .Price1 | .Price21 = .Price1 | .Price22 = .Price1 | .Price23 = .Price1 | .Price24 = .Price1) else . end]'
-      MERGE='. |= map(.tariffs = [.Price1, .Price2, .Price3, .Price4, .Price5, .Price6, .Price7, .Price8, .Price9, .Price10, .Price11, .Price12, .Price13, .Price14, .Price15, .Price16, .Price17, .Price18, .Price19, .Price20, .Price21, .Price22, .Price23, .Price24])'
-      # shellcheck disable=SC2016
-      CREATE='map(. as $item | {from: $item.from, to: $item.to, tariffs: $item.tariffs})'
+      MERGE='. |= map(.tariffs = [.Price1, .Price2, .Price3, .Price4, .Price5, .Price6, .Price7, .Price8, .Price9, .Price10, .Price11, .Price12, .Price13, .Price14, .Price15, .Price16, .Price17, .Price18, .Price19, .Price20, .Price21, .Price22, .Price23, .Price24]) | map(. as $item | {from: $item.from, to: $item.to, tariffs: $item.tariffs})'
 
-      jq -r --arg id "$id" --arg code "$code" '[.[] | select(.GLN_Number == $id) | select(.ChargeType == "D03") | select(.ChargeTypeCode == $code)]' < "$INPUT" | \
+      jq -r --arg id "$id" --arg code "$code" '[.[] | select(.GLN_Number == $id and .ChargeType == "D03" and .ChargeTypeCode == $code)]' < "$INPUT" | \
       jq -r "$TRANSFORMATION" | \
       jq -r "$UPDATE" | \
       jq -r "$MERGE" | \
-      jq -r "$CREATE" | \
       jq -r --arg id "$id" --arg name "$name" --arg from "$starting" --arg to "$ending" '[{id: $id|tonumber, name: $name, tariffs: [.[] | select(.from >= ($from|tonumber) and if ($to == "null") then true else .to <= ($to|tonumber) end)]}]' > "$firstpass"
 
       {
@@ -115,6 +112,9 @@ jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
     done
 
     jq -rcs 'add' "$DIR/$id".from.* | jq -r --arg id "$id" --arg name "$name" '[{id: $id|tonumber, name: $name, tariffs: (. | sort_by(.from) | reverse)}]' > "$DIR/$id.combined"
+    rm "$DIR/$id".from.*
+
+    >&2 echo " - $id / $name - $(wc -c < "$DIR/$id.combined") bytes"
 
 done
 
