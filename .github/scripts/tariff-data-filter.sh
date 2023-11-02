@@ -85,8 +85,7 @@ jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
       jq -r "$UPDATE" | \
       jq -r "$MERGE" | \
       jq -r "$CREATE" | \
-      # FIXME: test + jq -r --arg from "$starting" --arg to "$ending" '[.[] | select(.from <= $from) | if $to then select(.to >= $to) else . end]' | \
-      jq -r --arg id "$id" --arg name "$name" '[{id: $id|tonumber, name: $name, tariffs: .}]' > "$firstpass"
+      jq -r --arg id "$id" --arg name "$name" --arg from "$starting" --arg to "$ending" '[{id: $id|tonumber, name: $name, tariffs: [.[] | select(.from >= ($from|tonumber) and if ($to == "null") then true else .to <= ($to|tonumber) end)]}]' > "$firstpass"
 
       {
         if [ "$(jq -r '.[0].tariffs | length' < "$firstpass")" -eq 0 ]; then
@@ -111,11 +110,11 @@ jq -rc --arg zone "$AREA" '.[$zone][]' < "$CONFIG" | while read -r ITEM; do
           done < "$DIR/tmp"
           printf "\"to\": %s, \"tariffs\":%s}]" "$to" "$tariffs"
         fi
-      } | jq -rc reverse > "$DIR/$id.$starting.from"
+      } | jq -rc reverse > "$DIR/$id.from.$starting"
 
     done
 
-    jq -rcs 'add' "$DIR/$id".*.from | jq -r --arg id "$id" --arg name "$name" '[{id: $id|tonumber, name: $name, tariffs: (. | sort_by(.from) | reverse)}]' > "$DIR/$id.combined"
+    jq -rcs 'add' "$DIR/$id".from.* | jq -r --arg id "$id" --arg name "$name" '[{id: $id|tonumber, name: $name, tariffs: (. | sort_by(.from) | reverse)}]' > "$DIR/$id.combined"
 
 done
 
