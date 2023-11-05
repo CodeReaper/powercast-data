@@ -51,7 +51,7 @@ mkdir $PARTS
 
 jq -r --arg id "$NETWORK" '[.[] | select(.GLN_Number == $id and .ChargeType == "D03")]' < "$INPUT" > $FILTERED
 
-jq -r --arg id "$NETWORK" '.[][] | select(.gln == ($id|tonumber)) | .codes[] | "\(.code) \(.from) \(.to)"' < "$CONFIG" | while read -r CODE FROM TO; do
+jq -r --arg id "$NETWORK" '.[][] | select(.gln == ($id|tonumber)) | .codes[] | "\(.code)=\(.from)=\(.to)"' < "$CONFIG" | while IFS='=' read -r CODE FROM TO; do
   TRANSFORMATION='. |= map(.from = (.ValidFrom + "Z"|fromdateiso8601) | .to = if (.ValidTo|type) == "object" then null else (.ValidTo + "Z"|fromdateiso8601) end)'
   UPDATE='[.[] | if (.Price2|type) == "object" or (.Price2 == 0 and .Price3 == 0 and .Price4 == 0 and .Price5 == 0 and .Price6 == 0 and .Price7 == 0 and .Price8 == 0 and .Price9 == 0 and .Price10 == 0 and .Price11 == 0 and .Price12 == 0 and .Price13 == 0 and .Price14 == 0 and .Price15 == 0 and .Price16 == 0 and .Price17 == 0 and .Price18 == 0 and .Price19 == 0 and .Price20 == 0 and .Price21 == 0 and .Price22 == 0 and .Price23 == 0 and .Price24 == 0) then (. | .Price2 = .Price1 | .Price3 = .Price1 | .Price4 = .Price1 | .Price5 = .Price1 | .Price6 = .Price1 | .Price7 = .Price1 | .Price8 = .Price1 | .Price9 = .Price1 | .Price10 = .Price1 | .Price11 = .Price1 | .Price12 = .Price1 | .Price13 = .Price1 | .Price14 = .Price1 | .Price15 = .Price1 | .Price16 = .Price1 | .Price17 = .Price1 | .Price18 = .Price1 | .Price19 = .Price1 | .Price20 = .Price1 | .Price21 = .Price1 | .Price22 = .Price1 | .Price23 = .Price1 | .Price24 = .Price1) else . end]'
   # shellcheck disable=SC2016

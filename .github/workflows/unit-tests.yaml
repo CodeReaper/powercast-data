@@ -430,6 +430,17 @@ jobs:
                     "code": "CD"
                   }
                 ]
+              },
+              {
+                "name": "SPACE A/S",
+                "gln": 5790001089999,
+                "codes": [
+                  {
+                    "from": 0,
+                    "to": null,
+                    "code": "S P A C E S"
+                  }
+                ]
               }
             ]
           }
@@ -500,6 +511,17 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
           sh .github/scripts/tariff-data-filter.sh known-data.json config.json 5790001089030 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing data with id containing spaces that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-spaces.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json 5790001089999 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
