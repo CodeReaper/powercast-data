@@ -59,10 +59,10 @@ jobs:
       - shell: bash
         name: Create network data
         run: |
-          jq -rc 'keys[] as $k | "\($k) \(.[$k][].gln)"' < configuration/networks.json | while read ZONE ID; do
-            printf 'Write data for %s/%s' "$ZONE" "$ID"
+          jq -rc '.[][].gln' < configuration/networks.json | while read ID; do
+            printf 'Write data for %s' "$ID"
             mkdir -p ./github-pages/api/energy-charges/network/$ID/ > /dev/null
-            sh .github/scripts/tariff-data-filter.sh data.json configuration/networks.json $ZONE $ID > ./github-pages/api/energy-charges/network/$ID/index.json
+            sh .github/scripts/tariff-data-filter.sh data.json configuration/networks.json $ID > ./github-pages/api/energy-charges/network/$ID/index.json
             printf ' - %s bytes\n' $(wc -c < "./github-pages/api/energy-charges/network/$ID/index.json")
           done
 
