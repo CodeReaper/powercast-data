@@ -47,7 +47,7 @@ The electricity charge is defined by law.
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/energy-price/index.json
+curl -v https://codereaper.github.io/powercast-data/api/energy-price/
 ```
 
 The response will contain paths to latest and oldest available data points for each zone using the following format:
@@ -90,7 +90,7 @@ The response is the cost over time using the following format:
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/renewables/index.json
+curl -v https://codereaper.github.io/powercast-data/api/renewables/
 ```
 
 The response will contain paths to latest and oldest available data points for each zone using the following format:
@@ -139,7 +139,7 @@ The response is the grouped energy amount over time using the following format:
 Begin here to load all data using the API:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/emission/co2/index.json
+curl -v https://codereaper.github.io/powercast-data/api/emission/co2/
 ```
 
 The response will contain paths to latest and oldest available data points for each zone using the following format:
@@ -177,53 +177,70 @@ The response is the emission over time using the following format:
 
 ### Energy Charges
 
-#### Consume data points for a specific zone
-
 _Note that only DK zones are available_
+
+#### Grid Tariffs
 
 All data for a zone is available on a single endpoint:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/energy-charges/<zone>.json
+curl -v https://codereaper.github.io/powercast-data/api/energy-charges/grid/
 ```
 
-The response will contain conversion rates, taxes, tariffs and other charges:
+The response is the charges and tariffs over time using the following format:
 
 ```jsonc
-{
-  "vat": [
-    {
-      "from": <unix timestamp>,
-      "to": <optional unix timestamp>,
-      "vat": <percent>, // given as a fraction between 0 and 1
-    }
-  ],
-  "exchange": [
-    {
-      "from": <unix timestamp>,
-      "to": <optional unix timestamp>,
-      "rate": <amount>, // of local currency per Euro
-    }
-  ],
-  "grid": [
-    {
-      "from": <unix timestamp>,
-      "to": <unix timestamp>,
-      "electricityCharge": <local currency>,
-      "transmissionTariff": <local currency>,
-      "systemTariff": <local currency>
-    },
-  ],
-  "network": {
+[
+  {
+    "from": <unix timestamp>,
+    "to": <unix timestamp>,
+    "electricityCharge": <local currency>,
+    "transmissionTariff": <local currency>,
+    "systemTariff": <local currency>,
+    "zone": <zone>
+  },
+  // ...
+]
+```
+
+#### Available Networks
+
+All available networks are available on a single endpoint:
+
+```sh
+curl -v https://codereaper.github.io/powercast-data/api/energy-charges/network/
+```
+
+The response will contain a list of attributes for each network:
+
+```jsonc
+[
+  {
     "id": <id>,
     "name": <name>,
-    "tariffs": [
-      {
-        "from": <unix timestamp>,
-        "to": <optional unix timestamp>,
-        "tariffs": [<local currency>, ...] // 24 entries with hourly tariff
-      }
-    ]
-  }
-}
+    "zone": <zone>
+  },
+  // ...
+]
+```
+
+#### Network Tariffs
+
+All data for a specific network is available on a single endpoint:
+
+```sh
+curl -v https://codereaper.github.io/powercast-data/api/energy-charges/network/<id>/
+```
+
+The response is the tariffs over time using the following format:
+
+```jsonc
+[
+  {
+    "from": <unix timestamp>,
+    "to": <optional unix timestamp>,
+    "tariffs": [<local currency>, ...] // 24 entries with hourly tariff
+  },
+  // ...
+]
 ```

@@ -34,25 +34,36 @@ jobs:
           path: github-pages
 
       - shell: bash
+        name: Clear energy charges
+        run: |
+          rm -rf ./github-pages/api/energy-charges || true
+
+      - shell: bash
         name: Download data
         run: wget -nv -O data.json "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0"
 
       - shell: bash
-        name: Filter data
+        name: Create grid prices
         run: |
-          jq -rc 'keys[]' < configuration/networks.json | while read ZONE; do
-            echo "Filtering data for ${ZONE}..."
-            sh .github/scripts/tariff-data-filter.sh data.json configuration/networks.json $ZONE > "${ZONE}.filtered"
-          done
+          mkdir -p ./github-pages/api/energy-charges/grid/ > /dev/null
+
+          jq -r '[keys[] as $k | .[$k][] | . * {zone: $k}]' < configuration/grid.json > ./github-pages/api/energy-charges/grid/index.json
 
       - shell: bash
-        name: Write data
+        name: Create list of networks
         run: |
-          mkdir -p ./github-pages/api/energy-charges/ > /dev/null
+          mkdir -p ./github-pages/api/energy-charges/network/ > /dev/null
 
-          jq -rc 'keys[]' < configuration/networks.json | while read ZONE; do
-            echo "Write data for ${ZONE}..."
-            sh .github/scripts/tariff-data-write.sh "${ZONE}.filtered" configuration/grid.json "$ZONE" > "./github-pages/api/energy-charges/${ZONE}.json"
+          jq -r '[keys[] as $k | .[$k][] | {id: .gln, name: .name, zone: $k}]' < configuration/networks.json > ./github-pages/api/energy-charges/network/index.json
+
+      - shell: bash
+        name: Create network data
+        run: |
+          jq -rc '.[][].gln' < configuration/networks.json | while read ID; do
+            printf 'Write data for %s' "$ID"
+            mkdir -p ./github-pages/api/energy-charges/network/$ID/ > /dev/null
+            sh .github/scripts/tariff-data-filter.sh data.json configuration/networks.json $ID > ./github-pages/api/energy-charges/network/$ID/index.json
+            printf ' - %s bytes\n' $(wc -c < "./github-pages/api/energy-charges/network/$ID/index.json")
           done
 
       - uses: EndBug/add-and-commit@v9

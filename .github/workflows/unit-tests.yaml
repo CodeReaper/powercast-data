@@ -430,17 +430,15 @@ jobs:
                     "code": "CD"
                   }
                 ]
-              }
-            ],
-            "DK2": [
+              },
               {
-                "name": "N1 A/S",
-                "gln": 5790001089030,
+                "name": "SPACE A/S",
+                "gln": 5790001089999,
                 "codes": [
                   {
                     "from": 0,
                     "to": null,
-                    "code": "CD"
+                    "code": "S P A C E S"
                   }
                 ]
               }
@@ -467,19 +465,6 @@ jobs:
                   }
                 ]
               }
-            ],
-            "DK2": [
-              {
-                "name": "N1 A/S",
-                "gln": 5790001089030,
-                "codes": [
-                  {
-                    "from": 0,
-                    "to": null,
-                    "code": "CD"
-                  }
-                ]
-              }
             ]
           }
           EOF
@@ -501,10 +486,10 @@ jobs:
         run: |
           set +e
 
-          sh .github/scripts/tariff-data-filter.sh not-found.json config.json DK1
+          sh .github/scripts/tariff-data-filter.sh not-found.json config.json 5790001089030
           [ $? -eq 1 ] || exit 1
 
-          sh .github/scripts/tariff-data-filter.sh data.json not-found.json DK1
+          sh .github/scripts/tariff-data-filter.sh data.json not-found.json 5790001089030
           [ $? -eq 2 ] || exit 1
 
       - name: Test with no existing data that filter outputs no data
@@ -513,9 +498,9 @@ jobs:
 
           echo '[]' > empty.json
 
-          sh .github/scripts/tariff-data-filter.sh empty.json config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh empty.json config.json 5790001089030 > result
 
-          echo '[{"id": 5790001089030, "name": "N1 A/S","tariffs": []}]' | jq -r > expected
+          echo '[]' | jq -r > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with existing data that filter outputs as expected
@@ -525,7 +510,18 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json 5790001089030 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing data with id containing spaces that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-spaces.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json 5790001089999 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -536,7 +532,7 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input-repeated.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json 5790001089030 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -547,7 +543,7 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input-repeated-nonnull.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output-nonnull.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json 5790001089030 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -558,7 +554,7 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input-repeated-unpackable.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output-unpackable.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json config.json 5790001089030 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -569,7 +565,7 @@ jobs:
           cp .github/resources/test/well-known/tariff-data-filter-input-multi-code.json known-data.json
           cp .github/resources/test/well-known/tariff-data-filter-output.json expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json DK1 > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json 5790001089030 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -578,65 +574,8 @@ jobs:
           set -e
 
           cp .github/resources/test/well-known/tariff-data-filter-input-multi-code-no-matches.json known-data.json
-          echo '[{"id": 5790001089030, "name": "N1 A/S","tariffs": []}]' | jq -r > expected
+          echo '[]' | jq -r > expected
 
-          sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json DK1 > result
-
-          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
-
-  test-tariff-data-write:
-    name: Test tariff data write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup
-        run: |
-          touch data.json
-          touch config.json
-          cp .github/resources/test/well-known/tariff-data-write-config.json config.WK.json
-
-      - name: Test with too few arguments
-        run: |
-          set +e
-
-          sh .github/scripts/tariff-data-write.sh
-          [ $? -eq 1 ] || exit 1
-
-          sh .github/scripts/tariff-data-write.sh data.json
-          [ $? -eq 2 ] || exit 1
-
-          sh .github/scripts/tariff-data-write.sh data.json config.json
-          [ $? -eq 3 ] || exit 1
-
-      - name: Test with non-existing files
-        run: |
-          set +e
-
-          sh .github/scripts/tariff-data-write.sh not-found.json config.json WK
-          [ $? -eq 1 ] || exit 1
-
-          sh .github/scripts/tariff-data-write.sh data.json not-found.json WK
-          [ $? -eq 2 ] || exit 1
-
-      - name: Test with no existing data that write outputs no data
-        run: |
-          set -e
-
-          cp .github/resources/test/well-known/tariff-data-write-empty-input.json empty.json
-          cp .github/resources/test/well-known/tariff-data-write-empty-output.json expected
-
-          sh .github/scripts/tariff-data-write.sh empty.json config.WK.json WK > result
-
-          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
-
-      - name: Test with existing data that write outputs as expected
-        run: |
-          set -e
-
-          cp .github/resources/test/well-known/tariff-data-filter-output.json known-data.json
-          cp .github/resources/test/well-known/tariff-data-write-output.json expected
-
-          sh .github/scripts/tariff-data-write.sh known-data.json config.WK.json WK > result
+          sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json 5790001089030 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
