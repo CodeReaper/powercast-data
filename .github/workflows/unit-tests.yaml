@@ -579,3 +579,14 @@ jobs:
           sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json 5790001089030 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with sloppy multi code network data that filter outputs as expected
+        run: |
+          set -e
+
+          cp .github/resources/test/well-known/tariff-data-filter-input-sloppy-multi-code.json known-data.json
+          cp .github/resources/test/well-known/tariff-data-filter-output.json expected
+
+          sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json 5790001089030 > result
+
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
