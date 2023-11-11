@@ -8,7 +8,7 @@ jobs:
     name: Test data freshness
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
         run: |
@@ -50,7 +50,7 @@ jobs:
     name: Test data matrix
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
         run: |
@@ -100,7 +100,7 @@ jobs:
     name: Test data write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
         run: |
@@ -189,7 +189,7 @@ jobs:
     name: Test energy price data pull
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Test if endpoints does not answer pull will fail
         run: |
@@ -242,7 +242,7 @@ jobs:
     name: Test data freshness-file
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
         run: |
@@ -280,7 +280,7 @@ jobs:
     name: Test data index
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
         run: |
@@ -327,7 +327,7 @@ jobs:
     name: Test renewables data pull
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Test if endpoints does not answer pull will fail
         run: |
@@ -369,7 +369,7 @@ jobs:
     name: Test co2 emission data pull
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Test if endpoints does not answer pull will fail
         run: |
@@ -411,7 +411,7 @@ jobs:
     name: Test tariff data filter
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
         run: |

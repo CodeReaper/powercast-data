@@ -25,9 +25,9 @@ jobs:
     name: Update energy price data
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
           ref: ${{ env.publish-branch }}
@@ -136,9 +136,9 @@ jobs:
     name: Update renewables data
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
           ref: ${{ env.publish-branch }}
@@ -242,9 +242,9 @@ jobs:
     name: Update CO2 emission data
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
           ref: ${{ env.publish-branch }}
