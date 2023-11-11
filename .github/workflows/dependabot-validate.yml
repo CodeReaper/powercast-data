@@ -1,0 +1,11 @@
+name: dependabot validate
+
+on:
+  workflow_call: {}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: marocchino/validate-dependabot@v2
