@@ -178,6 +178,7 @@ The response is the emission over time using the following format:
 ### Energy Charges
 
 _Note that only DK zones are available_
+_Note that local currency for DK zones means Øre per kWh_
 
 #### Grid Tariffs
 
