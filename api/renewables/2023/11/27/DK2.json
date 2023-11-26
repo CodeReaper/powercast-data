@@ -1,14 +1,14 @@
 [
   {
-    "timestamp": 1700956800,
+    "timestamp": 1701043200,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 369.67
+        "energy": 51.29
       },
       {
         "type": "onshore wind",
-        "energy": 221.21
+        "energy": 27.75
       },
       {
         "type": "solar",
@@ -17,15 +17,15 @@
     ]
   },
   {
-    "timestamp": 1700960400,
+    "timestamp": 1701046800,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 337.13
+        "energy": 65.38
       },
       {
         "type": "onshore wind",
-        "energy": 225.25
+        "energy": 36.25
       },
       {
         "type": "solar",
@@ -34,15 +34,15 @@
     ]
   },
   {
-    "timestamp": 1700964000,
+    "timestamp": 1701050400,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 320.04
+        "energy": 85.5
       },
       {
         "type": "onshore wind",
-        "energy": 241.13
+        "energy": 50.04
       },
       {
         "type": "solar",
@@ -51,15 +51,15 @@
     ]
   },
   {
-    "timestamp": 1700967600,
+    "timestamp": 1701054000,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 314.17
+        "energy": 111.96
       },
       {
         "type": "onshore wind",
-        "energy": 234.5
+        "energy": 60.13
       },
       {
         "type": "solar",
@@ -68,15 +68,32 @@
     ]
   },
   {
-    "timestamp": 1700971200,
+    "timestamp": 1701057600,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 311
+        "energy": 139.46
       },
       {
         "type": "onshore wind",
-        "energy": 203.46
+        "energy": 66.04
+      },
+      {
+        "type": "solar",
+        "energy": 0
+      }
+    ]
+  },
+  {
+    "timestamp": 1701061200,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 164.54
+      },
+      {
+        "type": "onshore wind",
+        "energy": 75.13
       },
       {
         "type": "solar",
@@ -85,15 +102,181 @@
     ]
   },
   {
-    "timestamp": 1700974800,
+    "timestamp": 1701064800,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 318.08
+        "energy": 188.42
       },
       {
         "type": "onshore wind",
-        "energy": 188.29
+        "energy": 84.5
+      }
+    ]
+  },
+  {
+    "timestamp": 1701068400,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 218.21
+      },
+      {
+        "type": "onshore wind",
+        "energy": 105.13
+      },
+      {
+        "type": "solar",
+        "energy": 6.57
+      }
+    ]
+  },
+  {
+    "timestamp": 1701072000,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 237
+      },
+      {
+        "type": "onshore wind",
+        "energy": 109.5
+      },
+      {
+        "type": "solar",
+        "energy": 36.12
+      }
+    ]
+  },
+  {
+    "timestamp": 1701075600,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 244.75
+      },
+      {
+        "type": "onshore wind",
+        "energy": 102.75
+      },
+      {
+        "type": "solar",
+        "energy": 69.38
+      }
+    ]
+  },
+  {
+    "timestamp": 1701079200,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 256.58
+      },
+      {
+        "type": "onshore wind",
+        "energy": 107.75
+      },
+      {
+        "type": "solar",
+        "energy": 94.48
+      }
+    ]
+  },
+  {
+    "timestamp": 1701082800,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 274.04
+      },
+      {
+        "type": "onshore wind",
+        "energy": 107
+      },
+      {
+        "type": "solar",
+        "energy": 99.28
+      }
+    ]
+  },
+  {
+    "timestamp": 1701086400,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 308.5
+      },
+      {
+        "type": "onshore wind",
+        "energy": 109.67
+      },
+      {
+        "type": "solar",
+        "energy": 81.01
+      }
+    ]
+  },
+  {
+    "timestamp": 1701090000,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 371.17
+      },
+      {
+        "type": "onshore wind",
+        "energy": 118.5
+      },
+      {
+        "type": "solar",
+        "energy": 44.8
+      }
+    ]
+  },
+  {
+    "timestamp": 1701093600,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 437.63
+      },
+      {
+        "type": "onshore wind",
+        "energy": 138.79
+      },
+      {
+        "type": "solar",
+        "energy": 10.01
+      }
+    ]
+  },
+  {
+    "timestamp": 1701097200,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 523.71
+      },
+      {
+        "type": "onshore wind",
+        "energy": 175.88
+      },
+      {
+        "type": "solar",
+        "energy": 0.44
+      }
+    ]
+  },
+  {
+    "timestamp": 1701100800,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 615.04
+      },
+      {
+        "type": "onshore wind",
+        "energy": 216.46
       },
       {
         "type": "solar",
@@ -102,215 +285,15 @@
     ]
   },
   {
-    "timestamp": 1700978400,
+    "timestamp": 1701104400,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 328.13
+        "energy": 668.63
       },
       {
         "type": "onshore wind",
-        "energy": 205.29
-      }
-    ]
-  },
-  {
-    "timestamp": 1700982000,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 312.33
-      },
-      {
-        "type": "onshore wind",
-        "energy": 261.29
-      },
-      {
-        "type": "solar",
-        "energy": 11.99
-      }
-    ]
-  },
-  {
-    "timestamp": 1700985600,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 295.54
-      },
-      {
-        "type": "onshore wind",
-        "energy": 288.38
-      },
-      {
-        "type": "solar",
-        "energy": 78.52
-      }
-    ]
-  },
-  {
-    "timestamp": 1700989200,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 293.17
-      },
-      {
-        "type": "onshore wind",
-        "energy": 292.63
-      },
-      {
-        "type": "solar",
-        "energy": 152.46
-      }
-    ]
-  },
-  {
-    "timestamp": 1700992800,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 274.79
-      },
-      {
-        "type": "onshore wind",
-        "energy": 296.13
-      },
-      {
-        "type": "solar",
-        "energy": 188.92
-      }
-    ]
-  },
-  {
-    "timestamp": 1700996400,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 232.79
-      },
-      {
-        "type": "onshore wind",
-        "energy": 282.54
-      },
-      {
-        "type": "solar",
-        "energy": 182.36
-      }
-    ]
-  },
-  {
-    "timestamp": 1701000000,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 201.46
-      },
-      {
-        "type": "onshore wind",
-        "energy": 263.63
-      },
-      {
-        "type": "solar",
-        "energy": 153.86
-      }
-    ]
-  },
-  {
-    "timestamp": 1701003600,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 188.54
-      },
-      {
-        "type": "onshore wind",
-        "energy": 195.58
-      },
-      {
-        "type": "solar",
-        "energy": 92.16
-      }
-    ]
-  },
-  {
-    "timestamp": 1701007200,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 185
-      },
-      {
-        "type": "onshore wind",
-        "energy": 154.04
-      },
-      {
-        "type": "solar",
-        "energy": 24.91
-      }
-    ]
-  },
-  {
-    "timestamp": 1701010800,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 180.92
-      },
-      {
-        "type": "onshore wind",
-        "energy": 133.83
-      },
-      {
-        "type": "solar",
-        "energy": 1.22
-      }
-    ]
-  },
-  {
-    "timestamp": 1701014400,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 142.13
-      },
-      {
-        "type": "onshore wind",
-        "energy": 114.71
-      },
-      {
-        "type": "solar",
-        "energy": 0.02
-      }
-    ]
-  },
-  {
-    "timestamp": 1701018000,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 99.71
-      },
-      {
-        "type": "onshore wind",
-        "energy": 94.79
-      },
-      {
-        "type": "solar",
-        "energy": 0.01
-      }
-    ]
-  },
-  {
-    "timestamp": 1701021600,
-    "sources": [
-      {
-        "type": "offshore wind",
-        "energy": 88.54
-      },
-      {
-        "type": "onshore wind",
-        "energy": 90.88
+        "energy": 230.42
       },
       {
         "type": "solar",
@@ -319,15 +302,15 @@
     ]
   },
   {
-    "timestamp": 1701025200,
+    "timestamp": 1701108000,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 85.92
+        "energy": 690
       },
       {
         "type": "onshore wind",
-        "energy": 105.67
+        "energy": 254.46
       },
       {
         "type": "solar",
@@ -336,15 +319,15 @@
     ]
   },
   {
-    "timestamp": 1701028800,
+    "timestamp": 1701111600,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 93.71
+        "energy": 710.88
       },
       {
         "type": "onshore wind",
-        "energy": 122.63
+        "energy": 290.71
       },
       {
         "type": "solar",
@@ -353,15 +336,15 @@
     ]
   },
   {
-    "timestamp": 1701032400,
+    "timestamp": 1701115200,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 122.08
+        "energy": 736.83
       },
       {
         "type": "onshore wind",
-        "energy": 154.04
+        "energy": 324.71
       },
       {
         "type": "solar",
@@ -370,15 +353,15 @@
     ]
   },
   {
-    "timestamp": 1701036000,
+    "timestamp": 1701118800,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 167.29
+        "energy": 754.92
       },
       {
         "type": "onshore wind",
-        "energy": 214.83
+        "energy": 341.75
       },
       {
         "type": "solar",
@@ -387,15 +370,15 @@
     ]
   },
   {
-    "timestamp": 1701039600,
+    "timestamp": 1701122400,
     "sources": [
       {
         "type": "offshore wind",
-        "energy": 108.08
+        "energy": 776.79
       },
       {
         "type": "onshore wind",
-        "energy": 556.96
+        "energy": 353.13
       },
       {
         "type": "solar",
