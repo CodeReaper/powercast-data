@@ -6,9 +6,6 @@ on:
   workflow_dispatch: {}
   push: {} # FIXME: remove
 
-env:
-  publish-branch: gh-pages
-
 jobs:
   grid:
     uses: ./.github/workflows/health-check-grid.yaml
@@ -16,4 +13,4 @@ jobs:
   networks:
     uses: ./.github/workflows/health-check-networks.yaml
     with:
-      publish-branch: ${{ env.publish-branch }}
+      publish-branch: gh-pages
