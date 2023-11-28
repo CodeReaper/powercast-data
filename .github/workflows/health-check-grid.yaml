@@ -16,7 +16,7 @@ jobs:
           NOW=$(date +"%s")
           jq -r 'keys[]' < configuration/grid.json | while read AREA; do
             EXPIRATION=$(jq "[.${AREA} | .[].to] | max" < configuration/grid.json)
-            DIFFERENCE=$((NOW-EXPIRATION))
+            DIFFERENCE=$((EXPIRATION-NOW))
             DAYS=$((DIFFERENCE/86400))
-            echo "$AREA is valid for $DAYS days"
+            echo "$AREA is valid for $DAYS days until $(date -d "@$EXPIRATION" +"%Y-%m-%dT%H:%M:%S%z")"
           done
