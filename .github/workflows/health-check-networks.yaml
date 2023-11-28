@@ -1,0 +1,30 @@
+name: Networks Health Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish-branch:
+        description: 'Publishing branch'
+        required: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    name: Define matrix
+    steps:
+      - uses: actions/checkout@v4
+
+      # - uses: actions/checkout@v4
+      #   with:
+      #     ssh-key: ${{ secrets.POWERCASTDEPLOY }}
+      #     ref: ${{ env.publish-branch }}
+      #     path: github-pages
+
+      # - shell: bash
+      #   name: Setup configuration
+      #   run: |
+      #     mkdir -p ./github-pages/api/energy-price/ > /dev/null
+
+      #     sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ | tee configuration.json
+      #     echo "stale=false" >> $GITHUB_ENV
+      #     echo "changed=false" >> $GITHUB_ENV

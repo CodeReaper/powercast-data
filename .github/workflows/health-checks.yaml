@@ -1,0 +1,19 @@
+name: Health Checks
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+  push: {} # FIXME: remove
+
+env:
+  publish-branch: gh-pages
+
+jobs:
+  grid:
+    uses: ./.github/workflows/health-checks-grid.yaml
+
+  networks:
+    uses: ./.github/workflows/health-checks-networks.yaml
+    with:
+      publish-branch: ${{ env.publish-branch }}

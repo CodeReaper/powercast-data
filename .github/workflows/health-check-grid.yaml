@@ -1,0 +1,22 @@
+name: Grid Health Check
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    name: Define matrix
+    steps:
+      - uses: actions/checkout@v4
+
+      - shell: bash
+        name: Setup configuration
+        run: |
+          NOW=$(date +"%s")
+          jq -r 'keys[]' < configuration/grid.json | while read AREA; do
+            EXPIRATION=$(jq "[.${AREA} | .[].to] | max" < configuration/grid.json)
+            DIFFERENCE=$((NOW-EXPIRATION))
+            DAYS=$((DIFFERENCE/86400))
+            echo "$AREA is valid for $DAYS days"
+          done
