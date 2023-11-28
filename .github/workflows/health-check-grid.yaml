@@ -1,7 +1,7 @@
 name: Grid Health Check
 
 on:
-  workflow_dispatch: {}
+  workflow_call: {}
 
 jobs:
   setup:

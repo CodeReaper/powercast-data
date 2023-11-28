@@ -1,9 +1,10 @@
 name: Networks Health Check
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       publish-branch:
+        type: string
         description: 'Publishing branch'
         required: true
 
