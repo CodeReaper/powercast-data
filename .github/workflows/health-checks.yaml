@@ -11,9 +11,9 @@ env:
 
 jobs:
   grid:
-    uses: ./.github/workflows/health-checks-grid.yaml
+    uses: ./.github/workflows/health-check-grid.yaml
 
   networks:
-    uses: ./.github/workflows/health-checks-networks.yaml
+    uses: ./.github/workflows/health-check-networks.yaml
     with:
       publish-branch: ${{ env.publish-branch }}
