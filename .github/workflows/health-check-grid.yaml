@@ -3,13 +3,21 @@ name: Grid Health Check
 on:
   workflow_call: {}
 
+permissions:
+  contents: read
+  issues: write
+
+env:
+  minimum-data-amount: 90
+
 jobs:
   setup:
     runs-on: ubuntu-latest
     name: Define matrix
+    outputs:
+      matrix: ${{ env.matrix }}
     steps:
       - uses: actions/checkout@v4
-
       - shell: bash
         name: Setup configuration
         run: |
@@ -19,7 +27,37 @@ jobs:
             EXPIRATION=$(jq "[.${AREA} | .[].to] | max" < configuration/grid.json)
             DIFFERENCE=$((EXPIRATION-NOW))
             DAYS=$((DIFFERENCE/86400))
-            echo "$AREA is valid for $DAYS days until $(date -d "@$EXPIRATION" +"%Y-%m-%dT%H:%M:%S%z")"
-          done
+            FORMATTED=$(date -d "@$EXPIRATION" +"%Y-%m-%dT%H:%M:%S%z")
+            >&2 echo "$AREA is valid for $DAYS days until $FORMATTED"
 
-# https://github.com/JasonEtco/create-an-issue
+            #if [ "$DAYS" -lt "${{ env.minimum-data-amount }}" ]; then
+              jq -nc --arg zone "$AREA" --arg expiration "$FORMATTED" '{zone: $zone, expiration: $expiration}'
+            #fi
+          done | jq -sc > matrix
+
+          echo '::group::Matrix'
+          jq < matrix
+          echo '::endgroup::'
+
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+
+  create-issue:
+    runs-on: ubuntu-latest
+    name: Create issue
+    # if: github.ref == 'refs/heads/main'
+    needs: setup
+    strategy:
+      matrix:
+        build: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        name: Setup configuration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list --label "wontfix" --limit 1 --state open --search "Test issue" --json number,title | jq
+
+          gh issue list --label "automated" --limit 1 --state open --search "Grid data needs update for ${{ matrix.zone }}" --json number,title | jq
+
+          # expiration # -c > issues
