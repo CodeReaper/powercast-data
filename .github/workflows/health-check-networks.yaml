@@ -24,11 +24,13 @@ jobs:
       - shell: bash
         name: Setup configuration
         run: |
+          cd github-pages/api/energy-charges/network/
+
           NOW=$(date +"%s")
 
           >&2 echo "The required minimum days is ${{ env.minimum-data-amount }}"
-          jq -rc '.[] | select(.capabilities | index("networks") | .) | .zone' < configuration/zones.json | while read -r NETWORK; do
-            EXPIRATION=$(jq "[.[].to] | max" < ./github-pages/api/energy-charges/network/$NETWORK/index.json)
+          for NETWORK in *; do
+            EXPIRATION=$(jq "[.[].to] | max" < ./$NETWORK/index.json)
             DIFFERENCE=$((EXPIRATION-NOW))
             DAYS=$((DIFFERENCE/86400))
             FORMATTED=$(date -d "@$EXPIRATION" +"%Y-%m-%d")
