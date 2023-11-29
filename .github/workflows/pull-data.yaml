@@ -4,7 +4,13 @@ on:
   schedule:
     - cron: '0 * * * *'
     - cron: '*/5 12,13 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      overriden-timestamp:
+        type: string
+        description: Override which timestamp for pull data to reach
+        required: false
+        default: ''
   push:
     branches:
       - main
@@ -38,7 +44,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
@@ -149,7 +155,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/renewables/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
@@ -255,7 +261,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 

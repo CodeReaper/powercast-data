@@ -74,6 +74,12 @@ jobs:
           sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./non-existing-directory/ > /dev/null
           [ $? -eq 3 ] || exit 1
 
+      - name: Test invalid optional timestamp
+        run: |
+          set +e
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./empty-data-folder/ not-a-number > /dev/null
+          [ $? -eq 4 ] || exit 1
+
       - name: Test with no existing data that matrix contains all items from the configuration
         run: |
           set -e
@@ -94,6 +100,14 @@ jobs:
           printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > config.json
           printf '[{"zone":"DK1","latest":1654297200}]\n' > expected
           sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing well-known data but with overriden timestamp
+        run: |
+          set -e
+          printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > config.json
+          printf '[{"zone":"DK1","latest":1701302400}]\n' > expected
+          sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ 1701302400 | jq -rc '.' > result
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
   test-data-write:
@@ -183,6 +197,18 @@ jobs:
           sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/07/17/DK1.json ./test DK1
           sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-co2-emission-output/2022/07/17/DK1.json ./test2 DK1
           sh .github/scripts/data-write.sh changed ./test2 DK1
+          diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
+
+      - name: Test that write handles updating files correctly
+        run: |
+          set -e
+          mkdir ./test
+          mkdir ./test2
+          trap "rm -rf ./test; rm -rf ./test2; rm half 2>/dev/null" EXIT
+          jq -r '[ .[] | select(.timestamp < 1654084800)]' .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json > half
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh half ./test2 DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json ./test2 DK1
           diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
 
   test-energy-price-data-pull:
