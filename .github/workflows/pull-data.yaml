@@ -49,6 +49,11 @@ jobs:
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
+        if: ${{ github.event.inputs.overriden-timestamp != '' }}
+        name: Set data stale
+        run: echo "stale=true" >> $GITHUB_ENV
+
+      - shell: bash
         if: ${{ github.event.inputs.overriden-timestamp == '' }}
         name: Check for stale data
         run: |
@@ -161,6 +166,11 @@ jobs:
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
+        if: ${{ github.event.inputs.overriden-timestamp != '' }}
+        name: Set data stale
+        run: echo "stale=true" >> $GITHUB_ENV
+
+      - shell: bash
         if: ${{ github.event.inputs.overriden-timestamp == '' }}
         name: Check for stale data
         run: |
@@ -266,6 +276,11 @@ jobs:
           sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
+
+      - shell: bash
+        if: ${{ github.event.inputs.overriden-timestamp != '' }}
+        name: Set data stale
+        run: echo "stale=true" >> $GITHUB_ENV
 
       - shell: bash
         if: ${{ github.event.inputs.overriden-timestamp == '' }}
