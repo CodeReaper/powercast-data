@@ -48,6 +48,7 @@ jobs:
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
+        if: ${{ github.event.inputs.overriden-timestamp != '' }}
         name: Check for stale data
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
@@ -154,11 +155,12 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/renewables/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
+        if: ${{ github.event.inputs.overriden-timestamp != '' }}
         name: Check for stale data
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
@@ -260,11 +262,12 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
+        if: ${{ github.event.inputs.overriden-timestamp != '' }}
         name: Check for stale data
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
