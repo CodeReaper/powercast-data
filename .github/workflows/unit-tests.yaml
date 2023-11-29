@@ -74,6 +74,12 @@ jobs:
           sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./non-existing-directory/ > /dev/null
           [ $? -eq 3 ] || exit 1
 
+      - name: Test invalid optional timestamp
+        run: |
+          set +e
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./empty-data-folder/ not-a-number > /dev/null
+          [ $? -eq 4 ] || exit 1
+
       - name: Test with no existing data that matrix contains all items from the configuration
         run: |
           set -e
@@ -94,6 +100,14 @@ jobs:
           printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > config.json
           printf '[{"zone":"DK1","latest":1654297200}]\n' > expected
           sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with existing well-known data but with overriden timestamp
+        run: |
+          set -e
+          printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > config.json
+          printf '[{"zone":"DK1","latest":1701302400}]\n' > expected
+          sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ 1701302400 | jq -rc '.' > result
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
   test-data-write:
