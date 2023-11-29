@@ -49,12 +49,6 @@ jobs:
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
-        if: ${{ github.event.inputs.overriden-timestamp != '' }}
-        name: Set data stale
-        run: echo "stale=true" >> $GITHUB_ENV
-
-      - shell: bash
-        if: ${{ github.event.inputs.overriden-timestamp == '' }}
         name: Check for stale data
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
@@ -166,12 +160,6 @@ jobs:
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
-        if: ${{ github.event.inputs.overriden-timestamp != '' }}
-        name: Set data stale
-        run: echo "stale=true" >> $GITHUB_ENV
-
-      - shell: bash
-        if: ${{ github.event.inputs.overriden-timestamp == '' }}
         name: Check for stale data
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
@@ -278,12 +266,6 @@ jobs:
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
-        if: ${{ github.event.inputs.overriden-timestamp != '' }}
-        name: Set data stale
-        run: echo "stale=true" >> $GITHUB_ENV
-
-      - shell: bash
-        if: ${{ github.event.inputs.overriden-timestamp == '' }}
         name: Check for stale data
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
