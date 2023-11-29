@@ -23,6 +23,7 @@ jobs:
         run: |
           NOW=$(date +"%s")
 
+          >&2 echo "The required minimum days is ${{ env.minimum-data-amount }}"
           jq -rc '.[] | select(.capabilities | index("grid") | .) | .zone' < configuration/zones.json | while read -r AREA; do
             EXPIRATION=$(jq "[.${AREA} | .[].to] | max" < configuration/grid.json)
             DIFFERENCE=$((EXPIRATION-NOW))

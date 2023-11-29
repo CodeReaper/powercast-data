@@ -8,18 +8,42 @@ on:
         description: 'Publishing branch'
         required: true
 
+env:
+  minimum-data-amount: 90
+
 jobs:
   setup:
     runs-on: ubuntu-latest
     name: Define matrix
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.publish-branch }}
+          path: github-pages
+      - shell: bash
+        name: Setup configuration
+        run: |
+          NOW=$(date +"%s")
 
-      # - uses: actions/checkout@v4
-      #   with:
-      #     ssh-key: ${{ secrets.POWERCASTDEPLOY }}
-      #     ref: ${{ env.publish-branch }}
-      #     path: github-pages
+          >&2 echo "The required minimum days is ${{ env.minimum-data-amount }}"
+          jq -rc '.[] | select(.capabilities | index("networks") | .) | .zone' < configuration/zones.json | while read -r NETWORK; do
+            EXPIRATION=$(jq "[.[].to] | max" < ./github-pages/api/energy-charges/network/$NETWORK/index.json)
+            DIFFERENCE=$((EXPIRATION-NOW))
+            DAYS=$((DIFFERENCE/86400))
+            FORMATTED=$(date -d "@$EXPIRATION" +"%Y-%m-%d")
+            >&2 echo "$NETWORK is valid for $DAYS days until $(date -d "@$EXPIRATION" +"%Y-%m-%dT%H:%M:%S%z")"
+
+            if [ "$DAYS" -lt "${{ env.minimum-data-amount }}" ]; then
+              jq -nc --arg network "$NETWORK" --arg expiration "$FORMATTED" '{network: $network, expiration: $expiration}'
+            fi
+          done | jq -sc > matrix
+
+          echo '::group::Matrix'
+          jq < matrix
+          echo '::endgroup::'
+
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
 
       # - shell: bash
       #   name: Setup configuration
