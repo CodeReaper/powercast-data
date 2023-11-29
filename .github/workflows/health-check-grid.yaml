@@ -13,7 +13,7 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    name: Define matrix
+    name: Setup
     outputs:
       matrix: ${{ env.matrix }}
     steps:

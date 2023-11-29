@@ -8,11 +8,11 @@ on:
 
 jobs:
   grid:
-    name: Grid Health Check
+    name: Grid
     uses: ./.github/workflows/health-check-grid.yaml
 
   networks:
-    name: Networks Health Check
+    name: Networks
     uses: ./.github/workflows/health-check-networks.yaml
     with:
       publish-branch: gh-pages

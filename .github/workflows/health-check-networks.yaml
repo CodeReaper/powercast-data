@@ -14,17 +14,15 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    name: Define matrix
+    name: Setup
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
         with:
-          ref: ${{ env.publish-branch }}
-          path: github-pages
+          ref: ${{ inputs.publish-branch }}
       - shell: bash
         name: Setup configuration
         run: |
-          cd github-pages/api/energy-charges/network/
+          cd api/energy-charges/network/
 
           NOW=$(date +"%s")
 
