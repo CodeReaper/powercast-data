@@ -2,6 +2,8 @@
   {
     "zone": "DK1",
     "capabilities": [
+      "grid",
+      "networks",
       "energy-price",
       "co2-emission",
       "renewables-data"
@@ -10,6 +12,8 @@
   {
     "zone": "DK2",
     "capabilities": [
+      "grid",
+      "networks",
       "energy-price",
       "co2-emission",
       "renewables-data"

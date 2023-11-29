@@ -14,7 +14,8 @@ jobs:
         name: Setup configuration
         run: |
           NOW=$(date +"%s")
-          jq -r 'keys[]' < configuration/grid.json | while read AREA; do
+
+          jq -rc '.[] | select(.capabilities | index("grid") | .) | .zone' < configuration/zones.json | while read -r AREA; do
             EXPIRATION=$(jq "[.${AREA} | .[].to] | max" < configuration/grid.json)
             DIFFERENCE=$((EXPIRATION-NOW))
             DAYS=$((DIFFERENCE/86400))
