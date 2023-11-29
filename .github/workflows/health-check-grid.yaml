@@ -20,3 +20,5 @@ jobs:
             DAYS=$((DIFFERENCE/86400))
             echo "$AREA is valid for $DAYS days until $(date -d "@$EXPIRATION" +"%Y-%m-%dT%H:%M:%S%z")"
           done
+
+# https://github.com/JasonEtco/create-an-issue
