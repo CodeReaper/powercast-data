@@ -7,9 +7,10 @@ on:
   workflow_dispatch:
     inputs:
       overriden-timestamp:
-        type: number
+        type: string
         description: Override which timestamp for pull data to reach
         required: false
+        default: ''
   push:
     branches:
       - main
