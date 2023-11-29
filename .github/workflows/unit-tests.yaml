@@ -199,6 +199,18 @@ jobs:
           sh .github/scripts/data-write.sh changed ./test2 DK1
           diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
 
+      - name: Test that write handles updating files correctly
+        run: |
+          set -e
+          mkdir ./test
+          mkdir ./test2
+          trap "rm -rf ./test; rm -rf ./test2; rm half 2>/dev/null" EXIT
+          jq -r '[ .[] | select(.timestamp < 1654084800)]' .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json > half
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json ./test DK1
+          sh .github/scripts/data-write.sh half ./test2 DK1
+          sh .github/scripts/data-write.sh .github/resources/test/well-known/data-write-generated-energy-price-output/2022/06/01/DK1.json ./test2 DK1
+          diff -rq ./test ./test2 || { echo "Unexpected difference:"; diff -r ./test ./test2; exit 1; }
+
   test-energy-price-data-pull:
     name: Test energy price data pull
     runs-on: ubuntu-latest
