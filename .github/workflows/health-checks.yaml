@@ -2,7 +2,7 @@ name: Health Checks
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '10 0 * * *'
   workflow_dispatch: {}
   push: {} # FIXME: remove
 
@@ -16,3 +16,7 @@ jobs:
     uses: ./.github/workflows/health-check-networks.yaml
     with:
       publish-branch: gh-pages
+
+  # unit-tests:
+  #   name: Unit tests
+  #   uses: ./.github/workflows/unit-tests.yaml

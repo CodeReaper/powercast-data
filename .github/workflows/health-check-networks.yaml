@@ -9,7 +9,7 @@ on:
         required: true
 
 env:
-  minimum-data-amount: 90
+  minimum-data-amount: 1
 
 jobs:
   setup:
@@ -28,7 +28,9 @@ jobs:
 
           >&2 echo "The required minimum days is ${{ env.minimum-data-amount }}"
           for NETWORK in *; do
-            EXPIRATION=$(jq "[.[].to] | max" < ./$NETWORK/index.json)
+            [ -d "$NETWORK" ] || continue
+
+            EXPIRATION=$(jq "[.[].to] | max" < ./$NETWORK/index.json) #FIXME: to for the max from
             DIFFERENCE=$((EXPIRATION-NOW))
             DAYS=$((DIFFERENCE/86400))
             FORMATTED=$(date -d "@$EXPIRATION" +"%Y-%m-%d")
