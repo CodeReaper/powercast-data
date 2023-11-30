@@ -74,14 +74,14 @@ jobs:
           cd api/energy-price/
           find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
             duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
-            if [ $duration -ne 82800 && $duration -ne 79200 ]; then
+            if [ $duration != 82800 ] && [ $duration != 79200 ]; then
               echo "$file has incorrect duration: $duration"
             fi
           done | tee errors
 
   check-emission:
     runs-on: ubuntu-latest
-    name: Check energy prices
+    name: Check emission
     needs: setup-emission
     strategy:
       matrix:
@@ -103,7 +103,7 @@ jobs:
 
   check-renewables:
     runs-on: ubuntu-latest
-    name: Check energy prices
+    name: Check renewables
     needs: setup-renewables
     strategy:
       matrix:
