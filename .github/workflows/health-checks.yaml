@@ -17,6 +17,12 @@ jobs:
     with:
       publish-branch: gh-pages
 
+  integrity:
+    name: Integrity
+    uses: ./.github/workflows/health-check-integrity.yaml
+    with:
+      publish-branch: gh-pages
+
   # unit-tests:
   #   name: Unit tests
   #   uses: ./.github/workflows/unit-tests.yaml

@@ -1,0 +1,33 @@
+name: Integrity Health Check
+
+on:
+  workflow_call:
+    inputs:
+      publish-branch:
+        type: string
+        description: 'Publishing branch'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  energy-price:
+    runs-on: ubuntu-latest
+    name: Check energy prices
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.publish-branch }}
+      - shell: bash
+        name: Setup configuration
+        run: |
+          cd api/energy-price/
+
+          find 2??? -type f -mindepth 3 -maxdepth 3 -name "*.json" | sort | tail -n +2 | head -n-1 | while read file; do
+            duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
+
+            if [ $duration -ne 82800 ]; then
+              >&2 echo "$file has incorrect duration: $duration"
+            fi
+          done
