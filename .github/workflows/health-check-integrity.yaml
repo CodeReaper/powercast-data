@@ -12,9 +12,58 @@ permissions:
   contents: read
 
 jobs:
-  energy-price:
+  setup-energy-price:
+    runs-on: ubuntu-latest
+    name: Setup
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        name: Setup configuration
+        run: |
+          echo '::group::Matrix'
+          jq '[.[] | select(.capabilities | index("energy-price") | .) | .zone]' < configuration/zones.json | tee matrix
+          echo '::endgroup::'
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+    outputs:
+      matrix: ${{ env.matrix }}
+
+  setup-emission:
+    runs-on: ubuntu-latest
+    name: Setup
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        name: Setup configuration
+        run: |
+          echo '::group::Matrix'
+          jq '[.[] | select(.capabilities | index("co2-emission") | .) | .zone]' < configuration/zones.json | tee matrix
+          echo '::endgroup::'
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+    outputs:
+      matrix: ${{ env.matrix }}
+
+  setup-renewables:
+    runs-on: ubuntu-latest
+    name: Setup
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        name: Setup configuration
+        run: |
+          echo '::group::Matrix'
+          jq '[.[] | select(.capabilities | index("renewables-data") | .) | .zone]' < configuration/zones.json | tee matrix
+          echo '::endgroup::'
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+    outputs:
+      matrix: ${{ env.matrix }}
+
+  check-energy-price:
     runs-on: ubuntu-latest
     name: Check energy prices
+    needs: setup-energy-price
+    strategy:
+      matrix:
+        zone: ${{ fromJson(needs.setup-energy-price.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,11 +72,53 @@ jobs:
         name: Setup configuration
         run: |
           cd api/energy-price/
-
-          find 2??? -type f -mindepth 3 -maxdepth 3 -name "*.json" | sort | tail -n +2 | head -n-1 | while read file; do
+          find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
             duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
-
-            if [ $duration -ne 82800 ]; then
-              >&2 echo "$file has incorrect duration: $duration"
+            if [ $duration -ne 82800 && $duration -ne 79200 ]; then
+              echo "$file has incorrect duration: $duration"
             fi
-          done
+          done | tee errors
+
+  check-emission:
+    runs-on: ubuntu-latest
+    name: Check energy prices
+    needs: setup-emission
+    strategy:
+      matrix:
+        zone: ${{ fromJson(needs.setup-emission.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.publish-branch }}
+      - shell: bash
+        name: Setup configuration
+        run: |
+          cd api/emission/co2
+          find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
+            duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
+            if [ $duration -ne 82800 && $duration -ne 79200 ]; then
+              echo "$file has incorrect duration: $duration"
+            fi
+          done | tee errors
+
+  check-renewables:
+    runs-on: ubuntu-latest
+    name: Check energy prices
+    needs: setup-renewables
+    strategy:
+      matrix:
+        zone: ${{ fromJson(needs.setup-renewables.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.publish-branch }}
+      - shell: bash
+        name: Setup configuration
+        run: |
+          cd api/renewables
+          find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
+            duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
+            if [ $duration -ne 82800 && $duration -ne 79200 ]; then
+              echo "$file has incorrect duration: $duration"
+            fi
+          done | tee errors

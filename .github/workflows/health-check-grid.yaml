@@ -14,8 +14,6 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     name: Setup
-    outputs:
-      matrix: ${{ env.matrix }}
     steps:
       - uses: actions/checkout@v4
       - shell: bash
@@ -41,6 +39,8 @@ jobs:
           echo '::endgroup::'
 
           echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+    outputs:
+      matrix: ${{ env.matrix }}
 
   create-issue:
     runs-on: ubuntu-latest
