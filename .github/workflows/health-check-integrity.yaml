@@ -77,7 +77,7 @@ jobs:
             if [ $duration != 82800 ] && [ $duration != 79200 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | tee errors
+          done | tee ../../errors
       - uses: actions/upload-artifact@v3
         with:
           name: energy-price-${{ matrix.zone }}
@@ -103,7 +103,7 @@ jobs:
             if [ $duration != 86100 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | tee errors
+          done | tee ../../../errors
       - uses: actions/upload-artifact@v3
         with:
           name: emission-${{ matrix.zone }}
@@ -129,7 +129,7 @@ jobs:
             if [ $duration != 82800 ] && [ $duration != 79200 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | tee errors
+          done | tee ../../errors
       - uses: actions/upload-artifact@v3
         with:
           name: renewables-${{ matrix.zone }}
