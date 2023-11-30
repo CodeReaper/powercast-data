@@ -96,7 +96,7 @@ jobs:
           cd api/emission/co2
           find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
             duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
-            if [ $duration -ne 82800 && $duration -ne 79200 ]; then
+            if [ $duration != 82800 ] && [ $duration != 79200 ]; then
               echo "$file has incorrect duration: $duration"
             fi
           done | tee errors
@@ -118,7 +118,7 @@ jobs:
           cd api/renewables
           find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
             duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
-            if [ $duration -ne 82800 && $duration -ne 79200 ]; then
+            if [ $duration != 82800 ] && [ $duration != 79200 ]; then
               echo "$file has incorrect duration: $duration"
             fi
           done | tee errors
