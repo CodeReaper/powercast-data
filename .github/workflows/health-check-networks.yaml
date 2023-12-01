@@ -40,7 +40,7 @@ jobs:
               jq -nc --arg network "$NETWORK" --arg expiration "$FORMATTED" '{network: $network, expiration: $expiration}'
             fi
           done | jq -sc > ../../../matrix
-          cd -
+          cd - >/dev/null
 
           echo '::group::Matrix'
           jq < matrix
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: network-matrix
-          path: network-matrix
+          path: matrix
 
   create-issue:
     runs-on: ubuntu-latest
@@ -66,7 +66,7 @@ jobs:
         run: |
           [ -s network-matrix ] || exit 0
 
-          echo "\n\n--- issue body:\n\n"
+          printf '\n\n--- issue body:\n\n'
           {
             echo 'The following networks are out of date:'
             echo \`\`\`

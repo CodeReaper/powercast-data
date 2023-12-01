@@ -45,19 +45,25 @@ jobs:
   create-issue:
     runs-on: ubuntu-latest
     name: Create issue
-    if: github.ref == 'refs/heads/main'
     needs: setup
     strategy:
       matrix:
         build: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare issue
+        shell: bash
+        run: |
+          printf '\n\n--- issue body:\n\n'
+          echo "The current data for grid ${{ matrix.zone }} will expire at ${{ matrix.expiration }}" | tee body
       - shell: bash
         name: Create issue
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue list --label "automated" --limit 1 --state open --search "Out of date - grid ${{ matrix.zone }}" --json number,title | jq -c '.[]' | tee issues
+          title='Grid ${{ matrix.zone }} must be updated'
+          gh issue list --label "automated" --limit 1 --state open --search "$title" --json number,title | jq -c '.[]' | tee issues
           [ -s issues ] || exit 0
 
-          echo "The current data for grid ${{ matrix.zone }} will expire at ${{ matrix.expiration }}" | gh issue create --assignee codereaper --body-file - --label automated --title "Update ${{ matrix.zone }}"
+          gh issue create --assignee codereaper --body-file body --label automated --title "$title"

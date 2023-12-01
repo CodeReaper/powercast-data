@@ -152,7 +152,7 @@ jobs:
         run: |
           find artifacts -size 0 -type f -print -delete || true
           find artifacts -type f -print | grep . || exit 0
-          echo "\n\n--- issue body:\n\n"
+          printf '\n\n--- issue body:\n\n'
           {
             echo 'There is not enough data in present in listed files below.'
             echo '#### Energy Price'
