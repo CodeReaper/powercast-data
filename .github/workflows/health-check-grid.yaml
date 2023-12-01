@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - shell: bash
-        name: Setup configuration
+        name: Create issue
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

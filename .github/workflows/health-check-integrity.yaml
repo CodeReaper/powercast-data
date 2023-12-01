@@ -77,11 +77,11 @@ jobs:
             if [ $duration != 82800 ] && [ $duration != 79200 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | tee ../../errors
+          done | tee ../../${{ matrix.zone }}
       - uses: actions/upload-artifact@v3
         with:
-          name: energy-price-${{ matrix.zone }}
-          path: errors
+          name: energy-price
+          path: ${{ matrix.zone }}
 
   check-emission:
     runs-on: ubuntu-latest
@@ -103,11 +103,11 @@ jobs:
             if [ $duration != 86100 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | tee ../../../errors
+          done | tee ../../../${{ matrix.zone }}
       - uses: actions/upload-artifact@v3
         with:
-          name: emission-${{ matrix.zone }}
-          path: errors
+          name: emission
+          path: ${{ matrix.zone }}
 
   check-renewables:
     runs-on: ubuntu-latest
@@ -129,16 +129,15 @@ jobs:
             if [ $duration != 82800 ] && [ $duration != 79200 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | tee ../../errors
+          done | tee ../../${{ matrix.zone }}
       - uses: actions/upload-artifact@v3
         with:
-          name: renewables-${{ matrix.zone }}
-          path: errors
+          name: renewables
+          path: ${{ matrix.zone }}
 
   create-issue:
     runs-on: ubuntu-latest
     name: Create issue
-    # if: github.ref == 'refs/heads/main'
     needs:
       - check-energy-price
       - check-emission
@@ -148,15 +147,29 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: artifacts
+      - name: Prepare issue
+        shell: bash
+        run: |
+          find artifacts -size 0 -type f -print -delete || true
+          printf 'Integrity check failed' > title
+          {
+            echo "### $(cat title)"
+            echo 'There is not enough data in present in listed files below.'
+            echo '#### Energy Price'
+            find artifacts/energy-price -type f -print0 | xargs -0 sh -c "printf '##### %s\n```%s```\n' $(basename $1) $(cat $1)"
+            echo '#### Emission'
+            find artifacts/emission -type f -print0 | xargs -0 sh -c "printf '##### %s\n```%s```\n' $(basename $1) $(cat $1)"
+            echo '#### Renewables'
+            find artifacts/renewables -type f -print0 | xargs -0 sh -c "printf '##### %s\n```%s```\n' $(basename $1) $(cat $1)"
+          } | tee body
       - shell: bash
-        run: find artifacts
-      - shell: bash
-        name: Setup configuration
+        name: Create issue
         env:
           GH_TOKEN: ${{ github.token }}
-        if: false # FIXME: ifs
+        if: github.ref == 'refs/heads/main'
         run: |
-          gh issue list --label "automated" --limit 1 --state open --search "Out of date - grid ${{ matrix.zone }}" --json number,title | jq -c '.[]' | tee issues
+          title=$(cat title)
+          gh issue list --label "automated" --limit 1 --state open --search "$title" --json number,title | jq -c '.[]' | tee issues
           [ -s issues ] || exit 0
 
-          echo "The current data for grid ${{ matrix.zone }} will expire at ${{ matrix.expiration }}" | gh issue create --assignee codereaper --body-file - --label automated --title "Update ${{ matrix.zone }}"
+          gh issue create --assignee codereaper --body-file body --label automated --title "$title"
