@@ -3,6 +3,7 @@ name: Health Checks
 on:
   schedule:
     - cron: '10 0 * * *'
+  push: {}
 
 env:
   publish-branch: gh-pages
