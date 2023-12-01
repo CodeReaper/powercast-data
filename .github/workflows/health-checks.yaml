@@ -5,9 +5,6 @@ on:
     - cron: '10 0 * * *'
   push: {}
 
-env:
-  publish-branch: gh-pages
-
 jobs:
   grid:
     name: Grid
@@ -17,13 +14,13 @@ jobs:
     name: Networks
     uses: ./.github/workflows/health-check-networks.yaml
     with:
-      publish-branch: ${{ env.publish-branch }}
+      publish-branch: gh-pages
 
   integrity:
     name: Integrity
     uses: ./.github/workflows/health-check-integrity.yaml
     with:
-      publish-branch: ${{ env.publish-branch }}
+      publish-branch: gh-pages
 
   unit-tests:
     name: Unit tests
