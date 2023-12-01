@@ -49,21 +49,21 @@ jobs:
     if: ${{ needs.setup.outputs.matrix != '[]' }}
     strategy:
       matrix:
-        build: ${{ fromJson(needs.setup.outputs.matrix) }}
+        item: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - name: Prepare issue
         shell: bash
         run: |
           printf '\n\n--- issue body:\n\n'
-          echo "The current data for grid ${{ matrix.zone }} will expire at ${{ matrix.expiration }}" | tee body
+          echo "The current data for grid ${{ matrix.item.zone }} will expire at ${{ matrix.item.expiration }}" | tee body
       - shell: bash
         name: Create issue
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          title='Grid ${{ matrix.zone }} must be updated'
+          title='Grid ${{ matrix.item.zone }} must be updated'
           gh issue list --label "automated" --limit 1 --state open --search "$title" --json number,title | jq -c '.[]' | tee issues
           [ -s issues ] || exit 0
 

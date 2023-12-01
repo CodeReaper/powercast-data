@@ -65,7 +65,7 @@ jobs:
       - name: Prepare issue
         shell: bash
         run: |
-          [ -s network-matrix ] || exit 0
+          #[ -s network-matrix ] || exit 0
 
           printf '\n\n--- issue body:\n\n'
           {
