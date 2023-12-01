@@ -155,7 +155,7 @@ jobs:
           find artifacts -type f -print | grep . || exit 0
           printf '\n\n--- issue body:\n\n'
           {
-            echo 'There is not enough data in present in listed files below.'
+            echo 'There is not enough data in present in listed files'
             echo '#### Energy Price'
             find artifacts/energy-price -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
             echo '#### Emission'
