@@ -31,7 +31,6 @@ jobs:
             [ -d "$NETWORK" ] || continue
 
             EXPIRATION=$(jq 'max_by(.from).to // 2147483647' < ./$NETWORK/index.json)
-            EXPIRATION=$(jq "[.[].to] | max" < ./$NETWORK/index.json) #FIXME: to for the max from
             DIFFERENCE=$((EXPIRATION-NOW))
             DAYS=$((DIFFERENCE/86400))
             FORMATTED=$(date -d "@$EXPIRATION" +"%Y-%m-%d")

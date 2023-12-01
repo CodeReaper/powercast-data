@@ -166,7 +166,7 @@ jobs:
         name: Create issue
         env:
           GH_TOKEN: ${{ github.token }}
-        if: github.ref == 'refs/heads/main'
+        #if: github.ref == 'refs/heads/main'
         run: |
           test -f body || exit 0
 
