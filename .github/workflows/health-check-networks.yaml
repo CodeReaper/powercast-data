@@ -39,7 +39,8 @@ jobs:
             if [ "$DAYS" -lt "${{ env.minimum-data-amount }}" ]; then
               jq -nc --arg network "$NETWORK" --arg expiration "$FORMATTED" '{network: $network, expiration: $expiration}'
             fi
-          done | jq -sc > matrix
+          done | jq -sc > ../../../matrix
+          cd -
 
           echo '::group::Matrix'
           jq < matrix
