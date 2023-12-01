@@ -8,7 +8,7 @@ permissions:
   issues: write
 
 env:
-  minimum-data-amount: 90
+  minimum-data-amount: -1000
 
 jobs:
   setup:
@@ -46,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Create issue
     needs: setup
+    if: ${{ needs.setup.outputs.matrix != '[]' }}
     strategy:
       matrix:
         build: ${{ fromJson(needs.setup.outputs.matrix) }}
