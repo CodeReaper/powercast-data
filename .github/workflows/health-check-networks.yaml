@@ -66,6 +66,7 @@ jobs:
         shell: bash
         run: |
           [ -s networks/matrix ] || exit 0
+          jq -e 'if . == [] then true else false end' < networks/matrix || exit 0
 
           printf '\n\n--- issue body:\n\n'
           {
