@@ -60,18 +60,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
+        id: artifact
         with:
           name: network-matrix
       - name: Prepare issue
         shell: bash
         run: |
-          #[ -s network-matrix ] || exit 0
+          [ -s "${{ steps.artifact.outputs.download-path }}" ] || exit 0
 
           printf '\n\n--- issue body:\n\n'
           {
             echo 'The following networks are out of date:'
             echo \`\`\`
-            jq -r '["network","expiration"], (.[] | [.network, .expiration]) | @tsv' < network-matrix
+            jq -r '["network","expiration"], (.[] | [.network, .expiration]) | @tsv' < "${{ steps.artifact.outputs.download-path }}"
             echo \`\`\`
           } | tee body
       - shell: bash

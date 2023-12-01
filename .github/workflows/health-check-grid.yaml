@@ -29,9 +29,9 @@ jobs:
             FORMATTED=$(date -d "@$EXPIRATION" +"%Y-%m-%d")
             >&2 echo "$AREA is valid until $(date -d "@$EXPIRATION" +"%Y-%m-%dT%H:%M:%S%z") or $DAYS days"
 
-            #if [ "$DAYS" -lt "${{ env.minimum-data-amount }}" ]; then
+            if [ "$DAYS" -lt "${{ env.minimum-data-amount }}" ]; then
               jq -nc --arg zone "$AREA" --arg expiration "$FORMATTED" '{zone: $zone, expiration: $expiration}'
-            #fi
+            fi
           done | jq -sc > matrix
 
           echo '::group::Matrix'
