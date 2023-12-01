@@ -164,7 +164,7 @@ jobs:
             find artifacts/renewables -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
           } | tee body
       - uses: ./.github/actions/handle-issue
-        if: github.ref == 'refs/heads/main'
+        #if: github.ref == 'refs/heads/main'
         with:
           assignee: codereaper
           title: 'Integrity check failed'
