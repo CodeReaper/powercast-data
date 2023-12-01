@@ -151,16 +151,17 @@ jobs:
         shell: bash
         run: |
           find artifacts -size 0 -type f -print -delete || true
+          find artifacts -type f -print | grep . || exit 0
           printf 'Integrity check failed' > title
           {
             echo "### $(cat title)"
             echo 'There is not enough data in present in listed files below.'
             echo '#### Energy Price'
-            find artifacts/energy-price -type f -print0 | xargs -0 sh -c "printf '##### %s\n```%s```\n' $(basename $1) $(cat $1)"
+            find artifacts/energy-price -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
             echo '#### Emission'
-            find artifacts/emission -type f -print0 | xargs -0 sh -c "printf '##### %s\n```%s```\n' $(basename $1) $(cat $1)"
+            find artifacts/emission -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
             echo '#### Renewables'
-            find artifacts/renewables -type f -print0 | xargs -0 sh -c "printf '##### %s\n```%s```\n' $(basename $1) $(cat $1)"
+            find artifacts/renewables -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
           } | tee body
       - shell: bash
         name: Create issue
@@ -168,6 +169,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         if: github.ref == 'refs/heads/main'
         run: |
+          test -f body || exit 0
+
+          echo 'Searching issues...'
           title=$(cat title)
           gh issue list --label "automated" --limit 1 --state open --search "$title" --json number,title | jq -c '.[]' | tee issues
           [ -s issues ] || exit 0
