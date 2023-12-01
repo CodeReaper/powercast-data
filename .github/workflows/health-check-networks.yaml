@@ -1,0 +1,86 @@
+name: Networks Health Check
+
+on:
+  workflow_call:
+    inputs:
+      publish-branch:
+        type: string
+        description: 'Publishing branch'
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  minimum-data-amount: 30
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    name: Setup
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.publish-branch }}
+      - shell: bash
+        name: Setup configuration
+        run: |
+          cd api/energy-charges/network/
+
+          NOW=$(date +"%s")
+
+          >&2 echo "The required minimum days is ${{ env.minimum-data-amount }}"
+          for NETWORK in *; do
+            [ -d "$NETWORK" ] || continue
+
+            EXPIRATION=$(jq 'max_by(.from).to // 2147483647' < ./$NETWORK/index.json)
+            DIFFERENCE=$((EXPIRATION-NOW))
+            DAYS=$((DIFFERENCE/86400))
+            FORMATTED=$(date -d "@$EXPIRATION" +"%Y-%m-%d")
+            >&2 echo "$NETWORK is valid until $(date -d "@$EXPIRATION" +"%Y-%m-%dT%H:%M:%S%z") or $DAYS days"
+
+            if [ "$DAYS" -lt "${{ env.minimum-data-amount }}" ]; then
+              jq -nc --arg network "$NETWORK" --arg expiration "$FORMATTED" '{network: $network, expiration: $expiration}'
+            fi
+          done | jq -sc > ../../../matrix
+          cd - >/dev/null
+
+          echo '::group::Matrix'
+          jq < matrix
+          echo '::endgroup::'
+
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: networks
+          path: matrix
+
+  create-issue:
+    runs-on: ubuntu-latest
+    name: Create issue
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
+        with:
+          name: networks
+          path: networks
+      - name: Prepare issue
+        shell: bash
+        run: |
+          [ -s networks/matrix ] || exit 0
+          jq -e 'if . == [] then false else true end' < networks/matrix > /dev/null || exit 0
+
+          printf '\n\n--- issue body:\n\n'
+          {
+            echo 'The following networks are out of date:'
+            echo '| Network | Expiration |'
+            echo '| --- | --- |'
+            jq -r '(.[] | [.network, .expiration]) | @tsv' < networks/matrix | sed 's/\t/ | /;s/$/ |/;s/^/| /'
+          } | tee body
+      - uses: ./.github/actions/handle-issue
+        if: github.ref == 'refs/heads/main'
+        with:
+          assignee: codereaper
+          title: 'Networks are out of date'

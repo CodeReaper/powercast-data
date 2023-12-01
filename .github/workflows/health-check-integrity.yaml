@@ -1,0 +1,170 @@
+name: Integrity Health Check
+
+on:
+  workflow_call:
+    inputs:
+      publish-branch:
+        type: string
+        description: 'Publishing branch'
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  setup-energy-price:
+    runs-on: ubuntu-latest
+    name: Setup
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        name: Setup configuration
+        run: |
+          echo '::group::Matrix'
+          jq '[.[] | select(.capabilities | index("energy-price") | .) | .zone]' < configuration/zones.json | tee matrix
+          echo '::endgroup::'
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+    outputs:
+      matrix: ${{ env.matrix }}
+
+  setup-emission:
+    runs-on: ubuntu-latest
+    name: Setup
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        name: Setup configuration
+        run: |
+          echo '::group::Matrix'
+          jq '[.[] | select(.capabilities | index("co2-emission") | .) | .zone]' < configuration/zones.json | tee matrix
+          echo '::endgroup::'
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+    outputs:
+      matrix: ${{ env.matrix }}
+
+  setup-renewables:
+    runs-on: ubuntu-latest
+    name: Setup
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        name: Setup configuration
+        run: |
+          echo '::group::Matrix'
+          jq '[.[] | select(.capabilities | index("renewables-data") | .) | .zone]' < configuration/zones.json | tee matrix
+          echo '::endgroup::'
+          echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+    outputs:
+      matrix: ${{ env.matrix }}
+
+  check-energy-price:
+    runs-on: ubuntu-latest
+    name: Check energy prices
+    needs: setup-energy-price
+    strategy:
+      matrix:
+        zone: ${{ fromJson(needs.setup-energy-price.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.publish-branch }}
+      - shell: bash
+        name: Setup configuration
+        run: |
+          cd api/energy-price/
+          find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
+            duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
+            if [ $duration != 82800 ] && [ $duration != 79200 ]; then
+              echo "$file has incorrect duration: $duration"
+            fi
+          done | tee ../../${{ matrix.zone }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: energy-price
+          path: ${{ matrix.zone }}
+
+  check-emission:
+    runs-on: ubuntu-latest
+    name: Check emission
+    needs: setup-emission
+    strategy:
+      matrix:
+        zone: ${{ fromJson(needs.setup-emission.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.publish-branch }}
+      - shell: bash
+        name: Setup configuration
+        run: |
+          cd api/emission/co2
+          find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
+            duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
+            if [ $duration != 86100 ]; then
+              echo "$file has incorrect duration: $duration"
+            fi
+          done | tee ../../../${{ matrix.zone }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: emission
+          path: ${{ matrix.zone }}
+
+  check-renewables:
+    runs-on: ubuntu-latest
+    name: Check renewables
+    needs: setup-renewables
+    strategy:
+      matrix:
+        zone: ${{ fromJson(needs.setup-renewables.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.publish-branch }}
+      - shell: bash
+        name: Setup configuration
+        run: |
+          cd api/renewables
+          find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
+            duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
+            if [ $duration != 82800 ] && [ $duration != 79200 ]; then
+              echo "$file has incorrect duration: $duration"
+            fi
+          done | tee ../../${{ matrix.zone }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: renewables
+          path: ${{ matrix.zone }}
+
+  create-issue:
+    runs-on: ubuntu-latest
+    name: Create issue
+    needs:
+      - check-energy-price
+      - check-emission
+      - check-renewables
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+      - name: Prepare issue
+        shell: bash
+        run: |
+          find artifacts -size 0 -type f -print -delete || true
+          find artifacts -type f -print | grep . || exit 0
+          printf '\n\n--- issue body:\n\n'
+          {
+            echo 'There is not enough data in present in listed files'
+            echo '#### Energy Price'
+            find artifacts/energy-price -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
+            echo '#### Emission'
+            find artifacts/emission -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
+            echo '#### Renewables'
+            find artifacts/renewables -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
+          } | tee body
+      - uses: ./.github/actions/handle-issue
+        if: github.ref == 'refs/heads/main'
+        with:
+          assignee: codereaper
+          title: 'Integrity check failed'

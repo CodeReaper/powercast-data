@@ -1,0 +1,32 @@
+name: Health Checks
+
+on:
+  schedule:
+    - cron: '10 0 * * *'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/health-check*.yaml
+      - .github/actions/handle-issue
+
+jobs:
+  grid:
+    name: Grid
+    uses: ./.github/workflows/health-check-grid.yaml
+
+  networks:
+    name: Networks
+    uses: ./.github/workflows/health-check-networks.yaml
+    with:
+      publish-branch: gh-pages
+
+  integrity:
+    name: Integrity
+    uses: ./.github/workflows/health-check-integrity.yaml
+    with:
+      publish-branch: gh-pages
+
+  unit-tests:
+    name: Unit tests
+    uses: ./.github/workflows/unit-tests.yaml
