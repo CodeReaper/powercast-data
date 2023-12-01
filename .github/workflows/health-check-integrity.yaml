@@ -152,9 +152,8 @@ jobs:
         run: |
           find artifacts -size 0 -type f -print -delete || true
           find artifacts -type f -print | grep . || exit 0
-          printf 'Integrity check failed' > title
+          echo "\n\n--- issue body:\n\n"
           {
-            echo "### $(cat title)"
             echo 'There is not enough data in present in listed files below.'
             echo '#### Energy Price'
             find artifacts/energy-price -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
@@ -172,7 +171,7 @@ jobs:
           test -f body || exit 0
 
           echo 'Searching issues...'
-          title=$(cat title)
+          title='Integrity check failed'
           gh issue list --label "automated" --limit 1 --state open --search "$title" --json number,title | jq -c '.[]' | tee issues
           [ -s issues ] || exit 0
 

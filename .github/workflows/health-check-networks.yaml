@@ -30,7 +30,7 @@ jobs:
           for NETWORK in *; do
             [ -d "$NETWORK" ] || continue
 
-            EXPIRATION=$(jq "[.[].to] | max" < ./$NETWORK/index.json) #FIXME: to for the max from
+            EXPIRATION=$(jq 'max_by(.from).to // 2147483647' < ./$NETWORK/index.json)
             DIFFERENCE=$((EXPIRATION-NOW))
             DAYS=$((DIFFERENCE/86400))
             FORMATTED=$(date -d "@$EXPIRATION" +"%Y-%m-%d")
@@ -46,12 +46,43 @@ jobs:
           echo '::endgroup::'
 
           echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: network-matrix
+          path: network-matrix
 
-      # - shell: bash
-      #   name: Setup configuration
-      #   run: |
-      #     mkdir -p ./github-pages/api/energy-price/ > /dev/null
+  create-issue:
+    runs-on: ubuntu-latest
+    name: Create issue
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
+        with:
+          name: network-matrix
+      - name: Prepare issue
+        shell: bash
+        run: |
+          [ -s network-matrix ] || exit 0
 
-      #     sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ | tee configuration.json
-      #     echo "stale=false" >> $GITHUB_ENV
-      #     echo "changed=false" >> $GITHUB_ENV
+          echo "\n\n--- issue body:\n\n"
+          {
+            echo 'The following networks are out of date:'
+            echo \`\`\`
+            jq -r '["network","expiration"], (.[] | [.network, .expiration]) | @tsv' < network-matrix
+            echo \`\`\`
+          } | tee body
+      - shell: bash
+        name: Create issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        if: github.ref == 'refs/heads/main'
+        run: |
+          test -f body || exit 0
+
+          echo 'Searching issues...'
+          title='Networks are out of date'
+          gh issue list --label "automated" --limit 1 --state open --search "$title" --json number,title | jq -c '.[]' | tee issues
+          [ -s issues ] || exit 0
+
+          gh issue create --assignee codereaper --body-file body --label automated --title "$title"
