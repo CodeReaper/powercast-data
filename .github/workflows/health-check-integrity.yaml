@@ -175,7 +175,7 @@ jobs:
           gh issue list --label automated --limit 1 --state open --search "$title" --json number,title | jq -c '.[].number' > issue
 
           if [ -s issue ]; then
-            echo update issue
+            gh issue edit $(< issue) --body-file body
           else
             gh issue create --assignee codereaper --body-file body --label automated --title "$title"
           fi
