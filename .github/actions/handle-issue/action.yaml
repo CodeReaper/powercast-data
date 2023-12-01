@@ -1,0 +1,37 @@
+name: Handle issue
+description: Create an issue or updates an existing issue
+inputs:
+  assignee:
+    description: The github user to assign the issue to
+    required: true
+  title:
+    description: Title of issue to create or update
+    required: true
+  body:
+    description: Path to file that contains the body that the issue should have, silently skips issue handling if the body file does not exist
+    required: true
+    default: body
+  token:
+    description: GitHub token with write access to issues
+    required: true
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Handle issue
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        test -f "${{ inputs.body }}" || exit 0
+
+        printf 'Searching issues... '
+        gh issue list --label automated --limit 1 --state open --search "${{ inputs.title }}" --json number | jq -c '.[].number' | tee issue
+        printf '\n'
+
+        if [ -s issue ]; then
+          gh issue edit $(< issue) --body-file "${{ inputs.body }}"
+        else
+          gh issue create --assignee "${{ inputs.assignee }}" --body-file "${{ inputs.body }}" --label automated --title "${{ inputs.title }}"
+        fi

@@ -79,17 +79,8 @@ jobs:
             echo '| --- | --- |'
             jq -r '(.[] | [.network, .expiration]) | @tsv' < networks/matrix | sed 's/\t/ | /;s/$/ |/;s/^/| /'
           } | tee body
-      - shell: bash
-        name: Create issue
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - uses: ./.github/actions/handle-issue
         if: github.ref == 'refs/heads/main'
-        run: |
-          test -f body || exit 0
-
-          echo 'Searching issues...'
-          title='Networks are out of date'
-          gh issue list --label "automated" --limit 1 --state open --search "$title" --json number,title | jq -c '.[]' | tee issues
-          [ -s issues ] || exit 0
-
-          gh issue create --assignee codereaper --body-file body --label automated --title "$title"
+        with:
+          assignee: codereaper
+          title: 'Networks are out of date'

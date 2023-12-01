@@ -163,20 +163,8 @@ jobs:
             echo '#### Renewables'
             find artifacts/renewables -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
           } | tee body
-      - shell: bash
-        name: Create issue
-        env:
-          GH_TOKEN: ${{ github.token }}
-        #if: github.ref == 'refs/heads/main'
-        run: |
-          test -f body || exit 0
-
-          echo 'Searching issues...'
-          title='Integrity check failed'
-          gh issue list --label automated --limit 1 --state open --search "$title" --json number,title | jq -c '.[].number' > issue
-
-          if [ -s issue ]; then
-            gh issue edit $(< issue) --body-file body
-          else
-            gh issue create --assignee codereaper --body-file body --label automated --title "$title"
-          fi
+      - uses: ./.github/actions/handle-issue
+        if: github.ref == 'refs/heads/main'
+        with:
+          assignee: codereaper
+          title: 'Integrity check failed'
