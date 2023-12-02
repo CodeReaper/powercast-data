@@ -6,9 +6,14 @@ on:
     - cron: '*/5 12,13 * * *'
   workflow_dispatch:
     inputs:
-      overriden-timestamp:
+      from-timestamp:
         type: string
-        description: Override which timestamp for pull data to reach
+        description: Pull data from this timestamp and onwards - requires both from and end timestamps
+        required: false
+        default: ''
+      end-timestamp:
+        type: string
+        description: Pull data until reaching this timestamp - requires both from and end timestamps
         required: false
         default: ''
   push:
@@ -44,7 +49,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
@@ -53,13 +58,13 @@ jobs:
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
 
             NOW=$(date +%s)
-            HOURS=$(((LATEST-NOW)/3600))
+            HOURS=$(((FROM-NOW)/3600))
 
             echo "Checking stale data for ${ZONE}:"
-            echo " - ${LATEST} - current data"
+            echo " - ${FROM} - current data"
             echo " - ${NOW} - now"
             echo " - ${HOURS} - hours"
 
@@ -79,33 +84,12 @@ jobs:
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
+            END=$(echo "$CONFIG" | jq -r '.end')
 
-            echo "Pull data for ${ZONE} until ${LATEST}..."
-            sh .github/scripts/energy-price-data-pull.sh $ZONE $LATEST > "${ZONE}.generated"
-          done
-
-      - shell: bash
-        id: update-energy-price-data
-        name: Check for new data
-        if: env.stale == 'true'
-        run: |
-          jq -rc '.[]' configuration.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
-            GENERATED="${ZONE}.generated"
-
-            [ -f "$GENERATED" ] || continue
-
-            NEW=$(sh .github/scripts/data-freshness-file.sh $GENERATED $LATEST)
-
-            echo "Checking data for ${ZONE}:"
-            echo " - ${LATEST} - current data"
-            echo " - ${NEW} - new data"
-
-            if [ $NEW -gt $LATEST ]; then
-              echo "changed=true" >> $GITHUB_ENV
-            fi
+            echo "Pull data for ${ZONE} until ${END}..."
+            sh .github/scripts/energy-price-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
+            echo "changed=true" >> $GITHUB_ENV
           done
 
       - shell: bash
@@ -155,7 +139,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/renewables/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
@@ -164,13 +148,13 @@ jobs:
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
 
             NOW=$(date +%s)
-            HOURS=$(((LATEST-NOW)/3600))
+            HOURS=$(((FROM-NOW)/3600))
 
             echo "Checking stale data for ${ZONE}:"
-            echo " - ${LATEST} - current data"
+            echo " - ${FROM} - current data"
             echo " - ${NOW} - now"
             echo " - ${HOURS} - hours"
 
@@ -185,33 +169,12 @@ jobs:
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
+            END=$(echo "$CONFIG" | jq -r '.end')
 
-            echo "Pull data for ${ZONE} until ${LATEST}..."
-            sh .github/scripts/renewables-data-pull.sh $ZONE $LATEST > "${ZONE}.generated"
-          done
-
-      - shell: bash
-        id: update-renewables-data
-        name: Check for new data
-        if: env.stale == 'true'
-        run: |
-          jq -rc '.[]' configuration.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
-            GENERATED="${ZONE}.generated"
-
-            [ -f "$GENERATED" ] || continue
-
-            NEW=$(sh .github/scripts/data-freshness-file.sh $GENERATED $LATEST)
-
-            echo "Checking data for ${ZONE}:"
-            echo " - ${LATEST} - current data"
-            echo " - ${NEW} - new data"
-
-            if [ $NEW -gt $LATEST ]; then
-              echo "changed=true" >> $GITHUB_ENV
-            fi
+            echo "Pull data for ${ZONE} until ${END}..."
+            sh .github/scripts/renewables-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
+            echo "changed=true" >> $GITHUB_ENV
           done
 
       - shell: bash
@@ -261,7 +224,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ github.event.inputs.overriden-timestamp }} | tee configuration.json
+          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
@@ -270,13 +233,13 @@ jobs:
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
 
             NOW=$(date +%s)
-            HOURS=$(((LATEST-NOW)/3600))
+            HOURS=$(((FROM-NOW)/3600))
 
             echo "Checking stale data for ${ZONE}:"
-            echo " - ${LATEST} - current data"
+            echo " - ${FROM} - current data"
             echo " - ${NOW} - now"
             echo " - ${HOURS} - hours"
 
@@ -291,33 +254,12 @@ jobs:
         run: |
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
+            END=$(echo "$CONFIG" | jq -r '.end')
 
-            echo "Pull data for ${ZONE} until ${LATEST}..."
-            sh .github/scripts/co2-emission-data-pull.sh $ZONE $LATEST > "${ZONE}.generated"
-          done
-
-      - shell: bash
-        id: update-co2-emission-data
-        name: Check for new data
-        if: env.stale == 'true'
-        run: |
-          jq -rc '.[]' configuration.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            LATEST=$(echo "$CONFIG" | jq -r '.latest')
-            GENERATED="${ZONE}.generated"
-
-            [ -f "$GENERATED" ] || continue
-
-            NEW=$(sh .github/scripts/data-freshness-file.sh $GENERATED $LATEST)
-
-            echo "Checking data for ${ZONE}:"
-            echo " - ${LATEST} - current data"
-            echo " - ${NEW} - new data"
-
-            if [ $NEW -gt $LATEST ]; then
-              echo "changed=true" >> $GITHUB_ENV
-            fi
+            echo "Pull data for ${ZONE} until ${END}..."
+            sh .github/scripts/co2-emission-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
+            echo "changed=true" >> $GITHUB_ENV
           done
 
       - shell: bash

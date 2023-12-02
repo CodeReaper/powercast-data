@@ -74,17 +74,32 @@ jobs:
           sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./non-existing-directory/ > /dev/null
           [ $? -eq 3 ] || exit 1
 
-      - name: Test invalid optional timestamp
+      - name: Test invalid optional from timestamp
         run: |
           set +e
-          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./empty-data-folder/ not-a-number > /dev/null
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./empty-data-folder/ not-a-number 100 > /dev/null
           [ $? -eq 4 ] || exit 1
+
+      - name: Test invalid optional end timestamp
+        run: |
+          set +e
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./empty-data-folder/ 100 not-a-number > /dev/null
+          [ $? -eq 5 ] || exit 1
+
+      - name: Test invalid timestamps
+        run: |
+          set +e
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./empty-data-folder/ 100 > /dev/null
+          [ $? -eq 6 ] || exit 1
 
       - name: Test with no existing data that matrix contains all items from the configuration
         run: |
           set -e
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/date mocks/ && export PATH=mocks/:$PATH
+          export DATE_OVERRIDE=100
+
           sh .github/scripts/data-matrix.sh configuration/zones.json  energy-price ./empty-data-folder/ | jq -r '.' > result
-          jq -r 'map(reduce . as $item ({}; .zone = $item.zone | .latest = 0))' configuration/zones.json > expected
+          jq -r 'map(reduce . as $item ({}; .zone = $item.zone | .latest = 0 | .end = 100))' configuration/zones.json > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
       - name: Test with mismatched capabillity that matrix is empty
@@ -97,17 +112,19 @@ jobs:
       - name: Test with existing well-known data when it was fresh that matrix does not contain DK1 items from the configuration
         run: |
           set -e
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/date mocks/ && export PATH=mocks/:$PATH
+          export DATE_OVERRIDE=100
           printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > config.json
-          printf '[{"zone":"DK1","latest":1654297200}]\n' > expected
+          printf '[{"zone":"DK1","latest":1654297200,"end":100}]\n' > expected
           sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ | jq -rc '.' > result
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
-      - name: Test with existing well-known data but with overriden timestamp
+      - name: Test with existing well-known data but with overriden timestamps
         run: |
           set -e
           printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > config.json
-          printf '[{"zone":"DK1","latest":1701302400}]\n' > expected
-          sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ 1701302400 | jq -rc '.' > result
+          printf '[{"zone":"DK1","latest":1701302400,"end":1701302400}]\n' > expected
+          sh .github/scripts/data-matrix.sh config.json energy-price .github/resources/test/well-known/existing-data-write-output/ 1701302400 1701302400 | jq -rc '.' > result
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
   test-data-write:
@@ -220,47 +237,38 @@ jobs:
       - name: Test if endpoints does not answer pull will fail
         run: |
           set +e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           unset WGET_OVERRIDE
 
-          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400
+          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400 1658361600
           [ $? -ne 0 ] || exit 1
 
       - name: Test with existing well-known data that pull outputs as expected
         run: |
           set -e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/elspotprices
 
-          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400 > result
+          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400 1658361600 > result
           cat result
           diff -q .github/resources/test/well-known/energy-price-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/energy-price-data-pull-generated-output.json result; exit 1; }
 
       - name: Test pull makes a request with end date set to now
         run: |
           set +e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           unset WGET_OVERRIDE
 
-          sh .github/scripts/energy-price-data-pull.sh DK1 $(date +"%s") > /dev/null
+          sh .github/scripts/energy-price-data-pull.sh DK1 $(date +"%s") $(date -d +1days +"%s") > /dev/null
           [ $? -ne 0 ] || exit 1
-
-      - name: Test pull makes no requests with end date far in the future
-        run: |
-          set +e
-          export PATH=.github/resources/test/mocks/:$PATH
-          unset WGET_OVERRIDE
-
-          sh .github/scripts/energy-price-data-pull.sh DK1 $(date -d +5years +"%s") > /dev/null
-          [ $? -eq 0 ] || exit 1
 
       - name: Test with existing well-known empty data that pull outputs as expected
         run: |
           set -e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/elspotprices_empty
 
-          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400 > result
+          sh .github/scripts/energy-price-data-pull.sh DK1 1658318400 1658361600 > result
           echo '[]' > expected
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
 
@@ -358,38 +366,29 @@ jobs:
       - name: Test if endpoints does not answer pull will fail
         run: |
           set +e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           unset WGET_OVERRIDE
 
-          sh .github/scripts/renewables-data-pull.sh DK1 1654545600
+          sh .github/scripts/renewables-data-pull.sh DK1 1658318400 1658361600
           [ $? -ne 0 ] || exit 1
 
       - name: Test with existing well-known data that pull outputs as expected
         run: |
           set -e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/forecasts_hour
 
-          sh .github/scripts/renewables-data-pull.sh DK1 1658318400 > result
+          sh .github/scripts/renewables-data-pull.sh DK1 1658318400 1658361600 > result
           diff -q .github/resources/test/well-known/renewables-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/renewables-data-pull-generated-output.json result; exit 1; }
 
       - name: Test pull makes a request with end date set to now
         run: |
           set +e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           unset WGET_OVERRIDE
 
-          sh .github/scripts/renewables-data-pull.sh DK1 $(date +"%s") > /dev/null
+          sh .github/scripts/renewables-data-pull.sh DK1 $(date +"%s") $(date -d +1days +"%s") > /dev/null
           [ $? -ne 0 ] || exit 1
-
-      - name: Test pull makes no requests with end date far in the future
-        run: |
-          set +e
-          export PATH=.github/resources/test/mocks/:$PATH
-          unset WGET_OVERRIDE
-
-          sh .github/scripts/renewables-data-pull.sh DK1 $(date -d +5years +"%s") > /dev/null
-          [ $? -eq 0 ] || exit 1
 
   test-co2-emission-data-pull:
     name: Test co2 emission data pull
@@ -400,38 +399,29 @@ jobs:
       - name: Test if endpoints does not answer pull will fail
         run: |
           set +e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           unset WGET_OVERRIDE
 
-          sh .github/scripts/co2-emission-data-pull.sh DK1 1654545600
+          sh .github/scripts/co2-emission-data-pull.sh DK1 1658318400 1658361600
           [ $? -ne 0 ] || exit 1
 
       - name: Test with existing well-known data that pull outputs as expected
         run: |
           set -e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           export WGET_OVERRIDE=.github/resources/test/well-known/endpoint-response/co2emisprog
 
-          sh .github/scripts/co2-emission-data-pull.sh DK1 1658318400 > result
+          sh .github/scripts/co2-emission-data-pull.sh DK1 1658318400 1658361600 > result
           diff -q .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result || { echo "Unexpected difference:"; diff .github/resources/test/well-known/co2-emission-data-pull-generated-output.json result; exit 1; }
 
       - name: Test pull makes a request with end date set to now
         run: |
           set +e
-          export PATH=.github/resources/test/mocks/:$PATH
+          mkdir mocks 2>/dev/null || true && cp .github/resources/test/mocks/wget mocks/ && export PATH=mocks/:$PATH
           unset WGET_OVERRIDE
 
-          sh .github/scripts/co2-emission-data-pull.sh DK1 $(date +"%s") > /dev/null
+          sh .github/scripts/co2-emission-data-pull.sh DK1 $(date +"%s") $(date -d +1days +"%s") > /dev/null
           [ $? -ne 0 ] || exit 1
-
-      - name: Test pull makes no requests with end date far in the future
-        run: |
-          set +e
-          export PATH=.github/resources/test/mocks/:$PATH
-          unset WGET_OVERRIDE
-
-          sh .github/scripts/co2-emission-data-pull.sh DK1 $(date -d +5years +"%s") > /dev/null
-          [ $? -eq 0 ] || exit 1
 
   test-tariff-data-filter:
     name: Test tariff data filter

@@ -1,0 +1,5 @@
+#!/bin/sh
+# shellcheck disable=SC2068
+# shellcheck disable=SC2006
+[ -z "$DATE_OVERRIDE" ] && `which date` $@ && exit 0
+echo "$DATE_OVERRIDE"

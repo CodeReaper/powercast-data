@@ -5,7 +5,9 @@
 while getopts ":O:" OPTION; do
     case "$OPTION" in
         O)
-            cat "$WGET_OVERRIDE" > "$OPTARG"
+            path="$WGET_OVERRIDE"
+            echo "$@" | grep 'offset=0$' >/dev/null || path=".github/resources/test/well-known/endpoint-response/elspotprices_empty"
+            cat "$path" > "$OPTARG"
             exit 0
             ;;
         *)
