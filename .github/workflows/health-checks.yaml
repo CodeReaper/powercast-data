@@ -2,7 +2,7 @@ name: Health Checks
 
 on:
   schedule:
-    - cron: '10 0 * * *'
+    - cron: '0 10 * * *'
   pull_request:
     branches:
       - main
