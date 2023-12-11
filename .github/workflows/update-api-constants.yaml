@@ -34,7 +34,7 @@ jobs:
           cd -
 
           cd ./github-pages/api/
-          rm -rf $constants
+          rm -rf $constants || true
 
       - shell: bash
         name: Add constants
