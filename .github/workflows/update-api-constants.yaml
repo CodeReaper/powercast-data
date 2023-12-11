@@ -1,0 +1,50 @@
+name: Update API constants
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/update-api-constants.yaml
+      - configuration/constants.json
+
+concurrency: commits-pages
+
+env:
+  publish-branch: gh-pages
+
+jobs:
+  update-api-constants:
+    runs-on: ubuntu-latest
+    name: Update constants
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.POWERCASTDEPLOY }}
+          ref: ${{ env.publish-branch }}
+          path: github-pages
+
+      - shell: bash
+        name: Clean up previous constants
+        run: |
+          cd configuration/constants
+          constants=$(echo *)
+          cd -
+
+          cd ./github-pages/api/
+          rm -rf $constants || true
+
+      - shell: bash
+        name: Add constants
+        run: cp -rv configuration/constants/* ./github-pages/api/
+
+      - uses: EndBug/add-and-commit@v9
+        name: Publish constants
+        with:
+          cwd: github-pages
+          add: "['api/']"
+          push: --set-upstream origin ${{ env.publish-branch }}
+          default_author: github_actions
+          message: Publish constants via workflow
