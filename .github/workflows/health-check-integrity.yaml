@@ -79,7 +79,7 @@ jobs:
               echo "$file has incorrect duration: $duration"
             fi
           done | tee ../../${{ matrix.zone }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: energy-price
           path: ${{ matrix.zone }}
@@ -105,7 +105,7 @@ jobs:
               echo "$file has incorrect duration: $duration"
             fi
           done | tee ../../../${{ matrix.zone }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: emission
           path: ${{ matrix.zone }}
@@ -131,7 +131,7 @@ jobs:
               echo "$file has incorrect duration: $duration"
             fi
           done | tee ../../${{ matrix.zone }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: renewables
           path: ${{ matrix.zone }}
