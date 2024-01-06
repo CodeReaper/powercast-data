@@ -98,7 +98,7 @@ jobs:
       - shell: bash
         name: Setup configuration
         run: |
-          cat <<- "EOF" > .ignore-grep
+          cat << EOF > .ignore-grep
           2019/10/26/DK1.json has incorrect duration: 78900
           2019/10/26/DK2.json has incorrect duration: 78900
           2019/10/27/DK1.json has incorrect duration: 3300
