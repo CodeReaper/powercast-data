@@ -112,7 +112,7 @@ jobs:
             if [ $duration != 86100 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | grep -qvf .ignore-grep | tee ../../../${{ matrix.zone }}
+          done | (grep -vf .ignore-grep || true) | tee ../../../${{ matrix.zone }}
       - uses: actions/upload-artifact@v4
         with:
           name: emission-${{ matrix.zone }}
