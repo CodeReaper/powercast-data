@@ -99,20 +99,12 @@ jobs:
         name: Setup configuration
         run: |
           cd api/emission/co2
-
-          cat << EOF > .ignore-grep
-          2019/10/26/DK1.json has incorrect duration: 78900
-          2019/10/26/DK2.json has incorrect duration: 78900
-          2019/10/27/DK1.json has incorrect duration: 3300
-          2019/10/27/DK2.json has incorrect duration: 3300
-          EOF
-
           find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
             duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
             if [ $duration != 86100 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | (grep -vf .ignore-grep || true) | tee ../../../${{ matrix.zone }}
+          done | tee ../../../${{ matrix.zone }}
       - uses: actions/upload-artifact@v4
         with:
           name: emission-${{ matrix.zone }}
