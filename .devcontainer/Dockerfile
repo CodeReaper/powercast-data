@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:alpine-3.19
+FROM mcr.microsoft.com/devcontainers/base:alpine-3.18
 
 COPY --from=mikefarah/yq:4.41.1 /usr/bin/yq /usr/local/bin/yq
 COPY --from=koalaman/shellcheck-alpine:v0.9.0 /bin/shellcheck /usr/local/bin/shellcheck
