@@ -245,3 +245,42 @@ The response is the tariffs over time using the following format:
   // ...
 ]
 ```
+
+### Incidents
+
+The endpoints that serve data which is automatically updated from an upstream data source also has an endpoint to retrieve ongoing and past incidents.
+
+The endpoints in question in are:
+
+```sh
+curl -v https://codereaper.github.io/powercast-data/api/emission/co2/incidents/<zone>.json
+curl -v https://codereaper.github.io/powercast-data/api/energy-price/incidents/<zone>.json
+curl -v https://codereaper.github.io/powercast-data/api/renewables/incidents/<zone>.json
+```
+
+The response for the incidents are using the following format:
+
+```jsonc
+[
+  {
+    "from": <unix timestamp>,
+    "to": <optional unix timestamp>,
+    "type": <string> // Specific enumeration value see table below
+  },
+  // ...
+]
+```
+
+> [!TIP]
+> There will only be one ongoing incident with a specific `type` until it becomes a past incident.
+
+> [!NOTE]
+> Incidents started being recorded as of 2024 mid April.
+
+#### Types
+
+The list of used types are enumerated here:
+
+| Type  | Description |
+| ----- | ----------- |
+| delay | Data expected to be updated according to schedule remains unchanged |
