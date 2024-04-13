@@ -58,7 +58,7 @@ jq -rc '.[]' "$CONFIG" | while read -r ITEM; do
     cd "$FOLDER"
     mkdir find-helper
     AREA=$(echo "$ITEM" | jq -r '.zone')
-    find -- * -type f -name "${AREA}.json" | sort > "$DIR/found"
+    find -- * -type f -mindepth 3 -name "${AREA}.json" | sort > "$DIR/found"
     LATEST=$(tail -n1 < $DIR/found)
     OLDEST=$(head -n1 < $DIR/found)
     rmdir find-helper
