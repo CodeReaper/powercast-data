@@ -35,7 +35,7 @@ AREA=$(echo "$AREA" | tr '[:lower:]' '[:upper:]')
 [ -z "$AREA" ] && { echo "Invalid/Missing area."; exit 2; }
 [ -z "$ENDDATE" ] && { echo "Invalid/Missing ENDDATE."; exit 3; }
 
-LATEST=$(find "$FOLDER" -name "${AREA}.json" | sort | tail -n1)
+LATEST=$(find "$FOLDER" -mindepth 3 -name "${AREA}.json" | sort | tail -n1)
 
 if [ -z "$LATEST" ]; then
     echo "$ENDDATE"
