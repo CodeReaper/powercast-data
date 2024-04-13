@@ -79,7 +79,7 @@ jobs:
             fi
             if [ $HOURS -le 8 ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $NOW delay ./github-pages/api/energy-price/incidents/$ZONE
+              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/energy-price/incidents/
             fi
           done
 
@@ -138,7 +138,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ]; then
-              sh .github/scripts/incident-close.sh $NOW delay ./github-pages/api/energy-price/incidents/$ZONE
+              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/energy-price/incidents/
             fi
           done
 
@@ -196,7 +196,7 @@ jobs:
             fi
             if [ $HOURS -le 8 ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $NOW delay ./github-pages/api/renewables/incidents/$ZONE
+              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/renewables/incidents/
             fi
           done
 
@@ -255,7 +255,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ]; then
-              sh .github/scripts/incident-close.sh $NOW delay ./github-pages/api/renewables/incidents/$ZONE
+              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/renewables/incidents/
             fi
           done
 
@@ -313,7 +313,7 @@ jobs:
             fi
             if [ $HOURS -le 8 ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $NOW delay ./github-pages/api/emission/co2/incidents/$ZONE
+              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/emission/co2/incidents/
             fi
           done
 
@@ -372,7 +372,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ]; then
-              sh .github/scripts/incident-close.sh $NOW delay ./github-pages/api/emission/co2/incidents/$ZONE
+              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/emission/co2/incidents/
             fi
           done
 

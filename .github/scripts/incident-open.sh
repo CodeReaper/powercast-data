@@ -1,5 +1,10 @@
 #!/bin/sh
 # Takes four arguments:
+#   - price area:
+#       Must be a singular area.
+#       Examples:
+#           - DK1
+#           - DE
 #   - current date:
 #       Must be a unix timestamp.
 #       Example: 1654012800
@@ -16,19 +21,22 @@
 
 set -e
 
-NOW=$1
-TYPE=$2
-FOLDER=$3
+AREA=$1
+NOW=$2
+TYPE=$3
+FOLDER=$4
 
 which jq > /dev/null
 
-[ -z "$NOW" ] && { echo "Missing NOW."; exit 1; }
-[ -z "$TYPE" ] && { echo "Missing TYPE."; exit 2; }
-[ -z "$FOLDER" ] && { echo "Missing FOLDER"; exit 3; }
+AREA=$(echo "$AREA" | tr '[:lower:]' '[:upper:]')
+[ -z "$AREA" ] && { echo "Invalid/Missing area."; exit 1; }
+[ -z "$NOW" ] && { echo "Missing NOW."; exit 2; }
+[ -z "$TYPE" ] && { echo "Missing TYPE."; exit 3; }
+[ -z "$FOLDER" ] && { echo "Missing FOLDER"; exit 4; }
 
 mkdir -p "$FOLDER" || true
 
-OUTPUT="$FOLDER/index.json"
+OUTPUT="$FOLDER/$AREA.json"
 
 [ -f "$OUTPUT" ] || echo '[]' > "$OUTPUT"
 
@@ -37,8 +45,9 @@ TRANSFORMATION='[.[] | select(.to == null and .type == $type)] | length'
 
 COUNT=$(jq -r --arg type "$TYPE" "$TRANSFORMATION" < "$OUTPUT")
 
-[ $COUNT -gt 0 ] && exit 0
+[ "$COUNT" -gt 0 ] && exit 0
 
+# shellcheck disable=SC2016
 TRANSFORMATION='. += [{"from":($now|tonumber),"to":null,"type":$type}]'
 
 jq -r --arg type "$TYPE" --arg now "$NOW" "$TRANSFORMATION" < "$OUTPUT" > /tmp/$$.data

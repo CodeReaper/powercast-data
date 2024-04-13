@@ -1,5 +1,10 @@
 #!/bin/sh
 # Takes four arguments:
+#   - price area:
+#       Must be a singular area.
+#       Examples:
+#           - DK1
+#           - DE
 #   - current date:
 #       Must be a unix timestamp.
 #       Example: 1654012800
@@ -16,17 +21,20 @@
 
 set -e
 
-NOW=$1
-TYPE=$2
-FOLDER=$3
+AREA=$1
+NOW=$2
+TYPE=$3
+FOLDER=$4
 
 which jq > /dev/null
 
-[ -z "$NOW" ] && { echo "Invalid/Missing NOW."; exit 1; }
-[ -z "$TYPE" ] && { echo "Invalid/Missing TYPE."; exit 2; }
-[ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 3; }
+AREA=$(echo "$AREA" | tr '[:lower:]' '[:upper:]')
+[ -z "$AREA" ] && { echo "Invalid/Missing area."; exit 1; }
+[ -z "$NOW" ] && { echo "Invalid/Missing NOW."; exit 2; }
+[ -z "$TYPE" ] && { echo "Invalid/Missing TYPE."; exit 3; }
+[ -d "$FOLDER" ] || { echo "Not a directory: $FOLDER"; exit 4; }
 
-OUTPUT="$FOLDER/index.json"
+OUTPUT="$FOLDER/$AREA.json"
 
 # shellcheck disable=SC2016
 TRANSFORMATION='. |= map(.to = if .type == $type and .to == null then ($now|tonumber) else .to end)'
