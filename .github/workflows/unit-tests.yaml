@@ -606,3 +606,336 @@ jobs:
           sh .github/scripts/tariff-data-filter.sh known-data.json multi-code-config.json 5790001089030 > result
 
           diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+  test-incidents-open:
+    name: Test incidents open
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        run: |
+          touch data.json
+
+          cat << EOF > open-incident.json
+          [
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "delay"
+            }
+          ]
+          EOF
+
+          cat << EOF > foo-and-bar-incident.json
+          [
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "foo"
+            },
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "bar"
+            }
+          ]
+          EOF
+
+          cat << EOF > old-incident.json
+          [
+            {
+              "from": 1604067200,
+              "to": 1604099900,
+              "type": "delay"
+            }
+          ]
+          EOF
+
+          cat << EOF > open-and-old-incident.json
+          [
+            {
+              "from": 1604067200,
+              "to": 1604099900,
+              "type": "delay"
+            },
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "delay"
+            }
+          ]
+          EOF
+
+      - name: Test with too few arguments
+        run: |
+          set +e
+
+          sh .github/scripts/incident-open.sh
+          [ $? -eq 1 ] || exit 1
+
+          sh .github/scripts/incident-open.sh 1704067200
+          [ $? -eq 2 ] || exit 1
+
+          sh .github/scripts/incident-open.sh 1704067200 delay
+          [ $? -eq 3 ] || exit 1
+
+      - name: Test with handling non-existing directory
+        run: |
+          set +e
+
+          sh .github/scripts/incident-open.sh 1704067200 delay ./not-there-beforehand
+          [ $? -eq 0 ] || exit 1
+
+          [ -d ./not-there-beforehand ] || exit 2
+
+      - name: Test with that incident is created
+        run: |
+          set +e
+
+          rm -rf testing || true
+
+          sh .github/scripts/incident-open.sh 1704067200 delay testing
+          [ $? -eq 0 ] || exit 1
+
+          [ -f ./testing/index.json ] || exit 2
+
+          set -e
+          jq -r < open-incident.json > expected
+          jq -r < ./testing/index.json > result
+          set +e
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with that incident is not created twice
+        run: |
+          set +e
+
+          rm -rf testing || true
+
+          sh .github/scripts/incident-open.sh 1704067200 delay testing
+          [ $? -eq 0 ] || exit 1
+
+          sh .github/scripts/incident-open.sh 1704067200 delay testing
+          [ $? -eq 0 ] || exit 1
+
+          set -e
+          jq -r < open-incident.json > expected
+          jq -r < ./testing/index.json > result
+          set +e
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with that incident is created with type
+        run: |
+          set +e
+
+          rm -rf testing || true
+
+          sh .github/scripts/incident-open.sh 1704067200 foo testing
+          [ $? -eq 0 ] || exit 1
+
+          sh .github/scripts/incident-open.sh 1704067200 bar testing
+          [ $? -eq 0 ] || exit 1
+
+          set -e
+          jq -r < foo-and-bar-incident.json > expected
+          jq -r < ./testing/index.json > result
+          set +e
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with that old incidents are preserved
+        run: |
+          set +e
+
+          rm -rf testing || true
+          mkdir testing || true
+          cp old-incident.json testing/index.json
+
+          sh .github/scripts/incident-open.sh 1704067200 delay testing
+          [ $? -eq 0 ] || exit 1
+
+          set -e
+          jq -r < open-and-old-incident.json > expected
+          jq -r < ./testing/index.json > result
+          set +e
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+  test-incidents-close:
+    name: Test incidents close
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        run: |
+          touch data.json
+
+          cat << EOF > open-incident.json
+          [
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "delay"
+            }
+          ]
+          EOF
+
+          cat << EOF > closed-incident.json
+          [
+            {
+              "from": 1704067200,
+              "to": 1704099900,
+              "type": "delay"
+            }
+          ]
+          EOF
+
+          cat << EOF > open-and-old-incident.json
+          [
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "delay"
+            },
+            {
+              "from": 1604067200,
+              "to": 1604099900,
+              "type": "delay"
+            }
+          ]
+          EOF
+
+          cat << EOF > closed-and-old-incident.json
+          [
+            {
+              "from": 1704067200,
+              "to": 1704099900,
+              "type": "delay"
+            },
+            {
+              "from": 1604067200,
+              "to": 1604099900,
+              "type": "delay"
+            }
+          ]
+          EOF
+
+          cat << EOF > foo-and-bar-incident.json
+          [
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "foo"
+            },
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "bar"
+            }
+          ]
+          EOF
+
+          cat << EOF > closed-foo-and-open-bar-incident.json
+          [
+            {
+              "from": 1704067200,
+              "to": 1704099900,
+              "type": "foo"
+            },
+            {
+              "from": 1704067200,
+              "to": null,
+              "type": "bar"
+            }
+          ]
+          EOF
+
+      - name: Test with too few arguments
+        run: |
+          set +e
+
+          sh .github/scripts/incident-close.sh
+          [ $? -eq 1 ] || exit 1
+
+          sh .github/scripts/incident-close.sh 1704099900
+          [ $? -eq 2 ] || exit 1
+
+          sh .github/scripts/incident-close.sh 1704099900 delay
+          [ $? -eq 3 ] || exit 1
+
+      - name: Test with handling non-existing directory
+        run: |
+          set +e
+
+          sh .github/scripts/incident-close.sh 1704099900 delay ./not-there
+          [ $? -eq 3 ] || exit 1
+
+      - name: Test with that incident is created
+        run: |
+          set +e
+
+          rm -rf testing || true
+          mkdir testing
+          cp open-incident.json testing/index.json
+
+          sh .github/scripts/incident-close.sh 1704099900 delay testing
+          [ $? -eq 0 ] || exit 1
+
+          set -e
+          jq -r < closed-incident.json > expected
+          jq -r < ./testing/index.json > result
+          set +e
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with that incident is not created twice
+        run: |
+          set +e
+
+          rm -rf testing || true
+          mkdir testing
+          cp open-incident.json testing/index.json
+
+          sh .github/scripts/incident-close.sh 1704099900 delay testing
+          [ $? -eq 0 ] || exit 1
+
+          sh .github/scripts/incident-close.sh 1704099900 delay testing
+          [ $? -eq 0 ] || exit 1
+
+          set -e
+          jq -r < closed-incident.json > expected
+          jq -r < ./testing/index.json > result
+          set +e
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with that incident is created with type
+        run: |
+          set +e
+
+          rm -rf testing || true
+          mkdir testing
+          cp foo-and-bar-incident.json testing/index.json
+
+          sh .github/scripts/incident-close.sh 1704099900 foo testing
+          [ $? -eq 0 ] || exit 1
+
+          set -e
+          jq -r < closed-foo-and-open-bar-incident.json > expected
+          jq -r < ./testing/index.json > result
+          set +e
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }
+
+      - name: Test with that old incidents are preserved
+        run: |
+          set +e
+
+          rm -rf testing
+          mkdir testing
+          cp open-and-old-incident.json testing/index.json
+
+          sh .github/scripts/incident-close.sh 1704099900 delay testing
+          [ $? -eq 0 ] || exit 1
+
+          set -e
+          jq -r < closed-and-old-incident.json > expected
+          jq -r < ./testing/index.json > result
+          set +e
+          diff -q expected result || { echo "Unexpected difference:"; diff expected result; exit 1; }

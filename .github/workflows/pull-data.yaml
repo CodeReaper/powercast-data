@@ -3,7 +3,7 @@ name: Update contents
 on:
   schedule:
     - cron: '0 * * * *'
-    - cron: '*/5 12,13 * * *'
+    - cron: '5,15,30,45 12,13 * * *'
   workflow_dispatch:
     inputs:
       from-timestamp:
@@ -50,17 +50,18 @@ jobs:
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
       - shell: bash
         name: Check for stale data
         run: |
+          NOW=$(date +%s)
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             FROM=$(echo "$CONFIG" | jq -r '.latest')
 
-            NOW=$(date +%s)
             HOURS=$(((FROM-NOW)/3600))
 
             echo "Checking stale data for ${ZONE}:"
@@ -75,6 +76,10 @@ jobs:
 
             if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_ENV
+            fi
+            if [ $HOURS -le 8 ]; then
+              echo "delayed=true" >> $GITHUB_ENV
+              sh .github/scripts/incident-open.sh $NOW delay ./github-pages/api/energy-price/incidents/$ZONE
             fi
           done
 
@@ -107,12 +112,39 @@ jobs:
         name: Index data
         if: env.changed == 'true'
         run: |
-          rm ./github-pages/api/energy-price/latest.json || true
+          rm ./github-pages/api/energy-price/latest.json 2> /dev/null || true
           sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/index.json
+
+      - shell: bash
+        name: Handle open indicents
+        if: env.changed == 'true' && env.delayed == 'true'
+        run: |
+          NOW=$(date +%s)
+          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
+
+            HOURS=$(((FROM-NOW)/3600))
+
+            echo "Checking stale data for ${ZONE}:"
+            echo " - ${FROM} - current data"
+            echo " - ${NOW} - now"
+            echo " - ${HOURS} - hours"
+
+            if [ "$ZONE" = "DE" ]; then
+              echo "Ignoring..."
+              continue
+            fi
+
+            if [ $HOURS -ge 12 ]; then
+              sh .github/scripts/incident-close.sh $NOW delay ./github-pages/api/energy-price/incidents/$ZONE
+            fi
+          done
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
-        if: env.changed == 'true'
+        if: env.changed == 'true' || env.delayed == 'true'
         with:
           cwd: github-pages
           add: api/energy-price/
@@ -140,6 +172,7 @@ jobs:
           mkdir -p ./github-pages/api/renewables/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
@@ -160,6 +193,10 @@ jobs:
 
             if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_ENV
+            fi
+            if [ $HOURS -le 8 ]; then
+              echo "delayed=true" >> $GITHUB_ENV
+              sh .github/scripts/incident-open.sh $NOW delay ./github-pages/api/renewables/incidents/$ZONE
             fi
           done
 
@@ -192,12 +229,39 @@ jobs:
         name: Index data
         if: env.changed == 'true'
         run: |
-          rm ./github-pages/api/renewables/latest.json || true
+          rm ./github-pages/api/renewables/latest.json 2> /dev/null || true
           sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables > ./github-pages/api/renewables/index.json
+
+      - shell: bash
+        name: Handle open indicents
+        if: env.changed == 'true' && env.delayed == 'true'
+        run: |
+          NOW=$(date +%s)
+          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
+
+            HOURS=$(((FROM-NOW)/3600))
+
+            echo "Checking stale data for ${ZONE}:"
+            echo " - ${FROM} - current data"
+            echo " - ${NOW} - now"
+            echo " - ${HOURS} - hours"
+
+            if [ "$ZONE" = "DE" ]; then
+              echo "Ignoring..."
+              continue
+            fi
+
+            if [ $HOURS -ge 12 ]; then
+              sh .github/scripts/incident-close.sh $NOW delay ./github-pages/api/renewables/incidents/$ZONE
+            fi
+          done
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
-        if: env.changed == 'true'
+        if: env.changed == 'true' || env.delayed == 'true'
         with:
           cwd: github-pages
           add: api/renewables/
@@ -225,6 +289,7 @@ jobs:
           mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
           sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
 
@@ -245,6 +310,10 @@ jobs:
 
             if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_ENV
+            fi
+            if [ $HOURS -le 8 ]; then
+              echo "delayed=true" >> $GITHUB_ENV
+              sh .github/scripts/incident-open.sh $NOW delay ./github-pages/api/emission/co2/incidents/$ZONE
             fi
           done
 
@@ -277,12 +346,39 @@ jobs:
         name: Index data
         if: env.changed == 'true'
         run: |
-          rm ./github-pages/api/emission/co2/latest.json || true
+          rm ./github-pages/api/emission/co2/latest.json 2> /dev/null || true
           sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 > ./github-pages/api/emission/co2/index.json
+
+      - shell: bash
+        name: Handle open indicents
+        if: env.changed == 'true' && env.delayed == 'true'
+        run: |
+          NOW=$(date +%s)
+          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
+            FROM=$(echo "$CONFIG" | jq -r '.latest')
+
+            HOURS=$(((FROM-NOW)/3600))
+
+            echo "Checking stale data for ${ZONE}:"
+            echo " - ${FROM} - current data"
+            echo " - ${NOW} - now"
+            echo " - ${HOURS} - hours"
+
+            if [ "$ZONE" = "DE" ]; then
+              echo "Ignoring..."
+              continue
+            fi
+
+            if [ $HOURS -ge 12 ]; then
+              sh .github/scripts/incident-close.sh $NOW delay ./github-pages/api/emission/co2/incidents/$ZONE
+            fi
+          done
 
       - uses: EndBug/add-and-commit@v9
         name: Publish data
-        if: env.changed == 'true'
+        if: env.changed == 'true' || env.delayed == 'true'
         with:
           cwd: github-pages
           add: api/emission/co2/
