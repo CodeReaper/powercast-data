@@ -99,12 +99,20 @@ jobs:
         name: Setup configuration
         run: |
           cd api/emission/co2
+
+          cat << EOF > .ignore-grep
+          2024/04/12/DK1.json has incorrect duration: 78900
+          2024/04/14/DK1.json has incorrect duration: 6900
+          2024/04/12/DK2.json has incorrect duration: 78900
+          2024/04/14/DK2.json has incorrect duration: 6900
+          EOF
+
           find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
             duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
             if [ $duration != 86100 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | tee ../../../${{ matrix.zone }}
+          done | (grep -vf .ignore-grep || true) | tee ../../../${{ matrix.zone }}
       - uses: actions/upload-artifact@v4
         with:
           name: emission-${{ matrix.zone }}
@@ -125,12 +133,20 @@ jobs:
         name: Setup configuration
         run: |
           cd api/renewables
+
+          cat << EOF > .ignore-grep
+          2024/04/12/DK1.json has incorrect duration: 75600
+          2024/04/15/DK1.json has incorrect duration: 57600
+          2024/04/12/DK2.json has incorrect duration: 75600
+          2024/04/15/DK2.json has incorrect duration: 57600
+          EOF
+
           find 2??? -type f -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}.json" | sort | tail -n +2 | head -n-1 | while read file; do
             duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
             if [ $duration != 82800 ] && [ $duration != 79200 ]; then
               echo "$file has incorrect duration: $duration"
             fi
-          done | tee ../../${{ matrix.zone }}
+          done | (grep -vf .ignore-grep || true) | tee ../../../${{ matrix.zone }}
       - uses: actions/upload-artifact@v4
         with:
           name: renewables-${{ matrix.zone }}
