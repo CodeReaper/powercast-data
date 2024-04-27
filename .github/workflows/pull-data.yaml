@@ -92,11 +92,9 @@ jobs:
             END=$(echo "$CONFIG" | jq -r '.end')
 
             echo "Pull data for ${ZONE} until ${END}..."
-            sh .github/scripts/energy-price-data-pull.sh $ZONE $FROM $END | tee "${ZONE}.generated"
+            sh .github/scripts/energy-price-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
             echo "changed=true" >> $GITHUB_ENV
           done
-
-          ls -lsh *.generated
 
       - shell: bash
         name: Write data
@@ -147,6 +145,7 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
+          git add api/energy-price/
           git diff api/energy-price/ | tee ../energy-price.patch
 
       - uses: actions/upload-artifact@v4
@@ -210,11 +209,9 @@ jobs:
             END=$(echo "$CONFIG" | jq -r '.end')
 
             echo "Pull data for ${ZONE} until ${END}..."
-            sh .github/scripts/renewables-data-pull.sh $ZONE $FROM $END | tee "${ZONE}.generated"
+            sh .github/scripts/renewables-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
             echo "changed=true" >> $GITHUB_ENV
           done
-
-          ls -lsh *.generated
 
       - shell: bash
         name: Write data
@@ -265,6 +262,7 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
+          git add api/renewables/
           git diff api/renewables/ | tee ../renewables.patch
 
       - uses: actions/upload-artifact@v4
@@ -328,11 +326,9 @@ jobs:
             END=$(echo "$CONFIG" | jq -r '.end')
 
             echo "Pull data for ${ZONE} until ${END}..."
-            sh .github/scripts/co2-emission-data-pull.sh $ZONE $FROM $END | tee "${ZONE}.generated"
+            sh .github/scripts/co2-emission-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
             echo "changed=true" >> $GITHUB_ENV
           done
-
-          ls -lsh *.generated
 
       - shell: bash
         name: Write data
@@ -383,7 +379,8 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
-          git diff | tee ../emission-co2.patch
+          git add api/emission/co2/
+          git diff api/emission/co2/ | tee ../emission-co2.patch
 
       - uses: actions/upload-artifact@v4
         with:
