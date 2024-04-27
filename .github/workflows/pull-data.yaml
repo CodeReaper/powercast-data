@@ -378,7 +378,9 @@ jobs:
       - shell: bash
         name: Create patch
         run: |
+          git status
           cd github-pages
+          git status
           git add api/emission/co2/
           git diff api/emission/co2/ | tee ../emission-co2.patch
 
@@ -401,7 +403,7 @@ jobs:
 
       - shell: bash
         name: List patches
-        run: find . -type f
+        run: ls -lsh *.patch
 
       - uses: actions/checkout@v4
         with:
