@@ -1,10 +1,5 @@
 name: Update contents
 
-# tasks:
-# check for from-timestamp and end-timestamp to disable incidents
-# make the three update concurrent and output artifacts with git patches
-# make single commit at the end
-
 on:
   schedule:
     - cron: '0 * * * *'
