@@ -147,8 +147,7 @@ jobs:
           done
 
       - shell: bash
-        name: Handle open indicents
-        if: env.changed == 'true' && env.delayed == 'true'
+        name: Create patch
         run: |
           cd github-pages
           git diff api/energy-price/ > ../git.patch
@@ -264,8 +263,7 @@ jobs:
           done
 
       - shell: bash
-        name: Handle open indicents
-        if: env.changed == 'true' && env.delayed == 'true'
+        name: Create patch
         run: |
           cd github-pages
           git diff api/renewables/ > ../git.patch
@@ -381,8 +379,7 @@ jobs:
           done
 
       - shell: bash
-        name: Handle open indicents
-        if: env.changed == 'true' && env.delayed == 'true'
+        name: Create patch
         run: |
           cd github-pages
           git diff api/emission/co2/ > ../git.patch
@@ -400,15 +397,30 @@ jobs:
       - update-renewables-data
       - update-co2-emission-data
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - shell: bash
+        name: Debug
+        run: |
+          find .
+
+      - shell: bash
+        name: Debug
+        run: |
+          for file in $(find . -type f); do
+              echo "File: $file"
+              echo "Contents:"
+              cat "$file"
+              echo "-----------------------------"
+          done
+
       - uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
           ref: ${{ env.publish-branch }}
           path: github-pages
-
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
 
       - shell: bash
         name: Apply patches
