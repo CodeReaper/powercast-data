@@ -39,7 +39,6 @@ jq -rc '.[] | .data = . | .date = (.timestamp | todate) | .date, .data' "$FILE" 
     MONTH=$(echo "$DATE" | cut -d- -f2)
     DAY=$(echo "$DATE" | cut -d- -f3)
     DESTINATION="${FOLDER}/${YEAR}/${MONTH}/${DAY}/${AREA}-${TIME}.json"
-    echo "prepare $DESTINATION"
 
     if [ ! -d "${FOLDER}/${YEAR}/${MONTH}/${DAY}" ]; then
         mkdir -p "$(dirname "$DESTINATION")"
@@ -51,12 +50,14 @@ for DESTINATION in "$FOLDER"/????/??/??; do
   [ -d "$DESTINATION" ] || continue
   ls "${DESTINATION}/${AREA}"-*.json >/dev/null 2>&1 || continue
 
-  echo "working in $DESTINATION"
+  echo "doing: ${DESTINATION}/${AREA}.json"
   if [ -f "${DESTINATION}/${AREA}.json" ]; then
     find "${DESTINATION}" -type f -name "${AREA}-*.json" -print0 | xargs -0 jq -s '. | unique_by(.timestamp) | sort_by(.timestamp)' > /tmp/$$.data
-    jq -s '.[1] + .[0] | unique_by(.timestamp) | sort_by(.timestamp)' /tmp/$$.data "${DESTINATION}/${AREA}.json" > /tmp/$$.json && mv /tmp/$$.json "${DESTINATION}/${AREA}.json"
+    jq -s '.[1] + .[0] | unique_by(.timestamp) | sort_by(.timestamp)' /tmp/$$.data "${DESTINATION}/${AREA}.json" > /tmp/$$.json
   else
-    find "${DESTINATION}" -type f -name "${AREA}-*.json" -print0 | xargs -0 jq -s '. | unique_by(.timestamp) | sort_by(.timestamp)' > /tmp/$$.json && mv /tmp/$$.json "${DESTINATION}/${AREA}.json"
+    find "${DESTINATION}" -type f -name "${AREA}-*.json" -print0 | xargs -0 jq -s '. | unique_by(.timestamp) | sort_by(.timestamp)' > /tmp/$$.json
   fi
-  rm "${DESTINATION}/${AREA}"-*.json
+  ls -lsh /tmp/$$.json
+  mv /tmp/$$.json "${DESTINATION}/${AREA}.json"
+  rm -v "${DESTINATION}/${AREA}"-*.json
 done
