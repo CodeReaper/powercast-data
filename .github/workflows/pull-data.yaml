@@ -1,3 +1,4 @@
+name: Update contents
 
 on:
   schedule:
@@ -94,6 +95,8 @@ jobs:
             sh .github/scripts/energy-price-data-pull.sh $ZONE $FROM $END | tee "${ZONE}.generated"
             echo "changed=true" >> $GITHUB_ENV
           done
+
+          ls -lsh *.generated
 
       - shell: bash
         name: Write data
@@ -211,6 +214,8 @@ jobs:
             echo "changed=true" >> $GITHUB_ENV
           done
 
+          ls -lsh *.generated
+
       - shell: bash
         name: Write data
         if: env.changed == 'true'
@@ -327,7 +332,7 @@ jobs:
             echo "changed=true" >> $GITHUB_ENV
           done
 
-          ls -lsh
+          ls -lsh *.generated
 
       - shell: bash
         name: Write data
@@ -340,16 +345,12 @@ jobs:
             sh .github/scripts/data-write.sh $GENERATED ./github-pages/api/emission/co2/ $ZONE
           done
 
-          cd github-pages && git diff
-
       - shell: bash
         name: Index data
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/emission/co2/latest.json 2> /dev/null || true
           sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 | tee ./github-pages/api/emission/co2/index.json
-
-          cd github-pages && git diff
 
       - shell: bash
         name: Handle open indicents
@@ -377,8 +378,6 @@ jobs:
               sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/emission/co2/incidents/
             fi
           done
-
-          cd github-pages && git diff
 
       - shell: bash
         name: Create patch
