@@ -150,12 +150,12 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
-          git diff api/energy-price/ > ../git.patch
+          git diff api/energy-price/ > ../energy-price.patch
 
       - uses: actions/upload-artifact@v4
         with:
           name: energy-price
-          path: git.patch
+          path: energy-price.patch
 
   update-renewables-data:
     runs-on: ubuntu-latest
@@ -266,12 +266,12 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
-          git diff api/renewables/ > ../git.patch
+          git diff api/renewables/ > ../renewables.patch
 
       - uses: actions/upload-artifact@v4
         with:
           name: renewables
-          path: git.patch
+          path: renewables.patch
 
   update-co2-emission-data:
     runs-on: ubuntu-latest
@@ -382,12 +382,12 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
-          git diff api/emission/co2/ > ../git.patch
+          git diff api/emission/co2/ > ../emission-co2.patch
 
       - uses: actions/upload-artifact@v4
         with:
           name: emission-co2
-          path: git.patch
+          path: emission-co2.patch
 
   apply-updates:
     runs-on: ubuntu-latest
@@ -402,12 +402,7 @@ jobs:
           merge-multiple: true
 
       - shell: bash
-        name: Debug
-        run: |
-          find .
-
-      - shell: bash
-        name: Debug
+        name: List changes
         run: |
           for file in $(find . -type f); do
               echo "File: $file"
@@ -426,7 +421,7 @@ jobs:
         name: Apply patches
         run: |
           cd github-pages
-          git apply --allow-empty ../*/git.patch
+          git apply --allow-empty ../*.patch
 
       - uses: EndBug/add-and-commit@v9
         name: Publish changes
