@@ -112,7 +112,7 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/energy-price/latest.json 2> /dev/null || true
-          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price > ./github-pages/api/energy-price/index.json
+          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price | tee ./github-pages/api/energy-price/index.json
 
       - shell: bash
         name: Handle open indicents
@@ -145,7 +145,8 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
-          git diff api/energy-price/ > ../energy-price.patch
+          git add api/energy-price/
+          git diff --cached api/energy-price/ | tee ../energy-price.patch
 
       - uses: actions/upload-artifact@v4
         with:
@@ -228,7 +229,7 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/renewables/latest.json 2> /dev/null || true
-          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables > ./github-pages/api/renewables/index.json
+          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables | tee ./github-pages/api/renewables/index.json
 
       - shell: bash
         name: Handle open indicents
@@ -261,7 +262,8 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
-          git diff api/renewables/ > ../renewables.patch
+          git add api/renewables/
+          git diff --cached api/renewables/ | tee ../renewables.patch
 
       - uses: actions/upload-artifact@v4
         with:
@@ -344,7 +346,7 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/emission/co2/latest.json 2> /dev/null || true
-          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 > ./github-pages/api/emission/co2/index.json
+          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 | tee ./github-pages/api/emission/co2/index.json
 
       - shell: bash
         name: Handle open indicents
@@ -377,7 +379,8 @@ jobs:
         name: Create patch
         run: |
           cd github-pages
-          git diff api/emission/co2/ > ../emission-co2.patch
+          git add api/emission/co2/
+          git diff --cached api/emission/co2/ | tee ../emission-co2.patch
 
       - uses: actions/upload-artifact@v4
         with:
@@ -397,14 +400,8 @@ jobs:
           merge-multiple: true
 
       - shell: bash
-        name: List changes
-        run: |
-          for file in $(find . -type f); do
-              echo "File: $file"
-              echo "Contents:"
-              cat "$file"
-              echo "-----------------------------"
-          done
+        name: List patches
+        run: ls -lsh *.patch
 
       - uses: actions/checkout@v4
         with:
