@@ -3,7 +3,7 @@ name: Update contents
 on:
   schedule:
     - cron: '0 * * * *'
-    - cron: '5,15,30,45 12,13,14 * * *'
+    - cron: '5,15,30,45 11,12,13 * * *'
   workflow_dispatch:
     inputs:
       from-timestamp:
