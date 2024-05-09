@@ -253,9 +253,9 @@ The endpoints that serve data which is automatically updated from an upstream da
 The endpoints in question in are:
 
 ```sh
-curl -v https://codereaper.github.io/powercast-data/api/emission/co2/incidents/<zone>.json
-curl -v https://codereaper.github.io/powercast-data/api/energy-price/incidents/<zone>.json
-curl -v https://codereaper.github.io/powercast-data/api/renewables/incidents/<zone>.json
+curl -v https://codereaper.github.io/powercast-data/api/incidents/emission/co2/<zone>.json
+curl -v https://codereaper.github.io/powercast-data/api/incidents/energy-price/<zone>.json
+curl -v https://codereaper.github.io/powercast-data/api/incidents/renewables/<zone>.json
 ```
 
 The response for the incidents are using the following format:
