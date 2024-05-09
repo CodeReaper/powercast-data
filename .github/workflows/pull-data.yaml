@@ -80,9 +80,9 @@ jobs:
             if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_ENV
             fi
-            if [ $HOURS -le 8 ] && [ "${{ env.customized}}" = "false" ]; then
+            if [ $HOURS -lt 8 ] && [ "${{ env.customized}}" = "false" ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/energy-price/incidents/
+              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/energy-price/
             fi
           done
 
@@ -141,7 +141,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ] && [ "${{ env.customized}}" = "false" ]; then
-              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/energy-price/incidents/
+              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/energy-price/
             fi
           done
 
@@ -201,9 +201,9 @@ jobs:
             if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_ENV
             fi
-            if [ $HOURS -le 4 ] && [ "${{ env.customized}}" = "false" ]; then
+            if [ $HOURS -lt 4 ] && [ "${{ env.customized}}" = "false" ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/renewables/incidents/
+              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/renewables/
             fi
           done
 
@@ -262,7 +262,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ] && [ "${{ env.customized}}" = "false" ]; then
-              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/renewables/incidents/
+              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/renewables/
             fi
           done
 
@@ -322,9 +322,9 @@ jobs:
             if [ $HOURS -le 12 ]; then
               echo "stale=true" >> $GITHUB_ENV
             fi
-            if [ $HOURS -le 8 ] && [ "${{ env.customized}}" = "false" ]; then
+            if [ $HOURS -lt 8 ] && [ "${{ env.customized}}" = "false" ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/emission/co2/incidents/
+              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/emission/co2/
             fi
           done
 
@@ -383,7 +383,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ] && [ "${{ env.customized}}" = "false" ]; then
-              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/emission/co2/incidents/
+              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/emission/co2/
             fi
           done
 
