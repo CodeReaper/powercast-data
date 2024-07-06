@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Setup
 find /tmp/ -type f -exec rm {} +
 find /tmp/ -type d -mindepth 1 -exec rmdir {} +

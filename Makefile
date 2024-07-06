@@ -11,7 +11,7 @@ lint:
 
 test-shellcheck:
 	@echo 'Running shellcheck'
-	@shellcheck $$(find src -name "*.sh" -type f) test/mocks/*/*
+	@shellcheck src/*.sh test/*.sh test/mocks/*/*
 
 unit-tests:
 	@find test -name \*.sh -maxdepth 1 -print0 | xargs -0 -I {} echo 'echo Running {}; sh -e {}' | sort | sh -e

@@ -1,6 +1,8 @@
+#!/bin/sh
+
 # Setup
 OLDPATH=$PATH
-export PATH=test/mocks/wget/:$PATH
+export PATH="test/mocks/wget/:$PATH"
 
 # Test if endpoints does not answer pull will fail
 set +e
@@ -18,9 +20,9 @@ diff -q test/fixtures/co2-emission-data-pull-generated-output.json /tmp/result |
 set +e
 unset WGET_OVERRIDE
 now=$(($(date +"%s")+86400))
-tomorrow=$(($now+86400))
+tomorrow=$((now+86400))
 sh src/co2-emission-data-pull.sh DK1 $now $tomorrow > /dev/null
 [ $? -ne 0 ] || exit 1
 
 # Teardown
-export PATH=$OLDPATH
+export PATH="$OLDPATH"
