@@ -3,21 +3,41 @@ root = true
 [*]
 end_of_line = lf
 charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
 
 [.*]
 indent_size = 2
 indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[.git/**]
+end_of_line = unset
+charset = unset
+indent_size = unset
+indent_style = unset
+trim_trailing_whitespace = unset
+insert_final_newline = unset
 
 [*.sh]
 indent_size = 2
 indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
 
-[*.{yml,yaml}]
+[*.yml]
 indent_size = 2
 indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
 
-[configuration/*.json]
+[*.yaml]
 indent_size = 2
 indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[configuration/**]
+indent_size = 2
+indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true

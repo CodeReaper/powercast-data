@@ -30,4 +30,8 @@ jobs:
 
   unit-tests:
     name: Unit tests
-    uses: ./.github/workflows/unit-tests.yaml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make unit-tests
+        shell: bash

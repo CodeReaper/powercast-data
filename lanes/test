@@ -1,3 +1,0 @@
-shellcheck $(find .github/scripts .devcontainer -name "*.sh" -type f) .github/resources/test/mocks/* && \
-ec && \
-lane shell-run-github-workflow-tests -i .github/workflows/unit-tests.yaml

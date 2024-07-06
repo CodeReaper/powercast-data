@@ -1,0 +1,2 @@
+# Allow checking $? (used alot in tests for clarity)
+disable=SC2181
