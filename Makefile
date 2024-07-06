@@ -14,6 +14,7 @@ test-shellcheck:
 	@shellcheck src/*.sh test/*.sh test/mocks/*/*
 
 unit-tests:
+	@mkdir -p /tmp/t/ || true
 	@find test -name \*.sh -maxdepth 1 -print0 | xargs -0 -I {} echo 'echo Running {}; sh -e {}' | sort | sh -e
 
 shell:

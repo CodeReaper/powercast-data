@@ -13,8 +13,8 @@ sh src/energy-price-data-pull.sh DK1 1658318400 1658361600 > /dev/null
 # Test with existing well-known data that pull outputs as expected
 set -e
 export WGET_OVERRIDE=test/fixtures/endpoint-response/elspotprices
-sh src/energy-price-data-pull.sh DK1 1658318400 1658361600 > /tmp/result
-diff -q test/fixtures/energy-price-data-pull-generated-output.json /tmp/result || { echo "Unexpected difference:"; diff test/fixtures/energy-price-data-pull-generated-output.json /tmp/result; exit 1; }
+sh src/energy-price-data-pull.sh DK1 1658318400 1658361600 > /tmp/t/result
+diff -q test/fixtures/energy-price-data-pull-generated-output.json /tmp/t/result || { echo "Unexpected difference:"; diff test/fixtures/energy-price-data-pull-generated-output.json /tmp/t/result; exit 1; }
 
 # Test pull makes a request with end date set to now
 set +e
@@ -27,9 +27,9 @@ sh src/energy-price-data-pull.sh DK1 $now $tomorrow > /dev/null
 # Test with existing well-known empty data that pull outputs as expected
 set -e
 export WGET_OVERRIDE=test/fixtures/endpoint-response/elspotprices_empty
-sh src/energy-price-data-pull.sh DK1 1658318400 1658361600 > /tmp/result
-echo '[]' > /tmp/expected
-diff -q /tmp/expected /tmp/result || { echo "Unexpected difference:"; diff /tmp/expected /tmp/result; exit 1; }
+sh src/energy-price-data-pull.sh DK1 1658318400 1658361600 > /tmp/t/result
+echo '[]' > /tmp/t/expected
+diff -q /tmp/t/expected /tmp/t/result || { echo "Unexpected difference:"; diff /tmp/t/expected /tmp/t/result; exit 1; }
 
 # Teardown
 export PATH="$OLDPATH"

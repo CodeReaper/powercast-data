@@ -13,8 +13,8 @@ sh src/co2-emission-data-pull.sh DK1 1658318400 1658361600 > /dev/null
 # Test with existing well-known data that pull outputs as expected
 set -e
 export WGET_OVERRIDE=test/fixtures/endpoint-response/co2emisprog
-sh src/co2-emission-data-pull.sh DK1 1658318400 1658361600 > /tmp/result
-diff -q test/fixtures/co2-emission-data-pull-generated-output.json /tmp/result || { echo "Unexpected difference:"; diff test/fixtures/co2-emission-data-pull-generated-output.json /tmp/result; exit 1; }
+sh src/co2-emission-data-pull.sh DK1 1658318400 1658361600 > /tmp/t/result
+diff -q test/fixtures/co2-emission-data-pull-generated-output.json /tmp/t/result || { echo "Unexpected difference:"; diff test/fixtures/co2-emission-data-pull-generated-output.json /tmp/t/result; exit 1; }
 
 # Test pull makes a request with end date set to now
 set +e
