@@ -60,7 +60,7 @@ if [ "$END" = "0" ] && [ -n "$5" ]; then
   echo "Not a number: $5"
   exit 5
 fi
-END=${END:-$(date -d +14days +"%s")}
+END=${END:-$(($(date +"%s")+1209600))}
 
 # shellcheck disable=SC2166
 if [ -z "$4" -a -n "$5" ] || [ -n "$4" -a -z "$5" ]; then

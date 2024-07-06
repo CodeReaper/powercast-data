@@ -9,7 +9,7 @@ on:
       - main
     paths:
       - .github/workflows/pull-tariff-data.yaml
-      - .github/scripts/tariff-*.sh
+      - src/tariff-*.sh
       - configuration/zones.json
       - configuration/grid.json
       - configuration/networks.json
@@ -62,7 +62,7 @@ jobs:
           jq -rc '.[][].gln' < configuration/networks.json | while read ID; do
             printf 'Write data for %s' "$ID"
             mkdir -p ./github-pages/api/energy-charges/network/$ID/ > /dev/null
-            sh .github/scripts/tariff-data-filter.sh data.json configuration/networks.json $ID > ./github-pages/api/energy-charges/network/$ID/index.json
+            sh src/tariff-data-filter.sh data.json configuration/networks.json $ID > ./github-pages/api/energy-charges/network/$ID/index.json
             printf ' - %s bytes\n' $(wc -c < "./github-pages/api/energy-charges/network/$ID/index.json")
           done
 

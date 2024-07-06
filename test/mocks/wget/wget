@@ -1,12 +1,12 @@
 #!/bin/sh
 
-[ -f "$WGET_OVERRIDE" ] || { echo "WGET_OVERRIDE is not a file: $WGET_OVERRIDE"; exit 1; }
+[ -f "$WGET_OVERRIDE" ] || exit 1
 
 while getopts ":O:" OPTION; do
     case "$OPTION" in
         O)
             path="$WGET_OVERRIDE"
-            echo "$@" | grep 'offset=0$' >/dev/null || path=".github/resources/test/well-known/endpoint-response/elspotprices_empty"
+            echo "$@" | grep 'offset=0$' >/dev/null || path="test/fixtures/endpoint-response/elspotprices_empty"
             cat "$path" > "$OPTARG"
             exit 0
             ;;

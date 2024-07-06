@@ -21,8 +21,8 @@ on:
       - main
     paths:
       - .github/workflows/pull-data.yaml
-      - .github/scripts/data-*.sh
-      - .github/scripts/*-data-pull.sh
+      - src/data-*.sh
+      - src/*-data-pull.sh
       - configuration/zones.json
 
 concurrency: commits-pages
@@ -48,7 +48,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/energy-price/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          sh src/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
@@ -82,7 +82,7 @@ jobs:
             fi
             if [ $HOURS -lt 8 ] && [ "${{ env.customized}}" = "false" ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/energy-price/
+              sh src/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/energy-price/
             fi
           done
 
@@ -96,7 +96,7 @@ jobs:
             END=$(echo "$CONFIG" | jq -r '.end')
 
             echo "Pull data for ${ZONE} until ${END}..."
-            sh .github/scripts/energy-price-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
+            sh src/energy-price-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
             echo "changed=true" >> $GITHUB_ENV
           done
 
@@ -108,7 +108,7 @@ jobs:
             [ -f "$GENERATED" ] || continue
             ZONE=$(basename $GENERATED .generated)
             echo "Using generated data for ${ZONE}..."
-            sh .github/scripts/data-write.sh $GENERATED ./github-pages/api/energy-price/ $ZONE
+            sh src/data-write.sh $GENERATED ./github-pages/api/energy-price/ $ZONE
           done
 
       - shell: bash
@@ -116,14 +116,14 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/energy-price/latest.json 2> /dev/null || true
-          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price | tee ./github-pages/api/energy-price/index.json
+          sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price | tee ./github-pages/api/energy-price/index.json
 
       - shell: bash
         name: Handle open indicents
         if: env.changed == 'true' && env.delayed == 'true'
         run: |
           NOW=$(date +%s)
-          sh .github/scripts/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          sh src/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             FROM=$(echo "$CONFIG" | jq -r '.latest')
@@ -141,7 +141,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ] && [ "${{ env.customized}}" = "false" ]; then
-              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/energy-price/
+              sh src/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/energy-price/
             fi
           done
 
@@ -174,7 +174,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/renewables/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          sh src/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
@@ -203,7 +203,7 @@ jobs:
             fi
             if [ $HOURS -lt 4 ] && [ "${{ env.customized}}" = "false" ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/renewables/
+              sh src/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/renewables/
             fi
           done
 
@@ -217,7 +217,7 @@ jobs:
             END=$(echo "$CONFIG" | jq -r '.end')
 
             echo "Pull data for ${ZONE} until ${END}..."
-            sh .github/scripts/renewables-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
+            sh src/renewables-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
             echo "changed=true" >> $GITHUB_ENV
           done
 
@@ -229,7 +229,7 @@ jobs:
             [ -f "$GENERATED" ] || continue
             ZONE=$(basename $GENERATED .generated)
             echo "Using generated data for ${ZONE}..."
-            sh .github/scripts/data-write.sh $GENERATED ./github-pages/api/renewables/ $ZONE
+            sh src/data-write.sh $GENERATED ./github-pages/api/renewables/ $ZONE
           done
 
       - shell: bash
@@ -237,14 +237,14 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/renewables/latest.json 2> /dev/null || true
-          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables | tee ./github-pages/api/renewables/index.json
+          sh src/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables | tee ./github-pages/api/renewables/index.json
 
       - shell: bash
         name: Handle open indicents
         if: env.changed == 'true' && env.delayed == 'true'
         run: |
           NOW=$(date +%s)
-          sh .github/scripts/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          sh src/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             FROM=$(echo "$CONFIG" | jq -r '.latest')
@@ -262,7 +262,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ] && [ "${{ env.customized}}" = "false" ]; then
-              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/renewables/
+              sh src/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/renewables/
             fi
           done
 
@@ -295,7 +295,7 @@ jobs:
         run: |
           mkdir -p ./github-pages/api/emission/co2/ > /dev/null
 
-          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          sh src/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
           echo "changed=false" >> $GITHUB_ENV
@@ -324,7 +324,7 @@ jobs:
             fi
             if [ $HOURS -lt 8 ] && [ "${{ env.customized}}" = "false" ]; then
               echo "delayed=true" >> $GITHUB_ENV
-              sh .github/scripts/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/emission/co2/
+              sh src/incident-open.sh $ZONE $NOW delay ./github-pages/api/incidents/emission/co2/
             fi
           done
 
@@ -338,7 +338,7 @@ jobs:
             END=$(echo "$CONFIG" | jq -r '.end')
 
             echo "Pull data for ${ZONE} until ${END}..."
-            sh .github/scripts/co2-emission-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
+            sh src/co2-emission-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
             echo "changed=true" >> $GITHUB_ENV
           done
 
@@ -350,7 +350,7 @@ jobs:
             [ -f "$GENERATED" ] || continue
             ZONE=$(basename $GENERATED .generated)
             echo "Using generated data for ${ZONE}..."
-            sh .github/scripts/data-write.sh $GENERATED ./github-pages/api/emission/co2/ $ZONE
+            sh src/data-write.sh $GENERATED ./github-pages/api/emission/co2/ $ZONE
           done
 
       - shell: bash
@@ -358,14 +358,14 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/emission/co2/latest.json 2> /dev/null || true
-          sh .github/scripts/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 | tee ./github-pages/api/emission/co2/index.json
+          sh src/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 | tee ./github-pages/api/emission/co2/index.json
 
       - shell: bash
         name: Handle open indicents
         if: env.changed == 'true' && env.delayed == 'true'
         run: |
           NOW=$(date +%s)
-          sh .github/scripts/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
+          sh src/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           jq -rc '.[]' configuration.json | while read CONFIG; do
             ZONE=$(echo "$CONFIG" | jq -r '.zone')
             FROM=$(echo "$CONFIG" | jq -r '.latest')
@@ -383,7 +383,7 @@ jobs:
             fi
 
             if [ $HOURS -ge 12 ] && [ "${{ env.customized}}" = "false" ]; then
-              sh .github/scripts/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/emission/co2/
+              sh src/incident-close.sh $ZONE $NOW delay ./github-pages/api/incidents/emission/co2/
             fi
           done
 
