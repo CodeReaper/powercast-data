@@ -68,7 +68,7 @@
         <script type="text/javascript">
             const CATEGORY=`emission/co2`;
 
-            const endpoint = 'https://codereaper.github.io/powercast-data';
+            const endpoint = 'https://codereaper.com/powercast-data';
             const category = typeof CATEGORY == 'undefined' ? 'renewables' : CATEGORY;
             const zones = category == 'energy-price' ? ['DK1','DK2','NO2','SE3','SE4','DE'] : ['DK1','DK2'];
             const axisTitle = category == 'renewables' ? 'MWh': category == 'emission/co2' ? 'CO2 | g' : 'cost | EURO';
