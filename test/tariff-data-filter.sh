@@ -157,10 +157,19 @@ sh src/tariff-data-filter.sh /tmp/t/known-data.json /tmp/t/multi-code-config.jso
 
 diff -q /tmp/t/expected /tmp/t/result || { echo "Unexpected difference:"; diff /tmp/t/expected /tmp/t/result; exit 1; }
 
-# Test with existing data with true nulls that filter outputs as expected
+# Test with existing data with true nulls in valid to property that filter outputs as expected
 set -e
 cp test/fixtures/tariff-data-filter-input-with-nulls.json /tmp/t/known-data.json
 cp test/fixtures/tariff-data-filter-output.json /tmp/t/expected
+
+sh src/tariff-data-filter.sh /tmp/t/known-data.json /tmp/t/config.json 5790001089030 > /tmp/t/result
+
+diff -q /tmp/t/expected /tmp/t/result || { echo "Unexpected difference:"; diff /tmp/t/expected /tmp/t/result; exit 1; }
+
+# Test with existing data with true nulls in prices that filter outputs as expected
+set -e
+cp test/fixtures/tariff-data-filter-input-single-price.json /tmp/t/known-data.json
+cp test/fixtures/tariff-data-filter-output-single-price.json /tmp/t/expected
 
 sh src/tariff-data-filter.sh /tmp/t/known-data.json /tmp/t/config.json 5790001089030 > /tmp/t/result
 
