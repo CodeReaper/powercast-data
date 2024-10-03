@@ -62,7 +62,7 @@ jq -r '.[] | select(.GLN_Number == "5790000000000") |select(.ChargeType == "D03"
 Or attempt to list relevant `ChargeTypeCode` based on dates using the following command:
 
 ```sh
-jq -r '[.[] | select(.GLN_Number == "5790000000000") |select(.ChargeType == "D03")] | map(.from = (.ValidFrom + "Z"|fromdateiso8601) | .ValidTo = if (.ValidTo|type) == "object" then null else .ValidTo end) | group_by(.ChargeTypeCode) | map(max_by(.from))[] | {item: "\(.ChargeTypeCode) / \(.Note) / \(.ValidFrom) / \(.ValidTo)"}' < list.json| grep '^ '|cut -d\: -f2- | sort -u
+jq -r '[.[] | select(.GLN_Number == "5790000000000") |select(.ChargeType == "D03")] | map(.from = (.ValidFrom + "Z"|fromdateiso8601) | .ValidTo = if .ValidTo == null or (.ValidTo|type) == "object" then null else .ValidTo end) | group_by(.ChargeTypeCode) | map(max_by(.from))[] | {item: "\(.ChargeTypeCode) / \(.Note) / \(.ValidFrom) / \(.ValidTo)"}' < list.json| grep '^ '|cut -d\: -f2- | sort -u
 ```
 
 _Note that must replace 5790000000000 with the actual GLN number_.
