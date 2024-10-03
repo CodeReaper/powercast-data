@@ -120,6 +120,14 @@
     "zone": "DK1"
   },
   {
+    "from": 1735686000,
+    "to": 1767222000,
+    "electricityCharge": 72,
+    "transmissionTariff": 6.1,
+    "systemTariff": 7.4,
+    "zone": "DK1"
+  },
+  {
     "from": 1293836400,
     "to": 1325372400,
     "electricityCharge": 73,
@@ -237,6 +245,14 @@
     "electricityCharge": 76.1,
     "transmissionTariff": 7.4,
     "systemTariff": 5.1,
+    "zone": "DK2"
+  },
+  {
+    "from": 1735686000,
+    "to": 1767222000,
+    "electricityCharge": 72,
+    "transmissionTariff": 6.1,
+    "systemTariff": 7.4,
     "zone": "DK2"
   }
 ]
