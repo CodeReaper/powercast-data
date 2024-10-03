@@ -24,7 +24,7 @@ The following datasets are used to look up data.
 
 The network- and system-tariff in Denmark are defined by law and published by Energinet yearly.
 
-### [Danish ministry of taxation](https://www.skm.dk/skattetal/satser/satser-og-beloebsgraenser-i-lovgivningen/elafgiftsloven/)
+### [Danish ministry of taxation](https://skm.dk/tal-og-metode/satser/satser-og-beloebsgraenser-i-lovgivningen/elafgiftsloven)
 
 The electricity charge is defined by law.
 
