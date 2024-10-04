@@ -67,3 +67,13 @@ printf '[{"zone": "DK1","capabilities": ["energy-price"]}]' > /tmp/t/config.json
 printf '[{"zone":"DK1","latest":1701302400,"end":1701302400}]\n' > /tmp/t/expected
 sh src/data-matrix.sh /tmp/t/config.json energy-price test/fixtures/existing-data-write-output/ 1701302400 1701302400 | jq -rc '.' > /tmp/t/result
 diff -q /tmp/t/expected /tmp/t/result || { echo "Unexpected difference:"; diff /tmp/t/expected /tmp/t/result; exit 1; }
+
+# Test with multiple uneven well-known data that matrix contains DK1 and DK2 items with different lastest values
+set -e
+export PATH="test/mocks/date/:$PATH"
+export DATE_OVERRIDE=100
+printf '[{"zone": "DK1","capabilities": ["energy-price"]},{"zone": "DK2","capabilities": ["energy-price"]}]' > /tmp/t/config.json
+printf '[{"zone":"DK1","latest":1654297200,"end":1209700},{"zone":"DK2","latest":1654210800,"end":1209700}]\n' > /tmp/t/expected
+sh src/data-matrix.sh /tmp/t/config.json energy-price test/fixtures/uneven-existing-data-write-output/ | jq -rc '.' > /tmp/t/result
+diff -q /tmp/t/expected /tmp/t/result || { echo "Unexpected difference:"; diff /tmp/t/expected /tmp/t/result; exit 1; }
+export PATH="$OLDPATH"
