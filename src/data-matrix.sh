@@ -67,8 +67,13 @@ if [ -z "$4" -a -n "$5" ] || [ -n "$4" -a -z "$5" ]; then
   exit 6
 fi
 
+OVERRIDEN=true
+if [ -z "$FROM" ]; then
+  OVERRIDEN=false
+fi
+
 jq -rc --arg category "$CATEGORY" '.[] | select(.capabilities | index($category) | .) | .zone' "$CONFIG" | while read -r AREA; do
-  if [ -z "$FROM" ]; then
+  if [ $OVERRIDEN = false ]; then
     FROM=$(sh "${SCRIPTS}/data-freshness.sh" "$FOLDER" "$AREA" 0)
   fi
   printf "{\"zone\":\"%s\",\"latest\":%s,\"end\":%s}\n" "$AREA" "$FROM" "$END"
