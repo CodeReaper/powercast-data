@@ -1,6 +1,5 @@
 services:
   runner:
-    image: powercast-runner
     build:
       context: .
       dockerfile: Dockerfile
