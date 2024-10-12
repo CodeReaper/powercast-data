@@ -21,6 +21,7 @@ unit-tests:
 _unit-tests:
 	@mkdir -p /tmp/t/ || true
 	@find test -name \*.sh -maxdepth 1 -print0 | xargs -0 -I {} echo 'echo Running {}; sh -e {}' | sort | sh -e
+	exit 1
 
 swagger:
 	docker compose up swagger

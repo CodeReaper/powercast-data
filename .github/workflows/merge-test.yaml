@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: make unit-tests
+      - run: make
         shell: bash
 
   unit-tests:
@@ -67,6 +67,7 @@ jobs:
       - editorconfig-check
       - dependabot-validate
       - openapi-validate
+      - make-tests
 
     runs-on: ubuntu-latest
     steps:
