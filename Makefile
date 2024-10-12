@@ -11,7 +11,7 @@ lint-editorcheck:
 	docker compose run --rm runner ec
 
 lint-openapi:
-	docker compose run --rm redocly lint --skip-rule operation-4xx-response resources/openapi.yaml
+	docker compose run --rm redocly lint --skip-rule operation-4xx-response --format=github-actions resources/openapi.yaml
 
 test-shellcheck:
 	docker compose run --rm runner shellcheck src/*.sh test/*.sh test/mocks/*/*

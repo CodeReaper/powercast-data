@@ -5,6 +5,14 @@ on:
   pull_request: {}
 
 jobs:
+  make-tests:
+    name: Make tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make unit-tests
+        shell: bash
+
   unit-tests:
     name: Unit tests
     runs-on: ubuntu-latest
