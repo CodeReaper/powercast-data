@@ -36,7 +36,7 @@ jobs:
       - uses: actions/setup-node@v4
       - run: npm install -g @redocly/cli@latest
         shell: bash
-      - run: redocly lint --skip-rule operation-4xx-response --format=github-actions resources/api-spec.yaml
+      - run: redocly lint --skip-rule operation-4xx-response --format=github-actions resources/openapi.yaml
         shell: bash
 
   dependabot-validate:
