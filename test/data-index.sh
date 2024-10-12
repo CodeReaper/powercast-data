@@ -2,8 +2,9 @@
 
 # Setup
 find /tmp/t/ -type f -exec rm {} +
-find /tmp/t/ -type d -mindepth 1 -exec rmdir {} +
+find /tmp/t/ -type d -mindepth 1 -exec rm -rf {} +
 mkdir /tmp/t/empty-data-folder
+mkdir /tmp/t/empty-data-folder/find-helper
 
 # Test non-existing file
 set +e
