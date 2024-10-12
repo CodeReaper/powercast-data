@@ -1,0 +1,20 @@
+services:
+  runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+  redocly:
+    image: redocly/cli
+    volumes:
+      - .:/spec
+  swagger:
+    image: swaggerapi/swagger-ui
+    environment:
+      URL: /openapi.yaml
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./resources/openapi.yaml:/usr/share/nginx/html/openapi.yaml

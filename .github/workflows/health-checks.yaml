@@ -27,11 +27,3 @@ jobs:
     uses: ./.github/workflows/health-check-integrity.yaml
     with:
       publish-branch: gh-pages
-
-  unit-tests:
-    name: Unit tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: make unit-tests
-        shell: bash

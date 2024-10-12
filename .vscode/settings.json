@@ -1,4 +1,12 @@
 {
     "files.trimTrailingWhitespace": true,
-    "files.trimFinalNewlines": true
+    "files.trimFinalNewlines": true,
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.json": "file:///Users/code/repos/powercast-data/resources/openapi.yaml"
+    },
+    "cSpell.words": [
+        "openapi",
+        "Powercast",
+        "renewables"
+    ]
 }

@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/update-visualization.yaml
       - resources/*.html
+      - resources/openapi.yaml
       - configuration/displays.json
 
 concurrency: commits-pages
@@ -46,7 +47,7 @@ jobs:
         run: |
           set -e
 
-          cat resources/redirect.html | sed 's|REDIRECT_URL|//${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/energy-price/|g' > ./github-pages/index.html
+          cat resources/redirect.html | sed 's|REDIRECT_URL|//codereaper.com/powercast-data/energy-price/|g' > ./github-pages/index.html
 
       - shell: bash
         name: Generate energy price visualization
@@ -81,11 +82,21 @@ jobs:
 
           cat resources/graph.html | sed 's|PAGE_TITLE|Renewable Energy Production|g;s|//INJECT|const CATEGORY=`renewables`;|g' > ./github-pages/renewables/index.html
 
+      - shell: bash
+        name: Generate openapi documentation
+        run: |
+          set -e
+
+          mkdir -p ./github-pages/openapi/ 2>/dev/null
+
+          cat resources/openapi.yaml > ./github-pages/openapi/spec.yaml
+          cat resources/openapi.html | sed 's|OPENAPI_SPEC_URL|https://codereaper.com/powercast-data/openapi/spec.yaml|g;' > ./github-pages/openapi/index.html
+
       - uses: EndBug/add-and-commit@v9
         name: Publish graph
         with:
           cwd: github-pages
-          add: "['index.html', '404.html', 'energy-price', 'emission-co2', 'renewables']"
+          add: "['index.html', '404.html', 'energy-price', 'emission-co2', 'renewables', 'openapi']"
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
           message: Publish visualizations via workflow
