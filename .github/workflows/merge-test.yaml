@@ -6,7 +6,7 @@ on:
 
 jobs:
   tests-succeeded:
-    name: Run tests
+    name: Tests Succeeded
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
