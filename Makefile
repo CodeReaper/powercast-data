@@ -5,22 +5,22 @@ export DOCKER_CLI_HINTS=false
 
 test: lint test-shellcheck unit-tests
 
-lint:
-	@echo 'Running editorconfig check'
-	@ec
+lint: lint-editorcheck lint-openapi
+
+lint-editorcheck:
+	docker compose run --rm runner ec
+
+lint-openapi:
+	docker compose run --rm redocly lint --skip-rule operation-4xx-response resources/openapi.yaml
 
 test-shellcheck:
-	@echo 'Running shellcheck'
-	@shellcheck src/*.sh test/*.sh test/mocks/*/*
+	docker compose run --rm runner shellcheck src/*.sh test/*.sh test/mocks/*/*
 
 unit-tests:
+	docker compose run --rm runner make _unit-tests
+_unit-tests:
 	@mkdir -p /tmp/t/ || true
 	@find test -name \*.sh -maxdepth 1 -print0 | xargs -0 -I {} echo 'echo Running {}; sh -e {}' | sort | sh -e
 
-shell:
-	@docker rmi --force powercast-runner:latest 2>&1 > /dev/null
-	@docker build -qt powercast-runner . >/dev/null
-	@docker run -it --rm \
-	-v $$(pwd):/workspace \
-	-w /workspace \
-	powercast-runner /bin/sh
+swagger:
+	docker compose up swagger

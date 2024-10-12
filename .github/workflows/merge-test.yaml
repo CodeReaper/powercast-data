@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: make unit-tests
+      - run: make _unit-tests
         shell: bash
 
   editorconfig-check:
@@ -27,6 +27,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ludeeus/action-shellcheck@master
+
+  openapi-validate:
+    name: Validate openapi spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm install -g @redocly/cli@latest
+        shell: bash
+      - run: redocly lint --skip-rule operation-4xx-response --format=github-actions resources/api-spec.yaml
+        shell: bash
 
   dependabot-validate:
     name: Validate dependabot
@@ -47,6 +58,7 @@ jobs:
       - shellcheck
       - editorconfig-check
       - dependabot-validate
+      - openapi-validate
 
     runs-on: ubuntu-latest
     steps:

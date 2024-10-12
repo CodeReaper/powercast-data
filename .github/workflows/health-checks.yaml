@@ -33,5 +33,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: make unit-tests
+      - run: make _unit-tests
         shell: bash
