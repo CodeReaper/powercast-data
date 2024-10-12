@@ -96,7 +96,7 @@ jobs:
         name: Publish graph
         with:
           cwd: github-pages
-          add: "['index.html', '404.html', 'energy-price', 'emission-co2', 'renewables']"
+          add: "['index.html', '404.html', 'energy-price', 'emission-co2', 'renewables', 'openapi']"
           push: --set-upstream origin ${{ env.publish-branch }}
           default_author: github_actions
           message: Publish visualizations via workflow
