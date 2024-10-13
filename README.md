@@ -5,9 +5,9 @@ Powercast aims to lower the boundary to query, view and understand energy pricin
 ## Quick look
 
 Go and check the graphs:
- - [Energy Price](https://codereaper.com/powercast-data/energy-price/)
- - [CO2 Emission](https://codereaper.com/powercast-data/emission-co2/)
- - [Renewable Energy Production](https://codereaper.com/powercast-data/renewables/)
+- [Energy Price](https://codereaper.com/powercast-data/energy-price/)
+- [CO2 Emission](https://codereaper.com/powercast-data/emission-co2/)
+- [Renewable Energy Production](https://codereaper.com/powercast-data/renewables/)
 
 ## API documentation
 
@@ -36,7 +36,7 @@ The electricity charge is defined by law.
 
 #### Euro exchange rates
 
--  Danish krone is pegged to a rate of [7.46](https://www.investopedia.com/terms/d/dkk.asp) krones per Euro.
+- Danish krone is pegged to a rate of [7.46](https://www.investopedia.com/terms/d/dkk.asp) krones per Euro.
 
 #### VAT
 

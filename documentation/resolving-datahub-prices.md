@@ -69,7 +69,7 @@ _Note that must replace 5790000000000 with the actual GLN number_.
 
 The expected output will vary a lot, but here is an example:
 
-```
+```text
   "uniq": "4000 / Nettarif C skabelon"
   "uniq": "4000 / Nettarif C"
   "uniq": "4000 / Nettarif C-Flex"
