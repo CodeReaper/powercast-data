@@ -11,9 +11,20 @@ services:
     volumes:
       - .:/spec:ro
   dockerlint:
-    image: redcoolbeans/dockerlint
+    image: hadolint/hadolint
+    entrypoint: /bin/hadolint
     volumes:
-      - ./Dockerfile:/Dockerfile:ro
+      - .:/workspace:ro
+    working_dir: /workspace
+  makelint:
+    image: mrtazz/checkmake
+    volumes:
+      - ./Makefile:/Makefile:ro
+  markdownlint:
+    image: ghcr.io/igorshubovych/markdownlint-cli
+    volumes:
+      - .:/workspace:ro
+    working_dir: /workspace
   swagger:
     image: swaggerapi/swagger-ui
     environment:
