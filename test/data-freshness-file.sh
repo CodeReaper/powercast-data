@@ -2,7 +2,7 @@
 
 # Setup
 find /tmp/t/ -type f -exec rm {} +
-find /tmp/t/ -type d -mindepth 1 -exec rmdir {} +
+find /tmp/t/ -type d -mindepth 1 -exec rm -rf {} +
 echo '[]' > /tmp/t/empty-file
 
 # Test non-existing file

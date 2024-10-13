@@ -4,12 +4,16 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
     working_dir: /workspace
   redocly:
     image: redocly/cli
     volumes:
-      - .:/spec
+      - .:/spec:ro
+  dockerlint:
+    image: redcoolbeans/dockerlint
+    volumes:
+      - ./Dockerfile:/Dockerfile:ro
   swagger:
     image: swaggerapi/swagger-ui
     environment:
