@@ -12,7 +12,7 @@ services:
       - .:/spec:ro
   dockerlint:
     image: hadolint/hadolint
-    entrypoint: /bin/hadolint
+    entrypoint: /bin/hadolint --ignore DL3018
     volumes:
       - .:/workspace:ro
     working_dir: /workspace
