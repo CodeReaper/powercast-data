@@ -1,6 +1,6 @@
-# Resolving Datahub Prices
+# Resolving DataHub Prices
 
-_Datahub contains only prices for Denmark and this document is scoped only for Denmark for that reason._
+_DataHub contains only prices for Denmark and this document is scoped only for Denmark for that reason._
 
 ## Prerequisites
 
@@ -8,21 +8,10 @@ _Datahub contains only prices for Denmark and this document is scoped only for D
 
 The currently best known source for this is [this map](https://ens.dk/sites/ens.dk/files/Statistik/elnetgraenser_2023_04.pdf). There must be a better source...
 
-### The tool `jq`
+### Software
 
-[`jq`](https://jqlang.github.io/jq/) is json manipulation tool - you will find all tools are present in the [`devcontainer`](https://containers.dev) for this repo.
-
-### A local copy of price data
-
-We will prepare two files using these two commands:
-
-```sh
-curl -v "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0" > list.json
-```
-
-```sh
-jq 'group_by(.GLN_Number) | map({gln: .[0].GLN_Number, name:.[0].ChargeOwner}) | unique' < list.json > gln-names.json
-```
+- `make`
+- `docker`
 
 ## Searching data
 
@@ -40,7 +29,13 @@ The company name ("Zero Power") must be used to search online for an actual pric
 
 ### Look up GLN
 
-The prepared file `gls-names.json` should contain the name of the company and its GLN number, for instance:
+You can view the names of the companies and theirs GLN numbers by running:
+
+```sh
+make view-glns
+```
+
+The output should view the following example:
 
 ```jsonc
 // ...
@@ -53,16 +48,11 @@ The prepared file `gls-names.json` should contain the name of the company and it
 
 ### Look up available `ChargeTypeCode`
 
-We can list available `ChargeTypeCode` with some description using the following command:
+We can list available `ChargeTypeCode` with some description using the following commands:
 
 ```sh
-jq -r '.[] | select(.GLN_Number == "5790000000000") |select(.ChargeType == "D03") | {uniq: "\(.ChargeTypeCode) / \(.Note)"}' < list.json | grep '^ '| sort -u
-```
-
-Or attempt to list relevant `ChargeTypeCode` based on dates using the following command:
-
-```sh
-jq -r '[.[] | select(.GLN_Number == "5790000000000") |select(.ChargeType == "D03")] | map(.from = (.ValidFrom + "Z"|fromdateiso8601) | .ValidTo = if .ValidTo == null or (.ValidTo|type) == "object" then null else .ValidTo end) | group_by(.ChargeTypeCode) | map(max_by(.from))[] | {item: "\(.ChargeTypeCode) / \(.Note) / \(.ValidFrom) / \(.ValidTo)"}' < list.json| grep '^ '|cut -d\: -f2- | sort -u
+make id=5790000000000 find-charge
+make id=5790000000000 find-charge-verbose # for additional data
 ```
 
 _Note that must replace 5790000000000 with the actual GLN number_.
@@ -105,6 +95,12 @@ The expected output will vary a lot, but here is an example:
   "uniq": "8070 / Nettarif indfødning A høj"
 ```
 
+The verbose output will include date ranges for the codes, like so:
+```text
+"8040 / Nettarif indfødning B høj / 2015-10-01T00:00:00 / 2015-10-03T00:00:00"
+"8070 / Nettarif indfødning A høj / 2025-02-01T00:00:00 / null"
+```
+
 ### Find class `C` `ChargeTypeCode`
 
 One thing to note is that the `ChargeTypeCode` can be the same for multiple "notes".
@@ -123,7 +119,7 @@ At this point we have:
 
 With these items we can execute a command to view the prices:
 ```sh
-jq -r '[.[] | select(.GLN_Number == "5790000000000") |select(.ChargeType == "D03")| select(.ChargeTypeCode == "4000")]' < list.json|less
+make id=5790000000000 code=4000 view-prices |less
 ```
 
 _Note you can exit less by typing 'q'_.

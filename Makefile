@@ -16,7 +16,8 @@ test-dependabot:
 	$(COMPOSE_RUN) runner check-jsonschema --builtin-schema dependabot .github/dependabot.yml
 
 test-docker:
-	$(COMPOSE_RUN) dockerlint Dockerfile
+	$(COMPOSE_RUN) dockerlint docker/builder.Dockerfile
+	$(COMPOSE_RUN) dockerlint docker/runner.Dockerfile
 	docker compose config -q
 
 test-editorcheck:
@@ -54,6 +55,42 @@ _unit-tests:
 swagger: ## Runs a local swagger
 	docker compose up swagger
 
+build:
+	$(COMPOSE_RUN) builder make _build
+
+_build:
+	mkdir build
+	echo '*' > build/.gitignore
+	curl --fail --output build/datahub-prices.json "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0"
+	jq 'group_by(.GLN_Number) | map({gln: .[0].GLN_Number, name:.[0].ChargeOwner}) | unique' < build/datahub-prices.json > build/gln-names.json
+
+find-charge: build | guard-id ## Looks up charge type codes for a given id
+	$(COMPOSE_RUN) runner make id=$(id) _find-charge
+
+_find-charge:
+	jq -r --arg id "$(id)" '.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03") | {uniq: "\(.ChargeTypeCode) / \(.Note)"}' < build/datahub-prices.json | grep '^ '| sort -u
+
+find-charge-verbose: build | guard-id ## Looks up charge type codes for a given id, but with more data
+	$(COMPOSE_RUN) runner make id=$(id) _find-charge-verbose
+
+_find-charge-verbose:
+	jq -r --arg id "$(id)" '[.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03")] | map(.from = (.ValidFrom + "Z"|fromdateiso8601) | .ValidTo = if .ValidTo == null or (.ValidTo|type) == "object" then null else .ValidTo end) | group_by(.ChargeTypeCode) | map(max_by(.from))[] | {item: "\(.ChargeTypeCode) / \(.Note) / \(.ValidFrom) / \(.ValidTo)"}' < build/datahub-prices.json| grep '^ '|cut -d\: -f2- | sort -u
+
+view-glns: build ## View company names and their GLN numbers
+	$(COMPOSE_RUN) runner cat build/gln-names.json
+
+view-prices: build | guard-id guard-code ## View prices for a given id and code
+	$(COMPOSE_RUN) runner make id=$(id) code=$(code) _view-prices
+
+_view-prices:
+	jq -r --arg id "$(id)" --arg code "$(code)" '[.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03")| select(.ChargeTypeCode == $$code)]' < build/datahub-prices.json
+
+guard-%:
+	@if [ "${${*}}" = "" ]; then \
+		echo "Environment variable $* not set"; \
+		exit 1; \
+	fi
+
 help: ## Display this help
 	@$(COMPOSE_RUN) runner make _help
 _help:
@@ -62,5 +99,10 @@ _help:
 shell: ## Enters a shell on the runner
 	@$(COMPOSE_RUN) runner sh
 
-clean: ## Clears docker to trigger re-pulling and re-build images
+clean: ## Clears data and docker to trigger re-pulling and re-build images
+	@$(COMPOSE_RUN) builder make _clean
 	docker compose down --rmi all --remove-orphans
+
+_clean:
+	@-rm -rf build.backup
+	mv build build.backup
