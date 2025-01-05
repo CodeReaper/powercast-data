@@ -1,8 +1,15 @@
 services:
+  builder:
+    build:
+      context: .
+      dockerfile: docker/builder.Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
   runner:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/runner.Dockerfile
     volumes:
       - .:/workspace:ro
     working_dir: /workspace
