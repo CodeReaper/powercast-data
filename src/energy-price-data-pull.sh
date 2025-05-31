@@ -34,7 +34,7 @@ FROMDATE=$2
 ENDDATE=$3
 DIR=/tmp/$$
 ENDPOINT=https://api.energidataservice.dk/
-QUERY="dataset/DayAheadPrices?limit=${LIMIT}&sort=HourUTC%20desc&columns=HourUTC,PriceArea,DayAheadPriceEUR&start=$(date -d "@$FROMDATE" +"%Y-%m-%dT%H:%M")&end=$(date -d "@$ENDDATE" +"%Y-%m-%dT%H:%M")&timezone=UTC"
+QUERY="dataset/DayAheadPrices?limit=${LIMIT}&sort=TimeUTC%20desc&columns=TimeUTC,PriceArea,DayAheadPriceEUR&start=$(date -d "@$FROMDATE" +"%Y-%m-%dT%H:%M")&end=$(date -d "@$ENDDATE" +"%Y-%m-%dT%H:%M")&timezone=UTC"
 
 which mkdir wget jq cat date > /dev/null
 
@@ -51,7 +51,7 @@ while true; do
     wget -nv -O $DIR/request.json "${REQUEST}"
 
     # shellcheck disable=SC2016
-    TRANSFORMATION='.records |= map(. as $item | {euro: $item.DayAheadPriceEUR, timestamp: $item.HourUTC}) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records'
+    TRANSFORMATION='.records |= map(. as $item | {euro: $item.DayAheadPriceEUR, timestamp: $item.TimeUTC}) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records'
     cat $DIR/request.json | jq -r "$TRANSFORMATION" > $DIR/data.new.json
 
     jq -e 'if . == [] then false else true end' < $DIR/data.new.json > /dev/null || break
