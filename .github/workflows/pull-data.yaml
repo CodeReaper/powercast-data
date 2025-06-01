@@ -86,6 +86,11 @@ jobs:
             fi
           done
 
+      - uses: actions/setup-go@v5
+        if: env.stale == 'true'
+        with:
+          go-version-file: go.mod
+
       - shell: bash
         name: Pull data
         if: env.stale == 'true'
@@ -96,19 +101,8 @@ jobs:
             END=$(echo "$CONFIG" | jq -r '.end')
 
             echo "Pull data for ${ZONE} until ${END}..."
-            sh src/energy-price-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
+            go run download.go --zone ${ZONE} --from ${FROM} --end ${END} --output ./github-pages/api/energy-price/ --limit 100
             echo "changed=true" >> $GITHUB_ENV
-          done
-
-      - shell: bash
-        name: Write data
-        if: env.changed == 'true'
-        run: |
-          for GENERATED in *.generated; do
-            [ -f "$GENERATED" ] || continue
-            ZONE=$(basename $GENERATED .generated)
-            echo "Using generated data for ${ZONE}..."
-            sh src/data-write.sh $GENERATED ./github-pages/api/energy-price/ $ZONE
           done
 
       - shell: bash

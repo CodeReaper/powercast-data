@@ -21,7 +21,7 @@ test-docker:
 	docker compose config -q
 
 test-editorcheck:
-	$(COMPOSE_RUN) runner ec
+	$(COMPOSE_RUN) runner ec -exclude '^\.git/|^build/|^build\.backup/'
 
 test-github:
 	$(COMPOSE_RUN) runner make _test-github SCHEMA=github-workflows DIRECTORY=workflows
@@ -32,7 +32,7 @@ _test-github:
 test-json:
 	$(COMPOSE_RUN) runner make _test-json
 _test-json:
-	@find .vscode configuration test/fixtures -type f -iname '*.json' -print0 | xargs -0 -I {} echo 'echo Checking: {}; jq empty < {}' | sort | sh -e
+	@find .vscode configuration test/fixtures testdata -type f -iname '*.json*' -print0 | xargs -0 -I {} echo 'echo Checking: {}; jq empty < {}' | sort | sh -e
 
 test-makefile:
 	$(COMPOSE_RUN) makelint
@@ -45,6 +45,25 @@ test-openapi:
 
 test-shellcheck:
 	$(COMPOSE_RUN) runner shellcheck src/*.sh test/*.sh test/mocks/*/*
+
+CI = $(shell env | grep ^CI=)
+TOOL_VERSION = $(shell grep '^golang ' .tool-versions | sed 's/golang //')
+MOD_VERSION = $(shell grep '^go ' go.mod | sed 's/go //')
+test-go:
+	go fmt
+	go mod tidy
+ifeq ($(strip $(CI)),)
+	@git diff --quiet --exit-code || echo 'Warning: Workplace is dirty'
+else
+	@git diff --quiet --exit-code || (echo 'Error: Workplace is dirty'; exit 1)
+endif
+	go test -timeout 10s -p 1 -coverprofile=build/coverage.out ./...
+	go tool cover -html=build/coverage.out -o build/coverage.html
+ifneq ($(TOOL_VERSION),$(MOD_VERSION))
+	@echo 'Mismatched go versions'
+	@exit 1
+endif
+	@exit 0
 
 unit-tests:
 	$(COMPOSE_RUN) runner make _unit-tests

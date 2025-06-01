@@ -34,7 +34,6 @@ func main() {
 		zone, output string
 		from, end    int64
 		limit        int
-		records      []Record
 		err          error
 	)
 
@@ -49,15 +48,29 @@ func main() {
 		log.Fatalf("Missing flag, provided flags: %s", os.Args[1:])
 	}
 
-	records, err = fetchRecords(endpoint, zone, from, end, limit)
+	err = run(endpoint, zone, from, end, limit, output)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func run(endpoint string, zone string, from int64, end int64, limit int, output string) error {
+	var (
+		records []Record
+		err     error
+	)
+
+	records, err = fetchRecords(endpoint, zone, from, end, limit)
+	if err != nil {
+		return err
 	}
 
 	err = saveRecords(zone, records, output)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
 func saveRecords(zone string, records []Record, output string) error {
@@ -310,5 +323,3 @@ type SpotRecord struct {
 	Euro      float32 `json:"SpotPriceEUR"`
 	Timestamp string  `json:"HourUTC"`
 }
-
-// go run download.go --zone DK1 --from 1685577600 --end 1685588400 --output /tmp/ --limit 2

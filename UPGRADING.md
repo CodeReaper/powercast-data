@@ -6,9 +6,4 @@ DayAheadPrices with TimeUTC,PriceArea,DayAheadPriceEUR
 # https://codereaper.com/powercast-data/api/v2/energy-price/ dates for changes
 # https://codereaper.com/powercast-data/api/v2/energy-price/2024/01/01/DK1/
 
-test-json:
-test-shellcheck:
-unit-tests:
-
-pull-data.yaml - "data pulling"
 health-check-integrity.yaml - check-energy-price
