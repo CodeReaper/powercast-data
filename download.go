@@ -16,8 +16,6 @@ import (
 	"time"
 )
 
-const endpoint = `https://api.energidataservice.dk/`
-
 var (
 	errConvert       = errors.New("failed to convert data")
 	errDecode        = errors.New("failed to decode data")
@@ -31,43 +29,53 @@ var (
 
 func main() {
 	var (
-		zone, output string
-		from, end    int64
-		limit        int
-		err          error
+		flags Flags
+		err   error
 	)
 
-	flag.StringVar(&zone, "zone", "", "Price Area like DK1")
-	flag.StringVar(&output, "output", "", "Directory to place output into")
-	flag.Int64Var(&from, "from", 0, "Unix timestamp of period start")
-	flag.Int64Var(&end, "end", 0, "Unix timestamp of period end")
-	flag.IntVar(&limit, "limit", 100, "Limit to use per page in results")
+	flag.StringVar(&flags.Zone, "zone", "", "Price Area like DK1")
+	flag.StringVar(&flags.Output, "output", "", "Directory to place output into")
+	flag.StringVar(&flags.Endpoint, "endpoint", "https://api.energidataservice.dk/", "Endpoint to fetch from")
+	flag.StringVar(&flags.DayAheadDate, "dayaheaddate", "2025-10-01", "Date when dayahead prices take effect")
+	flag.Int64Var(&flags.From, "from", 0, "Unix timestamp of period start")
+	flag.Int64Var(&flags.End, "end", 0, "Unix timestamp of period end")
+	flag.IntVar(&flags.Limit, "limit", 100, "Limit to use per page in results")
+	flag.IntVar(&flags.SleepInterval, "sleep-interval", 1000, "Milliseconds to sleep when API is throttling")
 
 	flag.Parse()
-	if len(zone) == 0 || len(output) == 0 || from == 0 || end == 0 {
-		log.Fatalf("Missing flag, provided flags: %s", os.Args[1:])
+	err = flags.Validate()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	err = run(endpoint, zone, from, end, limit, output)
+	err = run(flags)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func run(endpoint string, zone string, from int64, end int64, limit int, output string) error {
+func run(f Flags) error {
 	var (
-		records []Record
-		err     error
+		partitions []Flags
+		records    []Record
+		err        error
 	)
 
-	records, err = fetchRecords(endpoint, zone, from, end, limit)
+	partitions, err = f.Partitions()
 	if err != nil {
 		return err
 	}
 
-	err = saveRecords(zone, records, output)
-	if err != nil {
-		return err
+	for _, flags := range partitions {
+		records, err = fetchRecords(flags.Endpoint, flags.Zone, flags.From, flags.End, flags.Limit, flags.SleepInterval)
+		if err != nil {
+			return err
+		}
+
+		err = saveRecords(flags.Zone, records, flags.Output)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -171,7 +179,7 @@ func updateOutput(file string, records []Record) ([]Record, error) {
 	return updated, nil
 }
 
-func fetchRecords(endpoint string, zone string, from int64, end int64, limit int) ([]Record, error) {
+func fetchRecords(endpoint string, zone string, from int64, end int64, limit int, sleep int) ([]Record, error) {
 	var (
 		data    = make(map[int64]Record)
 		records = make([]Record, 0)
@@ -190,7 +198,7 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 			return records, err
 		}
 
-		bytes, err = performRequest(req)
+		bytes, err = performRequest(req, sleep)
 		if err != nil {
 			return records, err
 		}
@@ -255,7 +263,7 @@ func buildRequest(endpoint string, zone string, from int64, end int64, limit int
 	return uri.String(), nil
 }
 
-func performRequest(req string) ([]byte, error) {
+func performRequest(req string, sleep int) ([]byte, error) {
 	var (
 		bytes     = make([]byte, 0)
 		res       *http.Response
@@ -280,7 +288,7 @@ func performRequest(req string) ([]byte, error) {
 
 	remainder, _ = strconv.Atoi(res.Header.Get("remainingcalls"))
 	if remainder > 0 && remainder < 20 {
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(sleep) * time.Millisecond)
 	}
 
 	return bytes, nil
@@ -310,6 +318,27 @@ func parseBody(body []byte) ([]Record, error) {
 	return records, nil
 }
 
+type Flags struct {
+	Zone, Output, Endpoint, DayAheadDate string
+	From, End                            int64
+	Limit, SleepInterval                 int
+}
+
+func (f *Flags) Validate() error {
+	if len(f.Zone) == 0 || len(f.Output) == 0 || f.From == 0 || f.End == 0 {
+		return fmt.Errorf("missing flag, provided flags: %s", os.Args[1:])
+	}
+
+	return nil
+}
+
+func (f *Flags) Partitions() ([]Flags, error) {
+	var flags = make([]Flags, 0)
+	// FIXME: split by dayahead
+	flags = append(flags, *f)
+	return flags, nil
+}
+
 type Record struct {
 	Euro      float32 `json:"euro"`
 	Timestamp int64   `json:"timestamp"`
@@ -322,4 +351,13 @@ type SpotRecords struct {
 type SpotRecord struct {
 	Euro      float32 `json:"SpotPriceEUR"`
 	Timestamp string  `json:"HourUTC"`
+}
+
+type DayAHeadRecords struct {
+	Records []SpotRecord `json:"records"`
+}
+
+type DayAHeadRecord struct {
+	Euro      float32 `json:"DayAheadPriceEUR"`
+	Timestamp string  `json:"TimeUTC"`
 }
