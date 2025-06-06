@@ -29,34 +29,34 @@ var (
 
 func main() {
 	var (
-		flags Flags
-		err   error
+		conf Configuration
+		err  error
 	)
 
-	flag.StringVar(&flags.Zone, "zone", "", "Price Area like DK1")
-	flag.StringVar(&flags.Output, "output", "", "Directory to place output into")
-	flag.StringVar(&flags.Endpoint, "endpoint", "https://api.energidataservice.dk/", "Endpoint to fetch from")
-	flag.StringVar(&flags.DayAheadDate, "dayaheaddate", "2025-10-01", "Date when dayahead prices take effect")
-	flag.Int64Var(&flags.From, "from", 0, "Unix timestamp of period start")
-	flag.Int64Var(&flags.End, "end", 0, "Unix timestamp of period end")
-	flag.IntVar(&flags.Limit, "limit", 100, "Limit to use per page in results")
-	flag.IntVar(&flags.SleepInterval, "sleep-interval", 1000, "Milliseconds to sleep when API is throttling")
+	flag.StringVar(&conf.Zone, "zone", "", "Price Area like DK1")
+	flag.StringVar(&conf.Output, "output", "", "Directory to place output into")
+	flag.StringVar(&conf.Endpoint, "endpoint", "https://api.energidataservice.dk/", "Endpoint to fetch from")
+	flag.Int64Var(&conf.V2Date, "v2date", 1759183200, "Date when day-a-head prices take effect") // 2025-09-30T00:00:00+02:00
+	flag.Int64Var(&conf.From, "from", 0, "Unix timestamp of period start")
+	flag.Int64Var(&conf.End, "end", 0, "Unix timestamp of period end")
+	flag.IntVar(&conf.Limit, "limit", 100, "Limit to use per page in results")
+	flag.IntVar(&conf.SleepInterval, "sleep-interval", 1000, "Milliseconds to sleep when API is throttling")
 
 	flag.Parse()
-	err = flags.Validate()
+	err = conf.Validate()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = run(flags)
+	err = run(conf)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func run(f Flags) error {
+func run(f Configuration) error {
 	var (
-		partitions []Flags
+		partitions []Configuration
 		records    []Record
 		err        error
 	)
@@ -66,13 +66,13 @@ func run(f Flags) error {
 		return err
 	}
 
-	for _, flags := range partitions {
-		records, err = fetchRecords(flags.Endpoint, flags.Zone, flags.From, flags.End, flags.Limit, flags.SleepInterval)
+	for _, p := range partitions {
+		records, err = fetchRecords(p.Endpoint, p.Zone, p.From, p.End, p.Limit, p.SleepInterval, p.apiVersion)
 		if err != nil {
 			return err
 		}
 
-		err = saveRecords(flags.Zone, records, flags.Output)
+		err = saveRecords(p.Zone, records, p.Output, p.apiVersion)
 		if err != nil {
 			return err
 		}
@@ -81,7 +81,7 @@ func run(f Flags) error {
 	return nil
 }
 
-func saveRecords(zone string, records []Record, output string) error {
+func saveRecords(zone string, records []Record, output string, version ApiVersion) error {
 	var (
 		date, file string
 		err        error
@@ -91,7 +91,7 @@ func saveRecords(zone string, records []Record, output string) error {
 		updated    []Record
 	)
 
-	for _, record = range records {
+	for _, record = range records { // FIXME: add v2 handling and v1 calculations
 		date = time.Unix(record.Timestamp, 0).Format("2006/01/02")
 		file = filepath.Join(output, date, fmt.Sprintf("%s.json", zone))
 		if _, ok = outputs[file]; !ok {
@@ -179,7 +179,7 @@ func updateOutput(file string, records []Record) ([]Record, error) {
 	return updated, nil
 }
 
-func fetchRecords(endpoint string, zone string, from int64, end int64, limit int, sleep int) ([]Record, error) {
+func fetchRecords(endpoint string, zone string, from int64, end int64, limit int, sleep int, version ApiVersion) ([]Record, error) {
 	var (
 		data    = make(map[int64]Record)
 		records = make([]Record, 0)
@@ -193,7 +193,7 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 	)
 
 	for from < end {
-		req, err = buildRequest(endpoint, zone, from, end, limit)
+		req, err = buildRequest(endpoint, zone, from, end, limit, version)
 		if err != nil {
 			return records, err
 		}
@@ -203,9 +203,19 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 			return records, err
 		}
 
-		items, err = parseBody(bytes)
-		if err != nil {
-			return records, err
+		switch version {
+		case ApiV1:
+			items, err = parseBodyV1(bytes)
+			if err != nil {
+				return records, err
+			}
+		case ApiV2:
+			items, err = parseBodyV2(bytes)
+			if err != nil {
+				return records, err
+			}
+		default:
+			return records, errParsing
 		}
 
 		size = len(data)
@@ -231,9 +241,8 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 	return records, nil
 }
 
-func buildRequest(endpoint string, zone string, from int64, end int64, limit int) (string, error) {
+func buildRequest(endpoint string, zone string, from int64, end int64, limit int, version ApiVersion) (string, error) {
 	var (
-		s      string
 		params = url.Values{}
 		uri    *url.URL
 		err    error
@@ -241,20 +250,23 @@ func buildRequest(endpoint string, zone string, from int64, end int64, limit int
 
 	uri, err = url.Parse(endpoint)
 	if err != nil {
-		return s, errors.Join(errParseEndpoint, err)
+		return "", errors.Join(errParseEndpoint, err)
 	}
 
-	// uri.Path += "dataset/DayAheadPrices"
-	uri.Path += "dataset/elspotprices"
+	switch version {
+	case ApiV1:
+		uri.Path += "dataset/elspotprices"
+		params.Add("columns", "HourUTC,PriceArea,SpotPriceEUR")
+		params.Add("sort", "HourUTC asc")
+	case ApiV2:
+		uri.Path += "dataset/DayAheadPrices"
+		params.Add("columns", "TimeUTC,PriceArea,DayAheadPriceEUR")
+		params.Add("sort", "TimeUTC desc")
+	}
 
-	// params.Add("columns", "TimeUTC,PriceArea,DayAheadPriceEUR")
-	params.Add("columns", "HourUTC,PriceArea,SpotPriceEUR")
 	params.Add("end", time.Unix(end, 0).Format("2006-01-02T15:04"))
-	// params.Add("filter", url.QueryEscape(fmt.Sprintf(`{"PriceArea":"%s"}`, zone)))
 	params.Add("filter", fmt.Sprintf(`{"PriceArea":"%s"}`, zone))
 	params.Add("limit", strconv.Itoa(limit))
-	// params.Add("sort", "TimeUTC desc")
-	params.Add("sort", "HourUTC asc")
 	params.Add("start", time.Unix(from, 0).Format("2006-01-02T15:04"))
 	params.Add("timezone", "UTC")
 
@@ -294,7 +306,7 @@ func performRequest(req string, sleep int) ([]byte, error) {
 	return bytes, nil
 }
 
-func parseBody(body []byte) ([]Record, error) {
+func parseBodyV1(body []byte) ([]Record, error) {
 	var (
 		records = make([]Record, 0)
 		err     error
@@ -318,13 +330,45 @@ func parseBody(body []byte) ([]Record, error) {
 	return records, nil
 }
 
-type Flags struct {
-	Zone, Output, Endpoint, DayAheadDate string
-	From, End                            int64
-	Limit, SleepInterval                 int
+func parseBodyV2(body []byte) ([]Record, error) {
+	var (
+		records = make([]Record, 0)
+		err     error
+		item    DayAHeadRecord
+		stamp   time.Time
+		items   DayAHeadRecords
+	)
+
+	if err = json.Unmarshal(body, &items); err != nil {
+		return records, errors.Join(errParsing, err)
+	}
+
+	for _, item = range items.Records {
+		stamp, err = time.Parse("2006-01-02T15:04:05", item.Timestamp)
+		if err != nil {
+			return records, errors.Join(errConvert, err)
+		}
+		records = append(records, Record{Euro: item.Euro, Timestamp: stamp.Unix()})
+	}
+
+	return records, nil
 }
 
-func (f *Flags) Validate() error {
+type ApiVersion int
+
+const (
+	ApiV1 ApiVersion = iota
+	ApiV2
+)
+
+type Configuration struct {
+	Zone, Output, Endpoint string
+	From, End, V2Date      int64
+	Limit, SleepInterval   int
+	apiVersion             ApiVersion
+}
+
+func (f *Configuration) Validate() error {
 	if len(f.Zone) == 0 || len(f.Output) == 0 || f.From == 0 || f.End == 0 {
 		return fmt.Errorf("missing flag, provided flags: %s", os.Args[1:])
 	}
@@ -332,11 +376,38 @@ func (f *Flags) Validate() error {
 	return nil
 }
 
-func (f *Flags) Partitions() ([]Flags, error) {
-	var flags = make([]Flags, 0)
-	// FIXME: split by dayahead
-	flags = append(flags, *f)
-	return flags, nil
+func (c *Configuration) Partitions() ([]Configuration, error) {
+	var (
+		parts = make([]Configuration, 0)
+		from  = c.From
+		end   = c.End
+		tmp   int64
+	)
+
+	for from < end {
+		copy := *c
+
+		if from < c.V2Date {
+			copy.apiVersion = ApiV1
+			tmp = min(c.End, c.V2Date)
+		} else {
+			copy.apiVersion = ApiV2
+			tmp = c.End
+		}
+
+		copy.From = from
+		copy.End = tmp
+
+		parts = append(parts, copy)
+
+		from = tmp
+	}
+
+	sort.Slice(parts, func(i, j int) bool {
+		return parts[i].End < parts[j].End
+	})
+
+	return parts, nil
 }
 
 type Record struct {
@@ -354,7 +425,7 @@ type SpotRecord struct {
 }
 
 type DayAHeadRecords struct {
-	Records []SpotRecord `json:"records"`
+	Records []DayAHeadRecord `json:"records"`
 }
 
 type DayAHeadRecord struct {
