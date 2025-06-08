@@ -28,22 +28,19 @@ var (
 )
 
 func main() {
-	var (
-		conf Configuration
-		err  error
-	)
+	conf := NewConfiguration()
 
-	flag.StringVar(&conf.Zone, "zone", "", "Price Area like DK1")
-	flag.StringVar(&conf.Output, "output", "", "Directory to place output into")
-	flag.StringVar(&conf.Endpoint, "endpoint", "https://api.energidataservice.dk/", "Endpoint to fetch from")
-	flag.Int64Var(&conf.V2Date, "v2date", 1759183200, "Date when day-a-head prices take effect") // 2025-09-30T00:00:00+02:00
-	flag.Int64Var(&conf.From, "from", 0, "Unix timestamp of period start")
-	flag.Int64Var(&conf.End, "end", 0, "Unix timestamp of period end")
-	flag.IntVar(&conf.Limit, "limit", 100, "Limit to use per page in results")
-	flag.IntVar(&conf.SleepInterval, "sleep-interval", 1000, "Milliseconds to sleep when API is throttling")
+	flag.StringVar(&conf.Zone, "zone", conf.Zone, "Price Area like DK1")
+	flag.StringVar(&conf.Output, "output", conf.Output, "Directory to place output into")
+	flag.StringVar(&conf.Endpoint, "endpoint", conf.Endpoint, "Endpoint to fetch from")
+	flag.Int64Var(&conf.V2Date, "v2date", conf.V2Date, "Date when day-a-head prices take effect")
+	flag.Int64Var(&conf.From, "from", conf.From, "Unix timestamp of period start")
+	flag.Int64Var(&conf.End, "end", conf.End, "Unix timestamp of period end")
+	flag.IntVar(&conf.Limit, "limit", conf.Limit, "Limit to use per page in results")
+	flag.IntVar(&conf.SleepInterval, "sleep-interval", conf.SleepInterval, "Milliseconds to sleep when API is throttling")
 
 	flag.Parse()
-	err = conf.Validate()
+	err := conf.Validate()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,54 +51,83 @@ func main() {
 	}
 }
 
-func run(f Configuration) error {
-	var (
-		partitions []Configuration
-		records    []Record
-		err        error
-	)
-
-	partitions, err = f.Partitions()
+func run(c Configuration) error {
+	partitions, err := c.Partitions()
 	if err != nil {
 		return err
 	}
 
-	for _, p := range partitions {
-		records, err = fetchRecords(p.Endpoint, p.Zone, p.From, p.End, p.Limit, p.SleepInterval, p.apiVersion)
+	return runConfigurations(partitions)
+}
+
+func runConfigurations(cs []Configuration) error {
+	for _, c := range cs {
+		records, err := fetchRecords(c.Endpoint, c.Zone, c.From, c.End, c.Limit, c.SleepInterval, c.apiVersion)
 		if err != nil {
 			return err
 		}
 
-		err = saveRecords(p.Zone, records, p.Output, p.apiVersion)
+		err = saveRecords(c.Zone, records, c.Output, c.apiVersion)
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
 func saveRecords(zone string, records []Record, output string, version ApiVersion) error {
-	var (
-		date, file string
-		err        error
-		ok         bool
-		outputs    = make(map[string][]Record)
-		record     Record
-		updated    []Record
-	)
+	outputs := make(map[string][]Record)
 
-	for _, record = range records { // FIXME: add v2 handling and v1 calculations
-		date = time.Unix(record.Timestamp, 0).Format("2006/01/02")
-		file = filepath.Join(output, date, fmt.Sprintf("%s.json", zone))
-		if _, ok = outputs[file]; !ok {
+	switch version {
+	case ApiV2:
+		for file, value := range produceOutputs(records, filepath.Join(output, "v2"), 15*time.Minute, filepath.Join(zone, "index.json")) {
+			outputs[file] = append(outputs[file], value...)
+		}
+		fallthrough
+	case ApiV1:
+		for file, value := range produceOutputs(records, output, 1*time.Hour, fmt.Sprintf("%s.json", zone)) {
+			outputs[file] = append(outputs[file], value...)
+		}
+	}
+
+	return writeOutput(outputs)
+}
+
+func produceOutputs(records []Record, output string, duration time.Duration, filename string) map[string][]Record {
+	calculated := make(map[time.Time][]Record)
+	for _, record := range records {
+		truncated := time.Unix(record.Timestamp, 0).Truncate(duration)
+		if _, ok := calculated[truncated]; !ok {
+			calculated[truncated] = make([]Record, 0)
+		}
+		calculated[truncated] = append(calculated[truncated], record)
+	}
+
+	records = make([]Record, 0)
+	for time, values := range calculated {
+		total := 0.0
+		for _, value := range values {
+			total += float64(value.Euro)
+		}
+		records = append(records, Record{Timestamp: time.Unix(), Euro: float32(total / float64(len(values)))})
+	}
+
+	outputs := make(map[string][]Record)
+	for _, record := range records {
+		date := time.Unix(record.Timestamp, 0).Format("2006/01/02")
+		file := filepath.Join(output, date, filename)
+		if _, ok := outputs[file]; !ok {
 			outputs[file] = make([]Record, 0)
 		}
 		outputs[file] = append(outputs[file], record)
 	}
 
-	for file = range outputs {
-		updated, err = updateOutput(file, outputs[file])
+	return outputs
+}
+
+func writeOutput(outputs map[string][]Record) error {
+	for file := range outputs {
+		updated, err := updateOutput(file, outputs[file])
 		if err != nil {
 			return err
 		}
@@ -203,19 +229,9 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 			return records, err
 		}
 
-		switch version {
-		case ApiV1:
-			items, err = parseBodyV1(bytes)
-			if err != nil {
-				return records, err
-			}
-		case ApiV2:
-			items, err = parseBodyV2(bytes)
-			if err != nil {
-				return records, err
-			}
-		default:
-			return records, errParsing
+		items, err = parseBody(bytes, version)
+		if err != nil {
+			return records, err
 		}
 
 		size = len(data)
@@ -306,6 +322,22 @@ func performRequest(req string, sleep int) ([]byte, error) {
 	return bytes, nil
 }
 
+func parseBody(body []byte, version ApiVersion) ([]Record, error) {
+	switch version {
+	case ApiV1:
+		items, err := parseBodyV1(body)
+		if err == nil {
+			return items, err
+		}
+	case ApiV2:
+		items, err := parseBodyV2(body)
+		if err == nil {
+			return items, err
+		}
+	}
+	return make([]Record, 0), errParsing
+}
+
 func parseBodyV1(body []byte) ([]Record, error) {
 	var (
 		records = make([]Record, 0)
@@ -366,6 +398,15 @@ type Configuration struct {
 	From, End, V2Date      int64
 	Limit, SleepInterval   int
 	apiVersion             ApiVersion
+}
+
+func NewConfiguration() Configuration {
+	return Configuration{
+		Endpoint:      "https://api.energidataservice.dk/",
+		Limit:         100,
+		SleepInterval: 1000,
+		V2Date:        1759183200, // 2025-09-30T00:00:00+02:00
+	}
 }
 
 func (f *Configuration) Validate() error {

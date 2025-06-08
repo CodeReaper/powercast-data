@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"dario.cat/mergo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,7 +56,47 @@ func TestThatKnownDataProducesExpectedOutputFiles(t *testing.T) {
 	output, err := os.MkdirTemp("", "test")
 	assert.Nil(t, err)
 
-	conf := Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Limit: 1, Output: output}
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Output: output})
+	err = run(conf)
+	assert.Nil(t, err)
+
+	bytes, err := os.ReadFile(filepath.Join(output, "2022/07/18/DK1.json"))
+	assert.Nil(t, err)
+
+	assert.Equal(t, expected, bytes)
+}
+
+func TestThatKnownDataProducesExpectedOutputVersion2Files(t *testing.T) {
+	expected, err := os.ReadFile("testdata/expected-dayaheadprices.json.raw")
+	assert.Nil(t, err)
+
+	svr := setupServerWith(t, "testdata/dataset-dayaheadprices.json.raw")
+	defer svr.Close()
+
+	output, err := os.MkdirTemp("", "test")
+	assert.Nil(t, err)
+
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", From: 2, V2Date: 1, End: 3, Output: output})
+	err = run(conf)
+	assert.Nil(t, err)
+
+	bytes, err := os.ReadFile(filepath.Join(output, "v2/2022/07/18/DK1/index.json"))
+	assert.Nil(t, err)
+
+	assert.Equal(t, expected, bytes)
+}
+
+func TestThatKnownDataProducesExpectedOutputVersion1FallbackFiles(t *testing.T) {
+	expected, err := os.ReadFile("testdata/expected-elspotprices.json.raw")
+	assert.Nil(t, err)
+
+	svr := setupServerWith(t, "testdata/dataset-dayaheadprices.json.raw")
+	defer svr.Close()
+
+	output, err := os.MkdirTemp("", "test")
+	assert.Nil(t, err)
+
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", From: 2, V2Date: 1, End: 3, Output: output})
 	err = run(conf)
 	assert.Nil(t, err)
 
@@ -80,7 +121,7 @@ func TestThatExistingOutputFileValuesAreUpdatedCorrectly(t *testing.T) {
 	os.WriteFile(filepath.Join(output, "2022/07/18/DK1.json"), expected, 0770)
 	assert.Nil(t, err)
 
-	conf := Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Limit: 1, Output: output}
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Output: output})
 	err = run(conf)
 	assert.Nil(t, err)
 
@@ -108,7 +149,7 @@ func TestThatExistingOutputFilesAreUpdatedCorrectly(t *testing.T) {
 	os.WriteFile(filepath.Join(output, "2022/07/18/DK1.json"), half, 0770)
 	assert.Nil(t, err)
 
-	conf := Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Limit: 1, Output: output}
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Output: output})
 	err = run(conf)
 	assert.Nil(t, err)
 
@@ -163,11 +204,11 @@ func TestThatApiHeaderLeadsToSleeping(t *testing.T) {
 }
 
 func TestThatPartitionsAreMadeDividedCorrectly(t *testing.T) {
-	conf := Configuration{
+	conf := updatedConfiguration(Configuration{
 		From:   946684800, // 2000-01-01
 		V2Date: 946771200, // 2000-01-02
 		End:    946857600, // 2000-01-03
-	}
+	})
 
 	partitions, err := conf.Partitions()
 
@@ -199,4 +240,12 @@ func setupServerWith(t *testing.T, file string) *httptest.Server {
 	}))
 
 	return svr
+}
+
+func updatedConfiguration(c Configuration) Configuration {
+	e := Configuration{}
+	d := NewConfiguration()
+	mergo.Merge(&e, c)
+	mergo.Merge(&e, d)
+	return e
 }
