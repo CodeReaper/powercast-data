@@ -97,7 +97,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: energy-price-${{ matrix.zone }}
-          path: "${{ matrix.zone }}*"
+          path: |
+            ${{ matrix.zone }}
+            ${{ matrix.zone }}.v2
 
   check-emission:
     runs-on: ubuntu-latest
