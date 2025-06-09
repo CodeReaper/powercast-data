@@ -17,6 +17,11 @@
 #       Example:
 #           - /
 #           - /data
+#   - mode:
+#       Changes which files to search for.
+#       Options:
+#           - with-zone
+#           - with-index
 
 # Output example:
 # [
@@ -31,6 +36,7 @@
 CONFIG=$1
 FOLDER=$2
 PREFIX=$3
+MODE=$4
 DIR=/tmp/$$
 
 set -e
@@ -49,6 +55,12 @@ if ! echo "$PREFIX" | grep -vq /$; then
     echo "Prefix cannot end on a '/'. Given: $PREFIX";
     exit 3;
 fi
+
+if [ ! "$MODE" = "with-index" ] && [ ! "$MODE" = "with-zone" ]; then
+    echo "Modes can only be 'with-zone' or 'with-index'. Given: $MODE";
+    exit 4;
+fi
+
 set -e
 
 printf '[' > $DIR/output.json
@@ -57,7 +69,12 @@ jq -rc '.[]' "$CONFIG" | while read -r ITEM; do
 
     cd "$FOLDER"
     AREA=$(echo "$ITEM" | jq -r '.zone')
-    find -- * -type f -mindepth 3 -name "${AREA}.json" | sort > "$DIR/found"
+    if [ "$MODE" = "with-zone" ]; then
+      find -- * -type f -mindepth 3 -name "${AREA}.json" | sort > "$DIR/found"
+    else
+      find -- * -type d -mindepth 3 -name "${AREA}" | sort > "$DIR/found"
+    fi
+
     LATEST=$(tail -n1 < $DIR/found)
     OLDEST=$(head -n1 < $DIR/found)
     cd - > /dev/null

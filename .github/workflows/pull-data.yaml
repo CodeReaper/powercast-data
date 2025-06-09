@@ -23,6 +23,7 @@ on:
       - .github/workflows/pull-data.yaml
       - src/data-*.sh
       - src/*-data-pull.sh
+      - "*.go"
       - configuration/zones.json
 
 concurrency: commits-pages
@@ -111,6 +112,7 @@ jobs:
         run: |
           rm ./github-pages/api/energy-price/latest.json 2> /dev/null || true
           sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price | tee ./github-pages/api/energy-price/index.json
+          sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/v2/ /api/energy-price/v2 | tee ./github-pages/api/energy-price/v2/index.json
 
       - shell: bash
         name: Handle open indicents

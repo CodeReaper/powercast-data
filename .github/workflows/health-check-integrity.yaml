@@ -79,10 +79,25 @@ jobs:
               echo "$file has incorrect duration: $duration"
             fi
           done | tee ../../${{ matrix.zone }}
+      - shell: bash
+        name: Setup configuration
+        run: |
+          cd api/energy-price/v2
+          find 2??? -type d -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}" | sort | tail -n +2 | head -n-1 | while read f; do
+            file="${f}/index.json"
+            if [ ! -f "$file" ]; then
+              echo "$file is missing"
+              break
+            fi
+            duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
+            if [ $duration != 82800 ] && [ $duration != 79200 ]; then
+              echo "$file has incorrect duration: $duration"
+            fi
+          done | tee ../../../${{ matrix.zone }}.v2
       - uses: actions/upload-artifact@v4
         with:
           name: energy-price-${{ matrix.zone }}
-          path: ${{ matrix.zone }}
+          path: "${{ matrix.zone }}*"
 
   check-emission:
     runs-on: ubuntu-latest
