@@ -78,8 +78,6 @@ build:
 	$(COMPOSE_RUN) builder make _build
 
 _build:
-	mkdir build
-	echo '*' > build/.gitignore
 	curl --fail --output build/datahub-prices.json "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0"
 	jq 'group_by(.GLN_Number) | map({gln: .[0].GLN_Number, name:.[0].ChargeOwner}) | unique' < build/datahub-prices.json > build/gln-names.json
 
