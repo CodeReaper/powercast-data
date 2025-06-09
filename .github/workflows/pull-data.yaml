@@ -111,6 +111,7 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/energy-price/latest.json 2> /dev/null || true
+          mkdir -p ./github-pages/api/energy-price/v2 || true
           sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price | tee ./github-pages/api/energy-price/index.json
           sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/v2/ /api/energy-price/v2 | tee ./github-pages/api/energy-price/v2/index.json
 
