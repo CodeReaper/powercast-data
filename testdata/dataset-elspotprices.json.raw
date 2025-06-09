@@ -1,0 +1,33 @@
+{
+    "total": 1616558,
+    "sort": "HourUTC desc",
+    "limit": 5,
+    "dataset": "Elspotprices",
+    "records": [
+        {
+            "HourUTC": "2022-07-18T21:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 469.859985
+        },
+        {
+            "HourUTC": "2022-07-18T20:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 451.5
+        },
+        {
+            "HourUTC": "2022-07-18T19:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 342.429993
+        },
+        {
+            "HourUTC": "2022-07-18T18:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 53.669998
+        },
+        {
+            "HourUTC": "2022-07-18T17:00:00",
+            "PriceArea": "DK1",
+            "SpotPriceEUR": 53.669998
+        }
+    ]
+}

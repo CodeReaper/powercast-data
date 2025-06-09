@@ -21,12 +21,12 @@ paths:
       tags:
         - Charges
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GridNetworks'
+                $ref: "#/components/schemas/GridNetworks"
           links:
             gridTariffsByNetworkId:
               operationId: gridTariffsByNetworkId
@@ -51,13 +51,13 @@ paths:
             format: int32
             example: 5790001090111
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GridNetworkTariffs'
-        '404':
+                $ref: "#/components/schemas/GridNetworkTariffs"
+        "404":
           description: Not found response
           content:
             text/html: {}
@@ -68,12 +68,12 @@ paths:
       tags:
         - Charges
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GridCharges'
+                $ref: "#/components/schemas/GridCharges"
   /energy-price:
     get:
       summary: Paths of latest and oldest available price data
@@ -81,15 +81,28 @@ paths:
       tags:
         - Prices
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PathRanges'
+                $ref: "#/components/schemas/PathRanges"
+  /energy-price/v2:
+    get:
+      summary: Paths of latest and oldest available price data
+      operationId: energyPricesPathRangesV2
+      tags:
+        - Prices
+      responses:
+        "200":
+          description: Found data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PathRanges"
   /energy-price/{year}/{month}/{day}/{zone}.json:
     get:
-      summary: Energy prices of a specific date in a specific zone
+      summary: Hourly energy prices of a specific date in a specific zone
       operationId: energyPriceByDateAndZone
       tags:
         - Prices
@@ -99,13 +112,35 @@ paths:
         - $ref: "#/components/parameters/day"
         - $ref: "#/components/parameters/zone"
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Prices'
-        '404':
+                $ref: "#/components/schemas/Prices"
+        "404":
+          description: Not found response
+          content:
+            text/html: {}
+  /energy-price/v2/{year}/{month}/{day}/{zone}:
+    get:
+      summary: Quarter hourly energy prices of a specific date in a specific zone
+      operationId: energyPriceByDateAndZoneV2
+      tags:
+        - Prices
+      parameters:
+        - $ref: "#/components/parameters/year"
+        - $ref: "#/components/parameters/month"
+        - $ref: "#/components/parameters/day"
+        - $ref: "#/components/parameters/zone"
+      responses:
+        "200":
+          description: Found data response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Prices"
+        "404":
           description: Not found response
           content:
             text/html: {}
@@ -116,12 +151,12 @@ paths:
       tags:
         - Emissions
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PathRanges'
+                $ref: "#/components/schemas/PathRanges"
   /emission/co2/{year}/{month}/{day}/{zone}.json:
     get:
       summary: CO2 emissions for a specific date in a specific zone
@@ -134,13 +169,13 @@ paths:
         - $ref: "#/components/parameters/day"
         - $ref: "#/components/parameters/zone"
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmissionsCO2'
-        '404':
+                $ref: "#/components/schemas/EmissionsCO2"
+        "404":
           description: Not found response
           content:
             text/html: {}
@@ -151,12 +186,12 @@ paths:
       tags:
         - Generation
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PathRanges'
+                $ref: "#/components/schemas/PathRanges"
   /renewables/{year}/{month}/{day}/{zone}.json:
     get:
       summary: Renewable data for a specific date in a specific zone
@@ -169,13 +204,13 @@ paths:
         - $ref: "#/components/parameters/day"
         - $ref: "#/components/parameters/zone"
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Renewables'
-        '404':
+                $ref: "#/components/schemas/Renewables"
+        "404":
           description: Not found response
           content:
             text/html: {}
@@ -199,13 +234,13 @@ paths:
             example: energy-price
         - $ref: "#/components/parameters/zone"
       responses:
-        '200':
+        "200":
           description: Found data response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Incidents'
-        '404':
+                $ref: "#/components/schemas/Incidents"
+        "404":
           description: Not found response
           content:
             text/html: {}
@@ -257,7 +292,7 @@ components:
     Prices:
       type: array
       items:
-        $ref: '#/components/schemas/Price'
+        $ref: "#/components/schemas/Price"
     Price:
       type: object
       required:
@@ -275,7 +310,7 @@ components:
     PathRanges:
       type: array
       items:
-        $ref: '#/components/schemas/PathRange'
+        $ref: "#/components/schemas/PathRange"
     PathRange:
       type: object
       required:
@@ -297,7 +332,7 @@ components:
     Renewables:
       type: array
       items:
-        $ref: '#/components/schemas/RenewableSources'
+        $ref: "#/components/schemas/RenewableSources"
     RenewableSources:
       type: object
       required:
@@ -307,7 +342,7 @@ components:
         sources:
           type: array
           items:
-            $ref: '#/components/schemas/RenewableSource'
+            $ref: "#/components/schemas/RenewableSource"
         timestamp:
           type: integer
           format: timestamp
@@ -328,7 +363,7 @@ components:
     EmissionsCO2:
       type: array
       items:
-        $ref: '#/components/schemas/EmissionCO2'
+        $ref: "#/components/schemas/EmissionCO2"
     EmissionCO2:
       type: object
       required:
@@ -346,7 +381,7 @@ components:
     GridCharges:
       type: array
       items:
-        $ref: '#/components/schemas/GridCharge'
+        $ref: "#/components/schemas/GridCharge"
     GridCharge:
       type: object
       required:
@@ -383,7 +418,7 @@ components:
     GridNetworks:
       type: array
       items:
-        $ref: '#/components/schemas/GridNetwork'
+        $ref: "#/components/schemas/GridNetwork"
     GridNetwork:
       type: object
       required:
@@ -405,7 +440,7 @@ components:
     GridNetworkTariffs:
       type: array
       items:
-        $ref: '#/components/schemas/GridNetworkTariff'
+        $ref: "#/components/schemas/GridNetworkTariff"
     GridNetworkTariff:
       type: object
       required:
@@ -420,7 +455,7 @@ components:
         to:
           type:
             - integer
-            - 'null'
+            - "null"
           format: timestamp
           description: Unix timestamp of when a date interval begins
         tariffs:
@@ -434,7 +469,7 @@ components:
     Incidents:
       type: array
       items:
-        $ref: '#/components/schemas/Incident'
+        $ref: "#/components/schemas/Incident"
     Incident:
       type: object
       required:
@@ -449,7 +484,7 @@ components:
         to:
           type:
             - integer
-            - 'null'
+            - "null"
           format: timestamp
           description: Unix timestamp of when a date interval begins
         type:

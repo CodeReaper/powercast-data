@@ -15,6 +15,10 @@ services:
     working_dir: /workspace
   redocly:
     image: redocly/cli
+    environment:
+      REDOCLY_TELEMETRY: off
+      REDOCLY_SUPPRESS_UPDATE_NOTICE: true
+      NPM_TELEMETRY_DISABLED: 1
     volumes:
       - .:/spec:ro
   dockerlint:
