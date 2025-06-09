@@ -21,7 +21,7 @@ test-docker:
 	docker compose config -q
 
 test-editorcheck:
-	$(COMPOSE_RUN) runner ec -exclude '^\.git/|^build/|^build\.backup/'
+	$(COMPOSE_RUN) runner ec -exclude '^\.git/|^build/|^build\.backup/|.DS_Store'
 
 test-github:
 	$(COMPOSE_RUN) runner make _test-github SCHEMA=github-workflows DIRECTORY=workflows
