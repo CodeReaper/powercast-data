@@ -112,8 +112,8 @@ jobs:
         run: |
           rm ./github-pages/api/energy-price/latest.json 2> /dev/null || true
           mkdir -p ./github-pages/api/energy-price/v2 || true
-          sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price | tee ./github-pages/api/energy-price/index.json
-          sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/v2/ /api/energy-price/v2 | tee ./github-pages/api/energy-price/v2/index.json
+          sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/ /api/energy-price with-zone | tee ./github-pages/api/energy-price/index.json
+          sh src/data-index.sh configuration/zones.json ./github-pages/api/energy-price/v2/ /api/energy-price/v2 with-index | tee ./github-pages/api/energy-price/v2/index.json
 
       - shell: bash
         name: Handle open indicents
@@ -234,7 +234,7 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/renewables/latest.json 2> /dev/null || true
-          sh src/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables | tee ./github-pages/api/renewables/index.json
+          sh src/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables with-zone | tee ./github-pages/api/renewables/index.json
 
       - shell: bash
         name: Handle open indicents
@@ -355,7 +355,7 @@ jobs:
         if: env.changed == 'true'
         run: |
           rm ./github-pages/api/emission/co2/latest.json 2> /dev/null || true
-          sh src/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 | tee ./github-pages/api/emission/co2/index.json
+          sh src/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 with-zone | tee ./github-pages/api/emission/co2/index.json
 
       - shell: bash
         name: Handle open indicents
