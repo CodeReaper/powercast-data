@@ -83,7 +83,7 @@ jobs:
         name: Setup configuration
         run: |
           cd api/energy-price/v2 || exit 0
-          find 2??? -type d -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}" | sort | tail -n +2 | head -n-1 | while read f; do
+          (find 2??? -type d -mindepth 3 -maxdepth 3 -name "${{ matrix.zone }}" || echo '') | sort | tail -n +2 | head -n-1 | while read f; do
             file="${f}/index.json"
             if [ ! -f "$file" ]; then
               echo "$file is missing"
