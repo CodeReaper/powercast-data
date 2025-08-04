@@ -372,5 +372,39 @@
         "energy": 0
       }
     ]
+  },
+  {
+    "timestamp": 1754344800,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 791.46
+      },
+      {
+        "type": "onshore wind",
+        "energy": 425.75
+      },
+      {
+        "type": "solar",
+        "energy": 0
+      }
+    ]
+  },
+  {
+    "timestamp": 1754348400,
+    "sources": [
+      {
+        "type": "offshore wind",
+        "energy": 824.29
+      },
+      {
+        "type": "onshore wind",
+        "energy": 378.67
+      },
+      {
+        "type": "solar",
+        "energy": 0
+      }
+    ]
   }
 ]
