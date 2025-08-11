@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Setup
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - shell: bash
         name: Setup configuration
         run: |
@@ -51,7 +51,7 @@ jobs:
       matrix:
         item: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Prepare issue
         shell: bash
         run: |
