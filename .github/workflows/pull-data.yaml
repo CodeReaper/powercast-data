@@ -102,7 +102,7 @@ jobs:
             END=$(echo "$CONFIG" | jq -r '.end')
 
             echo "Pull data for ${ZONE} until ${END}..."
-            go run download.go --zone ${ZONE} --from ${FROM} --end ${END} --output ./github-pages/api/energy-price/ --limit 100
+            go run download.go --zone ${ZONE} --from ${FROM} --end ${END} --output ./github-pages/api/energy-price/ --limit 0
             echo "changed=true" >> $GITHUB_ENV
           done
 
