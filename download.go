@@ -248,6 +248,10 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 				from = key
 			}
 		}
+
+		if limit == 0 {
+			break
+		}
 	}
 
 	for _, item = range data {
