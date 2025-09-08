@@ -87,7 +87,7 @@ jobs:
             fi
           done
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         if: env.stale == 'true'
         with:
           go-version-file: go.mod
