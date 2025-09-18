@@ -19,7 +19,8 @@ Check out the [OpenAPI specification](https://codereaper.com/powercast-data/open
 
 The following datasets are used to look up data.
 
-- [Energy prices](https://www.energidataservice.dk/tso-electricity/Elspotprices)
+- [Energy prices (old)](https://www.energidataservice.dk/tso-electricity/Elspotprices)
+- [Energy prices (new)](https://energidataservice.dk/tso-electricity/DayAheadPrices)
 - [Energy charge prices](https://www.energidataservice.dk/tso-electricity/DatahubPricelist)
 - [CO2 emission forecast data](https://www.energidataservice.dk/tso-electricity/CO2EmisProg)
 - [Renewable energy production](https://www.energidataservice.dk/tso-electricity/forecasts_hour)
