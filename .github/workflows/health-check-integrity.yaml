@@ -90,7 +90,7 @@ jobs:
               break
             fi
             duration=$(jq '[.[].timestamp] | max as $max | min as $min | $max - $min' < $file)
-            if [ $duration != 82800 ] && [ $duration != 79200 ]; then
+            if [ $duration != 85500 ] && [ $duration != 81900 ]; then
               echo "$file has incorrect duration: $duration"
             fi
           done | tee ../../../${{ matrix.zone }}.v2
