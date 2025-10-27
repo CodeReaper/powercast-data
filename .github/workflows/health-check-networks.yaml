@@ -51,7 +51,7 @@ jobs:
           echo '::endgroup::'
 
           echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: networks
           path: matrix

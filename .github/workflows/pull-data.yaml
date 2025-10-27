@@ -149,7 +149,7 @@ jobs:
           git add api/energy-price/
           git diff --cached api/energy-price/ | tee ../energy-price.patch
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: energy-price
           path: energy-price.patch
@@ -270,7 +270,7 @@ jobs:
           git add api/renewables/
           git diff --cached api/renewables/ | tee ../renewables.patch
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: renewables
           path: renewables.patch
@@ -391,7 +391,7 @@ jobs:
           git add api/emission/co2/
           git diff --cached api/emission/co2/ | tee ../emission-co2.patch
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: emission-co2
           path: emission-co2.patch
