@@ -257,7 +257,7 @@ components:
         minLength: 4
         maxLength: 4
         format: date
-        example: 2024
+        example: 2025
     month:
       name: month
       in: path
@@ -268,7 +268,7 @@ components:
         minLength: 2
         maxLength: 2
         format: date
-        example: "01"
+        example: "11"
     day:
       name: day
       in: path
