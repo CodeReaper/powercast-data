@@ -5,7 +5,7 @@ on:
     inputs:
       publish-branch:
         type: string
-        description: 'Publishing branch'
+        description: "Publishing branch"
         required: true
 
 permissions:
@@ -51,7 +51,7 @@ jobs:
           echo '::endgroup::'
 
           echo "matrix=$(jq -c < matrix)" >> "$GITHUB_ENV"
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: networks
           path: matrix
@@ -62,7 +62,7 @@ jobs:
     needs: setup
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: networks
           path: networks
@@ -83,4 +83,4 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           assignee: codereaper
-          title: 'Networks are out of date'
+          title: "Networks are out of date"
