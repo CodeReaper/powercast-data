@@ -2,20 +2,20 @@ name: Update contents
 
 on:
   schedule:
-    - cron: '0 * * * *'
-    - cron: '5,15,30,45 11,12,13 * * *'
+    - cron: "0 * * * *"
+    - cron: "5,15,30,45 11,12,13 * * *"
   workflow_dispatch:
     inputs:
       from-timestamp:
         type: string
         description: Pull data from this timestamp and onwards - requires both from and end timestamps
         required: false
-        default: ''
+        default: ""
       end-timestamp:
         type: string
         description: Pull data until reaching this timestamp - requires both from and end timestamps
         required: false
-        default: ''
+        default: ""
   push:
     branches:
       - main
@@ -149,7 +149,7 @@ jobs:
           git add api/energy-price/
           git diff --cached api/energy-price/ | tee ../energy-price.patch
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: energy-price
           path: energy-price.patch
@@ -270,7 +270,7 @@ jobs:
           git add api/renewables/
           git diff --cached api/renewables/ | tee ../renewables.patch
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: renewables
           path: renewables.patch
@@ -391,7 +391,7 @@ jobs:
           git add api/emission/co2/
           git diff --cached api/emission/co2/ | tee ../emission-co2.patch
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: emission-co2
           path: emission-co2.patch
@@ -404,7 +404,7 @@ jobs:
       - update-renewables-data
       - update-co2-emission-data
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           merge-multiple: true
 
