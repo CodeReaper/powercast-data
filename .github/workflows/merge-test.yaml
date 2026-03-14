@@ -31,6 +31,8 @@ jobs:
           private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: powercast-data
+          permission-contents: write
+          permission-workflows: write
       - name: Merge PR
         if: (github.actor == 'dependabot[bot]' || github.actor == 'codereaper-automation[bot]') && github.event_name == 'pull_request'
         run: gh pr merge --admin --squash "$PR_URL"
