@@ -94,7 +94,7 @@ jobs:
               echo "$file has incorrect duration: $duration"
             fi
           done | tee ../../../${{ matrix.zone }}.v2
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: energy-price-${{ matrix.zone }}
           path: |
@@ -133,7 +133,7 @@ jobs:
           echo "--- filtered output below ---"
           cat ../../../${{ matrix.zone }}.raw | (grep -vf .ignore-grep || true) > ../../../${{ matrix.zone }}
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: emission-${{ matrix.zone }}
           path: ${{ matrix.zone }}
@@ -169,7 +169,7 @@ jobs:
           done | tee ../../../${{ matrix.zone }}.raw
           echo "--- filtered output below ---"
           cat ../../../${{ matrix.zone }}.raw | (grep -vf .ignore-grep || true) > ../../../${{ matrix.zone }}
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: renewables-${{ matrix.zone }}
           path: ${{ matrix.zone }}
