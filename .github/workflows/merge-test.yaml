@@ -1,8 +1,9 @@
 name: Tests
 
 on:
-  workflow_dispatch: {}
-  pull_request: {}
+  pull_request:
+    branches:
+      - main
 
 jobs:
   tests-succeeded:
@@ -15,3 +16,24 @@ jobs:
           go-version-file: go.mod
       - run: make
         shell: bash
+
+  auto-merge:
+    name: Automatically merge bot PRs
+    needs: tests-succeeded
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create token
+        if: (github.actor == 'dependabot[bot]' || github.actor == 'codereaper-automation[bot]') && github.event_name == 'pull_request'
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: catalog
+      - name: Merge PR
+        if: (github.actor == 'dependabot[bot]' || github.actor == 'codereaper-automation[bot]') && github.event_name == 'pull_request'
+        run: gh pr merge --admin --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
