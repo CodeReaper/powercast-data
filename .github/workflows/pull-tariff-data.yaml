@@ -66,7 +66,7 @@ jobs:
             printf ' - %s bytes\n' $(wc -c < "./github-pages/api/energy-charges/network/$ID/index.json")
           done
 
-      - uses: EndBug/add-and-commit@v9
+      - uses: EndBug/add-and-commit@v10
         name: Publish data
         with:
           cwd: github-pages
