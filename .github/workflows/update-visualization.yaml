@@ -92,7 +92,7 @@ jobs:
           cat resources/openapi.yaml > ./github-pages/openapi/spec.yaml
           cat resources/openapi.html | sed 's|OPENAPI_SPEC_URL|https://codereaper.com/powercast-data/openapi/spec.yaml|g;' > ./github-pages/openapi/index.html
 
-      - uses: EndBug/add-and-commit@v9
+      - uses: EndBug/add-and-commit@v10
         name: Publish graph
         with:
           cwd: github-pages
