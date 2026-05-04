@@ -2,7 +2,7 @@ name: Update tariff data
 
 on:
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: "0 0 * * 1"
   workflow_dispatch: {}
   push:
     branches:
@@ -40,7 +40,11 @@ jobs:
 
       - shell: bash
         name: Download data
-        run: wget -nv -O data.json "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0"
+        run: |
+          < configuration/networks.json jq -r '.[][].gln' | while read id; do
+            wget -nv -O "data-${id}.json" "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0&filter=%7B%22GLN_Number%22%3A%5B%22${id}%22%5D%7D";
+          done
+          jq '.[]' -s data-*.json > data.json
 
       - shell: bash
         name: Create grid prices
