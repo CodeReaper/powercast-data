@@ -21,7 +21,7 @@ test-docker:
 	docker compose config -q
 
 test-editorcheck:
-	$(COMPOSE_RUN) runner ec -exclude '^\.git/|^build/|^build\.backup/|.DS_Store'
+	$(COMPOSE_RUN) runner ec -exclude '^\.git/|^build/|.DS_Store'
 
 test-github:
 	$(COMPOSE_RUN) runner make _test-github SCHEMA=github-workflows DIRECTORY=workflows
@@ -74,33 +74,36 @@ _unit-tests:
 swagger: ## Runs a local swagger
 	docker compose up swagger
 
-build:
-	$(COMPOSE_RUN) builder make _build
+build-id: guard-id
+	$(COMPOSE_RUN) builder make id=$(id) _build
 
 _build:
-	curl --fail --output build/datahub-prices.json "https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0"
-	jq 'group_by(.GLN_Number) | map({gln: .[0].GLN_Number, name:.[0].ChargeOwner}) | unique' < build/datahub-prices.json > build/gln-names.json
+	test -f build/datahub-prices-$(id).json || \
+		curl --fail --output build/datahub-prices-$(id).json 'https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0&filter=%7B%22GLN_Number%22%3A%5B%22$(id)%22%5D%7D'
 
-find-charge: build | guard-id ## Looks up charge type codes for a given id
+find-charge: build-id ## Looks up charge type codes for a given id
 	$(COMPOSE_RUN) runner make id=$(id) _find-charge
 
 _find-charge:
-	jq -r --arg id "$(id)" '.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03") | {uniq: "\(.ChargeTypeCode) / \(.Note)"}' < build/datahub-prices.json | grep '^ '| sort -u
+	jq -r --arg id "$(id)" '.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03") | {uniq: "\(.ChargeTypeCode) / \(.Note)"}' < build/datahub-prices-$(id).json | grep '^ '| sort -u
 
-find-charge-verbose: build | guard-id ## Looks up charge type codes for a given id, but with more data
+find-charge-verbose: build-id ## Looks up charge type codes for a given id, but with more data
 	$(COMPOSE_RUN) runner make id=$(id) _find-charge-verbose
 
 _find-charge-verbose:
-	jq -r --arg id "$(id)" '[.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03")] | map(.from = (.ValidFrom + "Z"|fromdateiso8601) | .ValidTo = if .ValidTo == null or (.ValidTo|type) == "object" then null else .ValidTo end) | group_by(.ChargeTypeCode) | map(max_by(.from))[] | {item: "\(.ChargeTypeCode) / \(.Note) / \(.ValidFrom) / \(.ValidTo)"}' < build/datahub-prices.json| grep '^ '|cut -d\: -f2- | sort -u
+	jq -r --arg id "$(id)" '[.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03")] | map(.from = (.ValidFrom + "Z"|fromdateiso8601) | .ValidTo = if .ValidTo == null or (.ValidTo|type) == "object" then null else .ValidTo end) | group_by(.ChargeTypeCode) | map(max_by(.from))[] | {item: "\(.ChargeTypeCode) / \(.Note) / \(.ValidFrom) / \(.ValidTo)"}' < build/datahub-prices-$(id).json| grep '^ '|cut -d\: -f2- | sort -u
 
-view-glns: build ## View company names and their GLN numbers
+view-glns: ## View company names and their GLN numbers
+	test -f build/datahub-prices-latest.json || \
+		curl --fail --output build/datahub-prices-latest.json 'https://api.energidataservice.dk/dataset/DatahubPricelist/download?format=json&limit=0&start=StartOfMonth-P6M&end=now%2BP1D&filter=%7B%22ChargeType%22%3A%5B%22D03%22%5D%7D'
+	jq 'group_by(.GLN_Number) | map({gln: .[0].GLN_Number, name:.[0].ChargeOwner}) | unique' < build/datahub-prices-latest.json > build/gln-names.json
 	$(COMPOSE_RUN) runner cat build/gln-names.json
 
-view-prices: build | guard-id guard-code ## View prices for a given id and code
+view-prices: build-id guard-code ## View prices for a given id and code
 	$(COMPOSE_RUN) runner make id=$(id) code=$(code) _view-prices
 
 _view-prices:
-	jq -r --arg id "$(id)" --arg code "$(code)" '[.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03")| select(.ChargeTypeCode == $$code)]' < build/datahub-prices.json
+	jq -r --arg id "$(id)" --arg code "$(code)" '[.[] | select(.GLN_Number == $$id) |select(.ChargeType == "D03")| select(.ChargeTypeCode == $$code)]' < build/datahub-prices-$(id).json
 
 guard-%:
 	@if [ "${${*}}" = "" ]; then \
@@ -121,5 +124,5 @@ clean: ## Clears data and docker to trigger re-pulling and re-build images
 	docker compose down --rmi all --remove-orphans
 
 _clean:
-	@-rm -rf build.backup
-	mv build build.backup
+	find build -type f -mtime +7 ! -name ".gitignore" -delete
+	find build -type d -empty -delete
