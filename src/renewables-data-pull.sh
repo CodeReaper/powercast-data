@@ -1,12 +1,6 @@
 #!/bin/sh
 
-# Takes three arguments:
-#   - price area:
-#       Data will be restricted to this price area.
-#       Must be a singular valid area.
-#       Examples:
-#           - DK1
-#           - DE
+# Takes two arguments:
 #   - from date:
 #       Data will be fetched between the from and end date.
 #       Must be a unix timestamp.
@@ -19,6 +13,7 @@
 # Output example:
 # [
 #   {
+#     "zone": "DK1",
 #     "timestamp": 1654012800,
 #     "sources": [
 #       {
@@ -35,20 +30,17 @@ set -e
 
 OFFSET=0
 LIMIT=100
-AREA=$1
-FROMDATE=$2
-ENDDATE=$3
+FROMDATE=$1
+ENDDATE=$2
 DIR=/tmp/$$
 ENDPOINT=https://api.energidataservice.dk/
-QUERY="dataset/forecasts_hour?limit=${LIMIT}&sort=HourUTC%20desc&columns=HourUTC,PriceArea,ForecastType,ForecastDayAhead&start=$(date -d "@$FROMDATE" +"%Y-%m-%dT%H:%M")&end=$(date -d "@$ENDDATE" +"%Y-%m-%dT%H:%M")&timezone=UTC"
+TEMPLATE="${ENDPOINT}dataset/forecasts_hour?limit=${LIMIT}&sort=HourUTC%20desc&columns=HourUTC,PriceArea,ForecastType,ForecastDayAhead&start=$(date -d "@$FROMDATE" +"%Y-%m-%dT%H:%M")&end=$(date -d "@$ENDDATE" +"%Y-%m-%dT%H:%M")&timezone=UTC"
 
 which mkdir wget jq cat date > /dev/null
 
 mkdir -p $DIR
 trap 'set +x; rm -fr $DIR >/dev/null 2>&1' 0
 trap 'exit 2' 1 2 3 15
-
-TEMPLATE=$(echo "{\"PriceArea\":\"${AREA}\"}" | jq -r "@uri \"${ENDPOINT}${QUERY}&filter=\(.)\"")
 
 echo '[]' > $DIR/data.json
 while true; do
@@ -57,7 +49,7 @@ while true; do
     wget -nv -O $DIR/request.json "${REQUEST}"
 
     # shellcheck disable=SC2016
-    TRANSFORMATION='.records |= map(. as $item | {type: ($item.ForecastType | ascii_downcase), energy: (if ($item.ForecastDayAhead == null) then 0 else ($item.ForecastDayAhead * 100 | round) / 100 end), timestamp: $item.HourUTC}) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records | group_by(.timestamp) | map({ timestamp: (.[0].timestamp), sources: [.[] | del(.timestamp)] })'
+    TRANSFORMATION='.records |= map(. as $item | {zone: $item.PriceArea, type: ($item.ForecastType | ascii_downcase), energy: (if ($item.ForecastDayAhead == null) then 0 else ($item.ForecastDayAhead * 100 | round) / 100 end), timestamp: $item.HourUTC}) | .records[].timestamp |= (split("+")[0] + "Z"|fromdateiso8601) | .records | group_by(.zone, .timestamp) | map({zone: .[0].zone, timestamp: .[0].timestamp, sources: [.[] | del(.zone, .timestamp)] })'
     cat $DIR/request.json | jq -r "$TRANSFORMATION" > $DIR/data.new.json
 
     jq -e 'if . == [] then false else true end' < $DIR/data.new.json > /dev/null || break

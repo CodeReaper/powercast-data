@@ -31,14 +31,16 @@ rm -rf /tmp/t/test
 # Test with existing well-known renewables data that write actually writes output files as expected
 set -e
 mkdir /tmp/t/test
-sh src/data-write.sh test/fixtures/renewables-data-pull-generated-output.json /tmp/t/test DK1
+jq -c "map(select(.zone == \"DK1\") | del(.zone))" test/fixtures/renewables-data-pull-generated-output.json > /tmp/t/renewables-dk1.json
+sh src/data-write.sh /tmp/t/renewables-dk1.json /tmp/t/test DK1
 diff -rq /tmp/t/test test/fixtures/data-write-generated-renewables-output || { echo "Unexpected difference:"; diff -r /tmp/t/test test/fixtures/data-write-generated-renewables-output; exit 1; }
 rm -rf /tmp/t/test
 
 # Test with existing well-known co2 emission data that write actually writes output files as expected
 set -e
 mkdir /tmp/t/test
-sh src/data-write.sh test/fixtures/co2-emission-data-pull-generated-output.json /tmp/t/test DK1
+jq -c "map(select(.zone == \"DK1\") | del(.zone))" test/fixtures/co2-emission-data-pull-generated-output.json > /tmp/t/co2-dk1.json
+sh src/data-write.sh /tmp/t/co2-dk1.json /tmp/t/test DK1
 diff -rq /tmp/t/test test/fixtures/data-write-generated-co2-emission-output || { echo "Unexpected difference:"; diff -r /tmp/t/test test/fixtures/data-write-generated-co2-emission-output; exit 1; }
 rm -rf /tmp/t/test
 

@@ -1,5 +1,6 @@
 [
   {
+    "zone": "DK1",
     "timestamp": 1658091600,
     "sources": [
       {
@@ -13,7 +14,13 @@
       {
         "type": "solar",
         "energy": 0
-      },
+      }
+    ]
+  },
+  {
+    "zone": "DK2",
+    "timestamp": 1658091600,
+    "sources": [
       {
         "type": "offshore wind",
         "energy": 0
