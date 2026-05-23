@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -29,8 +30,9 @@ var (
 
 func main() {
 	conf := NewConfiguration()
+	zones := ""
 
-	flag.StringVar(&conf.Zone, "zone", conf.Zone, "Price Area like DK1")
+	flag.StringVar(&zones, "zones", zones, "Comma-separated list of price areas to keep")
 	flag.StringVar(&conf.Output, "output", conf.Output, "Directory to place output into")
 	flag.StringVar(&conf.Endpoint, "endpoint", conf.Endpoint, "Endpoint to fetch from")
 	flag.Int64Var(&conf.V2Date, "v2date", conf.V2Date, "Date when day-a-head prices take effect")
@@ -40,6 +42,11 @@ func main() {
 	flag.IntVar(&conf.SleepInterval, "sleep-interval", conf.SleepInterval, "Milliseconds to sleep when API is throttling")
 
 	flag.Parse()
+
+	if zones != "" {
+		conf.Zones = strings.Split(zones, ",")
+	}
+
 	err := conf.Validate()
 	if err != nil {
 		log.Fatal(err)
@@ -62,12 +69,12 @@ func run(c Configuration) error {
 
 func runConfigurations(cs []Configuration) error {
 	for _, c := range cs {
-		records, err := fetchRecords(c.Endpoint, c.Zone, c.From, c.End, c.Limit, c.SleepInterval, c.apiVersion)
+		records, err := fetchRecords(c.Endpoint, c.From, c.End, c.Limit, c.SleepInterval, c.apiVersion)
 		if err != nil {
 			return err
 		}
 
-		err = saveRecords(c.Zone, records, c.Output, c.apiVersion)
+		err = saveRecords(records, c.Zones, c.Output, c.apiVersion)
 		if err != nil {
 			return err
 		}
@@ -75,18 +82,39 @@ func runConfigurations(cs []Configuration) error {
 	return nil
 }
 
-func saveRecords(zone string, records []Record, output string, version ApiVersion) error {
+func saveRecords(records []Record, zones []string, output string, version ApiVersion) error {
+	byZone := make(map[string][]Record)
+	for _, r := range records {
+		byZone[r.Zone] = append(byZone[r.Zone], r)
+	}
+
+	zoneSet := make(map[string]bool)
+	for _, z := range zones {
+		zoneSet[z] = true
+	}
+
 	outputs := make(map[string][]Record)
 
-	switch version {
-	case ApiV2:
-		for file, value := range produceOutputs(records, filepath.Join(output, "v2"), 15*time.Minute, filepath.Join(zone, "index.json")) {
-			outputs[file] = append(outputs[file], value...)
+	for zone, zoneRecords := range byZone {
+		if !zoneSet[zone] {
+			continue
 		}
-		fallthrough
-	case ApiV1:
-		for file, value := range produceOutputs(records, output, 1*time.Hour, fmt.Sprintf("%s.json", zone)) {
-			outputs[file] = append(outputs[file], value...)
+
+		stripped := make([]Record, len(zoneRecords))
+		for i, r := range zoneRecords {
+			stripped[i] = Record{Euro: r.Euro, Timestamp: r.Timestamp}
+		}
+
+		switch version {
+		case ApiV2:
+			for file, value := range produceOutputs(stripped, filepath.Join(output, "v2"), 15*time.Minute, filepath.Join(zone, "index.json")) {
+				outputs[file] = append(outputs[file], value...)
+			}
+			fallthrough
+		case ApiV1:
+			for file, value := range produceOutputs(stripped, output, 1*time.Hour, fmt.Sprintf("%s.json", zone)) {
+				outputs[file] = append(outputs[file], value...)
+			}
 		}
 	}
 
@@ -205,9 +233,9 @@ func updateOutput(file string, records []Record) ([]Record, error) {
 	return updated, nil
 }
 
-func fetchRecords(endpoint string, zone string, from int64, end int64, limit int, sleep int, version ApiVersion) ([]Record, error) {
+func fetchRecords(endpoint string, from int64, end int64, limit int, sleep int, version ApiVersion) ([]Record, error) {
 	var (
-		data    = make(map[int64]Record)
+		data    = make(map[recordKey]Record)
 		records = make([]Record, 0)
 		req     string
 		bytes   []byte
@@ -215,11 +243,11 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 		items   []Record
 		item    Record
 		size    int
-		key     int64
+		key     recordKey
 	)
 
 	for from < end {
-		req, err = buildRequest(endpoint, zone, from, end, limit, version)
+		req, err = buildRequest(endpoint, from, end, limit, version)
 		if err != nil {
 			return records, err
 		}
@@ -236,7 +264,7 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 
 		size = len(data)
 		for _, item = range items {
-			data[item.Timestamp] = item
+			data[recordKey{timestamp: item.Timestamp, zone: item.Zone}] = item
 		}
 
 		if len(data) == size {
@@ -244,8 +272,8 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 		}
 
 		for key = range data {
-			if key > from {
-				from = key
+			if key.timestamp > from {
+				from = key.timestamp
 			}
 		}
 
@@ -261,7 +289,7 @@ func fetchRecords(endpoint string, zone string, from int64, end int64, limit int
 	return records, nil
 }
 
-func buildRequest(endpoint string, zone string, from int64, end int64, limit int, version ApiVersion) (string, error) {
+func buildRequest(endpoint string, from int64, end int64, limit int, version ApiVersion) (string, error) {
 	var (
 		params = url.Values{}
 		uri    *url.URL
@@ -285,7 +313,6 @@ func buildRequest(endpoint string, zone string, from int64, end int64, limit int
 	}
 
 	params.Add("end", time.Unix(end, 0).Format("2006-01-02T15:04"))
-	params.Add("filter", fmt.Sprintf(`{"PriceArea":"%s"}`, zone))
 	params.Add("limit", strconv.Itoa(limit))
 	params.Add("start", time.Unix(from, 0).Format("2006-01-02T15:04"))
 	params.Add("timezone", "UTC")
@@ -360,7 +387,7 @@ func parseBodyV1(body []byte) ([]Record, error) {
 		if err != nil {
 			return records, errors.Join(errConvert, err)
 		}
-		records = append(records, Record{Euro: item.Euro, Timestamp: stamp.Unix()})
+		records = append(records, Record{Euro: item.Euro, Timestamp: stamp.Unix(), Zone: item.Zone})
 	}
 
 	return records, nil
@@ -384,7 +411,7 @@ func parseBodyV2(body []byte) ([]Record, error) {
 		if err != nil {
 			return records, errors.Join(errConvert, err)
 		}
-		records = append(records, Record{Euro: item.Euro, Timestamp: stamp.Unix()})
+		records = append(records, Record{Euro: item.Euro, Timestamp: stamp.Unix(), Zone: item.Zone})
 	}
 
 	return records, nil
@@ -398,10 +425,11 @@ const (
 )
 
 type Configuration struct {
-	Zone, Output, Endpoint string
-	From, End, V2Date      int64
-	Limit, SleepInterval   int
-	apiVersion             ApiVersion
+	Output, Endpoint     string
+	Zones                []string
+	From, End, V2Date    int64
+	Limit, SleepInterval int
+	apiVersion           ApiVersion
 }
 
 func NewConfiguration() Configuration {
@@ -414,7 +442,7 @@ func NewConfiguration() Configuration {
 }
 
 func (f *Configuration) Validate() error {
-	if len(f.Zone) == 0 || len(f.Output) == 0 || f.From == 0 || f.End == 0 {
+	if len(f.Zones) == 0 || len(f.Output) == 0 || f.From == 0 || f.End == 0 {
 		return fmt.Errorf("missing flag, provided flags: %s", os.Args[1:])
 	}
 
@@ -455,9 +483,15 @@ func (c *Configuration) Partitions() ([]Configuration, error) {
 	return parts, nil
 }
 
+type recordKey struct {
+	timestamp int64
+	zone      string
+}
+
 type Record struct {
 	Euro      float32 `json:"euro"`
 	Timestamp int64   `json:"timestamp"`
+	Zone      string  `json:"zone,omitempty"`
 }
 
 type SpotRecords struct {
@@ -467,6 +501,7 @@ type SpotRecords struct {
 type SpotRecord struct {
 	Euro      float32 `json:"SpotPriceEUR"`
 	Timestamp string  `json:"HourUTC"`
+	Zone      string  `json:"PriceArea"`
 }
 
 type DayAHeadRecords struct {
@@ -476,4 +511,5 @@ type DayAHeadRecords struct {
 type DayAHeadRecord struct {
 	Euro      float32 `json:"DayAheadPriceEUR"`
 	Timestamp string  `json:"TimeUTC"`
+	Zone      string  `json:"PriceArea"`
 }

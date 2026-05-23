@@ -96,15 +96,11 @@ jobs:
         name: Pull data
         if: env.stale == 'true'
         run: |
-          jq -rc '.[]' configuration.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            FROM=$(echo "$CONFIG" | jq -r '.latest')
-            END=$(echo "$CONFIG" | jq -r '.end')
-
-            echo "Pull data for ${ZONE} until ${END}..."
-            go run download.go --zone ${ZONE} --from ${FROM} --end ${END} --output ./github-pages/api/energy-price/ --limit 0 --v2date 1758326400
-            echo "changed=true" >> $GITHUB_ENV
-          done
+          FROM=$(jq -r 'map(.latest) | min' configuration.json)
+          END=$(jq -r 'map(.end) | max' configuration.json)
+          ZONES=$(jq -r '[.[].zone] | join(",")' configuration.json)
+          go run download.go --zones ${ZONES} --from ${FROM} --end ${END} --output ./github-pages/api/energy-price/ --limit 0 --v2date 1758326400
+          echo "changed=true" >> $GITHUB_ENV
 
       - shell: bash
         name: Index data
@@ -208,25 +204,20 @@ jobs:
         name: Pull data
         if: env.stale == 'true'
         run: |
-          jq -rc '.[]' configuration.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            FROM=$(echo "$CONFIG" | jq -r '.latest')
-            END=$(echo "$CONFIG" | jq -r '.end')
-
-            echo "Pull data for ${ZONE} until ${END}..."
-            sh src/renewables-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
-            echo "changed=true" >> $GITHUB_ENV
-          done
+          FROM=$(jq -r 'map(.latest) | min' configuration.json)
+          END=$(jq -r 'map(.end) | max' configuration.json)
+          sh src/renewables-data-pull.sh $FROM $END > fetched-data
+          echo "changed=true" >> $GITHUB_ENV
 
       - shell: bash
         name: Write data
         if: env.changed == 'true'
         run: |
-          for GENERATED in *.generated; do
-            [ -f "$GENERATED" ] || continue
-            ZONE=$(basename $GENERATED .generated)
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
             echo "Using generated data for ${ZONE}..."
-            sh src/data-write.sh $GENERATED ./github-pages/api/renewables/ $ZONE
+            jq -c "map(select(.zone == \"$ZONE\") | del(.zone))" fetched-data > "${ZONE}.generated"
+            sh src/data-write.sh "${ZONE}.generated" ./github-pages/api/renewables/ $ZONE
           done
 
       - shell: bash
@@ -329,25 +320,20 @@ jobs:
         name: Pull data
         if: env.stale == 'true'
         run: |
-          jq -rc '.[]' configuration.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            FROM=$(echo "$CONFIG" | jq -r '.latest')
-            END=$(echo "$CONFIG" | jq -r '.end')
-
-            echo "Pull data for ${ZONE} until ${END}..."
-            sh src/co2-emission-data-pull.sh $ZONE $FROM $END > "${ZONE}.generated"
-            echo "changed=true" >> $GITHUB_ENV
-          done
+          FROM=$(jq -r 'map(.latest) | min' configuration.json)
+          END=$(jq -r 'map(.end) | max' configuration.json)
+          sh src/co2-emission-data-pull.sh $FROM $END > fetched-data
+          echo "changed=true" >> $GITHUB_ENV
 
       - shell: bash
         name: Write data
         if: env.changed == 'true'
         run: |
-          for GENERATED in *.generated; do
-            [ -f "$GENERATED" ] || continue
-            ZONE=$(basename $GENERATED .generated)
+          jq -rc '.[]' configuration.json | while read CONFIG; do
+            ZONE=$(echo "$CONFIG" | jq -r '.zone')
             echo "Using generated data for ${ZONE}..."
-            sh src/data-write.sh $GENERATED ./github-pages/api/emission/co2/ $ZONE
+            jq -c "map(select(.zone == \"$ZONE\") | del(.zone))" fetched-data > "${ZONE}.generated"
+            sh src/data-write.sh "${ZONE}.generated" ./github-pages/api/emission/co2/ $ZONE
           done
 
       - shell: bash

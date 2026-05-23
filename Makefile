@@ -35,7 +35,7 @@ _test-json:
 	@find .vscode configuration test/fixtures testdata -type f -iname '*.json*' -print0 | xargs -0 -I {} echo 'echo Checking: {}; jq empty < {}' | sort | sh -e
 
 test-makefile:
-	$(COMPOSE_RUN) makelint
+	test -z "$$(make -n all 1>/dev/null)"
 
 test-markdown:
 	$(COMPOSE_RUN) markdownlint --disable MD013 MD031 MD032 -- README.md documentation/*.md

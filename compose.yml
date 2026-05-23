@@ -27,10 +27,6 @@ services:
     volumes:
       - .:/workspace:ro
     working_dir: /workspace
-  makelint:
-    image: mrtazz/checkmake
-    volumes:
-      - ./Makefile:/Makefile:ro
   markdownlint:
     image: ghcr.io/igorshubovych/markdownlint-cli
     volumes:

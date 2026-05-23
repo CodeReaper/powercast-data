@@ -18,10 +18,30 @@ func TestThatKnownDataProducesExpectedRecords(t *testing.T) {
 	svr := setupServerWith(t, "testdata/dataset-elspotprices.json.raw")
 	defer svr.Close()
 
-	records, err := fetchRecords(svr.URL, "", 0, 1, 1, 1000, ApiV1)
+	records, err := fetchRecords(svr.URL, 0, 1, 1, 1000, ApiV1)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 5, len(records))
+}
+
+func TestThatRecordsFromSeparateZonesAreNotDeduplicated(t *testing.T) {
+	svr := setupServerWith(t, "testdata/dataset-elspotprices-twozone.json.raw")
+	defer svr.Close()
+
+	records, err := fetchRecords(svr.URL, 0, 1, 1, 1000, ApiV1)
+	assert.Nil(t, err)
+	assert.Len(t, records, 4)
+
+	seen := make(map[string]bool)
+	for _, r := range records {
+		key := fmt.Sprintf("%d-%s", r.Timestamp, r.Zone)
+		seen[key] = true
+	}
+
+	assert.True(t, seen["1654041600-DK1"], "DK1 record at 2022-06-01T00:00:00 missing or deduplicated")
+	assert.True(t, seen["1654041600-DK2"], "DK2 record at 2022-06-01T00:00:00 missing or deduplicated")
+	assert.True(t, seen["1654045200-DK1"], "DK1 record at 2022-06-01T01:00:00 missing or deduplicated")
+	assert.True(t, seen["1654045200-DK2"], "DK2 record at 2022-06-01T01:00:00 missing or deduplicated")
 }
 
 func TestThatKnownDataProducesExpectedOutputFilesAndRecords(t *testing.T) {
@@ -34,10 +54,10 @@ func TestThatKnownDataProducesExpectedOutputFilesAndRecords(t *testing.T) {
 	output, err := os.MkdirTemp("", "test")
 	assert.Nil(t, err)
 
-	records, err := fetchRecords(svr.URL, "", 0, 1, 1, 1000, ApiV1)
+	records, err := fetchRecords(svr.URL, 0, 1, 1, 1000, ApiV1)
 	assert.Nil(t, err)
 
-	err = saveRecords("DK1", records, output, ApiV1)
+	err = saveRecords(records, []string{"DK1"}, output, ApiV1)
 	assert.Nil(t, err)
 
 	bytes, err := os.ReadFile(filepath.Join(output, "2022/07/18/DK1.json"))
@@ -56,7 +76,7 @@ func TestThatKnownDataProducesExpectedOutputFiles(t *testing.T) {
 	output, err := os.MkdirTemp("", "test")
 	assert.Nil(t, err)
 
-	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Output: output})
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zones: []string{"DK1"}, End: 1, Output: output})
 	err = run(conf)
 	assert.Nil(t, err)
 
@@ -76,7 +96,7 @@ func TestThatKnownDataProducesExpectedOutputVersion2Files(t *testing.T) {
 	output, err := os.MkdirTemp("", "test")
 	assert.Nil(t, err)
 
-	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", From: 2, V2Date: 1, End: 3, Output: output})
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zones: []string{"DK1"}, From: 2, V2Date: 1, End: 3, Output: output})
 	err = run(conf)
 	assert.Nil(t, err)
 
@@ -96,7 +116,7 @@ func TestThatKnownDataProducesExpectedOutputVersion1FallbackFiles(t *testing.T) 
 	output, err := os.MkdirTemp("", "test")
 	assert.Nil(t, err)
 
-	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", From: 2, V2Date: 1, End: 3, Output: output})
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zones: []string{"DK1"}, From: 2, V2Date: 1, End: 3, Output: output})
 	err = run(conf)
 	assert.Nil(t, err)
 
@@ -121,7 +141,7 @@ func TestThatExistingOutputFileValuesAreUpdatedCorrectly(t *testing.T) {
 	os.WriteFile(filepath.Join(output, "2022/07/18/DK1.json"), expected, 0770)
 	assert.Nil(t, err)
 
-	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Output: output})
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zones: []string{"DK1"}, End: 1, Output: output})
 	err = run(conf)
 	assert.Nil(t, err)
 
@@ -149,7 +169,7 @@ func TestThatExistingOutputFilesAreUpdatedCorrectly(t *testing.T) {
 	os.WriteFile(filepath.Join(output, "2022/07/18/DK1.json"), half, 0770)
 	assert.Nil(t, err)
 
-	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zone: "DK1", End: 1, Output: output})
+	conf := updatedConfiguration(Configuration{Endpoint: svr.URL, Zones: []string{"DK1"}, End: 1, Output: output})
 	err = run(conf)
 	assert.Nil(t, err)
 
@@ -163,7 +183,7 @@ func TestThatNoDataProducesExpectedRecords(t *testing.T) {
 	svr := setupServerWith(t, "")
 	defer svr.Close()
 
-	records, err := fetchRecords(svr.URL, "", 0, 1, 1, 1000, ApiV1)
+	records, err := fetchRecords(svr.URL, 0, 1, 1, 1000, ApiV1)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 0, len(records))
@@ -180,7 +200,7 @@ func TestThatFailingHttpRequestsDoesNotProduceRecords(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	records, err := fetchRecords(svr.URL, "", 0, 1, 1, 1000, ApiV1)
+	records, err := fetchRecords(svr.URL, 0, 1, 1, 1000, ApiV1)
 	assert.NotNil(t, err)
 
 	assert.Equal(t, 0, len(records))
