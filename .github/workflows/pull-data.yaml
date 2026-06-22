@@ -36,9 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Update energy price data
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
           ref: ${{ env.publish-branch }}
@@ -154,9 +154,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Update renewables data
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
           ref: ${{ env.publish-branch }}
@@ -270,9 +270,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Update CO2 emission data
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
           ref: ${{ env.publish-branch }}
@@ -398,7 +398,7 @@ jobs:
         name: List patches
         run: ls -lsh *.patch
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ssh-key: ${{ secrets.POWERCASTDEPLOY }}
           ref: ${{ env.publish-branch }}
