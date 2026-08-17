@@ -410,7 +410,7 @@ jobs:
           cd github-pages
           git apply --allow-empty ../*.patch
 
-      - uses: EndBug/add-and-commit@v10
+      - uses: EndBug/add-and-commit@v11
         name: Publish changes
         if: github.ref == 'refs/heads/main'
         with:
