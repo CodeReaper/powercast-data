@@ -136,6 +136,14 @@
     "zone": "DK1"
   },
   {
+    "from": 1798758000,
+    "to": 1830294000,
+    "electricityCharge": 0.8,
+    "transmissionTariff": 5.6,
+    "systemTariff": 4.9,
+    "zone": "DK1"
+  },
+  {
     "from": 1293836400,
     "to": 1325372400,
     "electricityCharge": 73.0,
@@ -269,6 +277,14 @@
     "electricityCharge": 0.8,
     "transmissionTariff": 4.3,
     "systemTariff": 7.2,
+    "zone": "DK2"
+  },
+  {
+    "from": 1798758000,
+    "to": 1830294000,
+    "electricityCharge": 0.8,
+    "transmissionTariff": 5.6,
+    "systemTariff": 4.9,
     "zone": "DK2"
   }
 ]
