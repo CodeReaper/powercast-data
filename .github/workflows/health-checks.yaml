@@ -2,7 +2,7 @@ name: Health Checks
 
 on:
   schedule:
-    - cron: "0 10 * * *"
+    - cron: "10 10 * * *"
       timezone: "Europe/Copenhagen"
   workflow_dispatch: {}
   pull_request:
