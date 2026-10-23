@@ -13,7 +13,7 @@ deps: ## Prepares all docker images
 	docker compose build -q
 
 test-dependabot:
-	$(COMPOSE_RUN) runner check-jsonschema --builtin-schema dependabot .github/dependabot.yml
+	$(COMPOSE_RUN) runner check-jsonschema --schemafile https://json.schemastore.org/dependabot-2.0.json .github/dependabot.yml
 
 test-docker:
 	$(COMPOSE_RUN) dockerlint docker/builder.Dockerfile
@@ -24,10 +24,10 @@ test-editorcheck:
 	$(COMPOSE_RUN) runner ec -exclude '^\.git/|^build/|.DS_Store'
 
 test-github:
-	$(COMPOSE_RUN) runner make _test-github SCHEMA=github-workflows DIRECTORY=workflows
-	$(COMPOSE_RUN) runner make _test-github SCHEMA=github-actions DIRECTORY=actions
+	$(COMPOSE_RUN) runner make _test-github SCHEMA=https://json.schemastore.org/github-workflow.json DIRECTORY=workflows
+	$(COMPOSE_RUN) runner make _test-github SCHEMA=https://json.schemastore.org/github-action.json DIRECTORY=actions
 _test-github:
-	@find .github/$(DIRECTORY) -type f \( -iname \*.yaml -o -iname \*.yml \) -print0 | xargs -0 -I {} echo 'echo Checking: {}; check-jsonschema --builtin-schema $(SCHEMA) {}' | sort | sh -e
+	@find .github/$(DIRECTORY) -type f \( -iname \*.yaml -o -iname \*.yml \) -print0 | xargs -0 -I {} echo 'echo Checking: {}; check-jsonschema --schemafile $(SCHEMA) {}' | sort | sh -e
 
 test-json:
 	$(COMPOSE_RUN) runner make _test-json
