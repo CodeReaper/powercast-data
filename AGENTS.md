@@ -123,15 +123,15 @@ When modifying this repository:
 
 ```text
 ├── .github/
-│   ├── workflows/  # GitHub Actions workflows
-│   └── actions/    # Reusable GitHub Actions
-├── build/          # Generated build artifacts (gitignored)
-├── configuration/  # JSON configuration files
-├── resources/      # OpenAPI spec and static HTML
-├── download/       # Go downloader for datasets
-├── src/            # Shell scripts for data operations other than dataset downloads/writes
-├── test/           # Shell script tests
-├── test/fixtures/  # Shell test fixtures
+│   ├── workflows/     # GitHub Actions workflows
+│   └── actions/       # Reusable GitHub Actions
+├── build/             # Generated build artifacts (gitignored)
+├── configuration/     # JSON configuration files
+├── resources/         # OpenAPI spec and static HTML
+├── download/          # Go downloader for datasets
+├── src/               # Shell scripts for data operations other than dataset downloads/writes
+├── test/              # Shell script tests
+├── test/fixtures/     # Shell test fixtures
 ├── download/testdata/ # Go downloader test fixtures (raw API responses)
-└── Makefile        # Build automation
+└── Makefile           # Build automation
 ```
