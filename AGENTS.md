@@ -129,9 +129,9 @@ When modifying this repository:
 ├── configuration/     # JSON configuration files
 ├── resources/         # OpenAPI spec and static HTML
 ├── download/          # Go downloader for datasets
+├── download/testdata/ # Go downloader test fixtures (raw API responses)
 ├── src/               # Shell scripts for data operations other than dataset downloads/writes
 ├── test/              # Shell script tests
 ├── test/fixtures/     # Shell test fixtures
-├── download/testdata/ # Go downloader test fixtures (raw API responses)
 └── Makefile           # Build automation
 ```
