@@ -32,7 +32,7 @@ _test-github:
 test-json:
 	$(COMPOSE_RUN) runner make _test-json
 _test-json:
-	@find .vscode configuration test/fixtures testdata -type f -iname '*.json*' -print0 | xargs -0 -I {} echo 'echo Checking: {}; jq empty < {}' | sort | sh -e
+	@find .vscode configuration test/fixtures download/testdata -type f -iname '*.json*' -print0 | xargs -0 -I {} echo 'echo Checking: {}; jq empty < {}' | sort | sh -e
 
 test-makefile:
 	test -z "$$(make -n all 1>/dev/null)"
@@ -50,7 +50,7 @@ CI = $(shell env | grep ^CI=)
 TOOL_VERSION = $(shell grep '^golang ' .tool-versions | sed 's/golang //')
 MOD_VERSION = $(shell grep '^go ' go.mod | sed 's/go //')
 test-go:
-	go fmt
+	go fmt ./...
 	go mod tidy
 ifeq ($(strip $(CI)),)
 	@git diff --quiet --exit-code || echo 'Warning: Workplace is dirty'
@@ -126,3 +126,6 @@ clean: ## Clears data and docker to trigger re-pulling and re-build images
 _clean:
 	find build -type f -mtime +7 ! -name ".gitignore" -delete
 	find build -type d -empty -delete
+
+smoke-download: ## Run a download of all datasets as a smoke test
+	$(MAKE) -f make.d/smoke-download.mk

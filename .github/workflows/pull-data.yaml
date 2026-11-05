@@ -23,7 +23,7 @@ on:
       - .github/workflows/pull-data.yaml
       - src/data-*.sh
       - src/*-data-pull.sh
-      - "*.go"
+      - download/**
       - configuration/zones.json
 
 concurrency: commits-pages
@@ -52,7 +52,6 @@ jobs:
           sh src/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
-          echo "changed=false" >> $GITHUB_ENV
           echo "customized=false" >> $GITHUB_ENV
           if [ ! -z "${{ inputs.from-timestamp }}" ]; then
             echo "customized=true" >> $GITHUB_ENV
@@ -99,12 +98,11 @@ jobs:
           FROM=$(jq -r 'map(.latest) | min' configuration.json)
           END=$(jq -r 'map(.end) | max' configuration.json)
           ZONES=$(jq -r '[.[].zone] | join(",")' configuration.json)
-          go run download.go --zones ${ZONES} --from ${FROM} --end ${END} --output ./github-pages/api/energy-price/ --limit 0 --v2date 1758326400
-          echo "changed=true" >> $GITHUB_ENV
+          go run ./download --dataset energy-price --zones ${ZONES} --from ${FROM} --end ${END} --output ./github-pages/api/energy-price/ --v2date 1758326400
 
       - shell: bash
         name: Index data
-        if: env.changed == 'true'
+        if: env.stale == 'true'
         run: |
           rm ./github-pages/api/energy-price/latest.json 2> /dev/null || true
           mkdir -p ./github-pages/api/energy-price/v2 || true
@@ -113,7 +111,7 @@ jobs:
 
       - shell: bash
         name: Handle open indicents
-        if: env.changed == 'true' && env.delayed == 'true'
+        if: env.stale == 'true' && env.delayed == 'true'
         run: |
           NOW=$(date +%s)
           sh src/data-matrix.sh configuration/zones.json energy-price ./github-pages/api/energy-price/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
@@ -170,7 +168,6 @@ jobs:
           sh src/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
-          echo "changed=false" >> $GITHUB_ENV
           echo "customized=false" >> $GITHUB_ENV
           if [ ! -z "${{ inputs.from-timestamp }}" ]; then
             echo "customized=true" >> $GITHUB_ENV
@@ -200,36 +197,30 @@ jobs:
             fi
           done
 
+      - uses: actions/setup-go@v7
+        if: env.stale == 'true'
+        with:
+          go-version-file: go.mod
+
       - shell: bash
         name: Pull data
         if: env.stale == 'true'
         run: |
           FROM=$(jq -r 'map(.latest) | min' configuration.json)
           END=$(jq -r 'map(.end) | max' configuration.json)
-          sh src/renewables-data-pull.sh $FROM $END > fetched-data
-          echo "changed=true" >> $GITHUB_ENV
-
-      - shell: bash
-        name: Write data
-        if: env.changed == 'true'
-        run: |
-          jq -rc '.[]' configuration.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            echo "Using generated data for ${ZONE}..."
-            jq -c "map(select(.zone == \"$ZONE\") | del(.zone))" fetched-data > "${ZONE}.generated"
-            sh src/data-write.sh "${ZONE}.generated" ./github-pages/api/renewables/ $ZONE
-          done
+          ZONES=$(jq -r '[.[].zone] | join(",")' configuration.json)
+          go run ./download --dataset renewables --zones ${ZONES} --from ${FROM} --end ${END} --output ./github-pages/api/renewables/
 
       - shell: bash
         name: Index data
-        if: env.changed == 'true'
+        if: env.stale == 'true'
         run: |
           rm ./github-pages/api/renewables/latest.json 2> /dev/null || true
           sh src/data-index.sh configuration/zones.json ./github-pages/api/renewables/ /api/renewables with-zone | tee ./github-pages/api/renewables/index.json
 
       - shell: bash
         name: Handle open indicents
-        if: env.changed == 'true' && env.delayed == 'true'
+        if: env.stale == 'true' && env.delayed == 'true'
         run: |
           NOW=$(date +%s)
           sh src/data-matrix.sh configuration/zones.json renewables-data ./github-pages/api/renewables/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
@@ -286,7 +277,6 @@ jobs:
           sh src/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json
           echo "delayed=false" >> $GITHUB_ENV
           echo "stale=false" >> $GITHUB_ENV
-          echo "changed=false" >> $GITHUB_ENV
           echo "customized=false" >> $GITHUB_ENV
           if [ ! -z "${{ inputs.from-timestamp }}" ]; then
             echo "customized=true" >> $GITHUB_ENV
@@ -316,36 +306,30 @@ jobs:
             fi
           done
 
+      - uses: actions/setup-go@v7
+        if: env.stale == 'true'
+        with:
+          go-version-file: go.mod
+
       - shell: bash
         name: Pull data
         if: env.stale == 'true'
         run: |
           FROM=$(jq -r 'map(.latest) | min' configuration.json)
           END=$(jq -r 'map(.end) | max' configuration.json)
-          sh src/co2-emission-data-pull.sh $FROM $END > fetched-data
-          echo "changed=true" >> $GITHUB_ENV
-
-      - shell: bash
-        name: Write data
-        if: env.changed == 'true'
-        run: |
-          jq -rc '.[]' configuration.json | while read CONFIG; do
-            ZONE=$(echo "$CONFIG" | jq -r '.zone')
-            echo "Using generated data for ${ZONE}..."
-            jq -c "map(select(.zone == \"$ZONE\") | del(.zone))" fetched-data > "${ZONE}.generated"
-            sh src/data-write.sh "${ZONE}.generated" ./github-pages/api/emission/co2/ $ZONE
-          done
+          ZONES=$(jq -r '[.[].zone] | join(",")' configuration.json)
+          go run ./download --dataset co2-emission --zones ${ZONES} --from ${FROM} --end ${END} --output ./github-pages/api/emission/co2/
 
       - shell: bash
         name: Index data
-        if: env.changed == 'true'
+        if: env.stale == 'true'
         run: |
           rm ./github-pages/api/emission/co2/latest.json 2> /dev/null || true
           sh src/data-index.sh configuration/zones.json ./github-pages/api/emission/co2/ /api/emission/co2 with-zone | tee ./github-pages/api/emission/co2/index.json
 
       - shell: bash
         name: Handle open indicents
-        if: env.changed == 'true' && env.delayed == 'true'
+        if: env.stale == 'true' && env.delayed == 'true'
         run: |
           NOW=$(date +%s)
           sh src/data-matrix.sh configuration/zones.json co2-emission ./github-pages/api/emission/co2/ ${{ inputs.from-timestamp }} ${{ inputs.end-timestamp }} | tee configuration.json

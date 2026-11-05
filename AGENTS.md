@@ -121,16 +121,17 @@ When modifying this repository:
 
 ## Project Structure
 
-```
+```text
 ├── .github/
-│   ├── workflows/  # GitHub Actions workflows
-│   └── actions/    # Reusable GitHub Actions
-├── build/          # Generated build artifacts (gitignored)
-├── configuration/  # JSON configuration files
-├── resources/      # OpenAPI spec and static HTML
-├── src/            # Shell scripts for data operations
-├── test/           # Shell script tests
-├── test/fixtures/  # Shell test fixtures
-├── testdata/       # Go test fixtures (raw API responses)
-└── Makefile        # Build automation
+│   ├── workflows/     # GitHub Actions workflows
+│   └── actions/       # Reusable GitHub Actions
+├── build/             # Generated build artifacts (gitignored)
+├── configuration/     # JSON configuration files
+├── resources/         # OpenAPI spec and static HTML
+├── download/          # Go downloader for datasets
+├── download/testdata/ # Go downloader test fixtures (raw API responses)
+├── src/               # Shell scripts for data operations other than dataset downloads/writes
+├── test/              # Shell script tests
+├── test/fixtures/     # Shell test fixtures
+└── Makefile           # Build automation
 ```
