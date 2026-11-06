@@ -1,0 +1,50 @@
+name: Scheduled tasks
+
+on:
+  schedule:
+    # Data
+    - cron: "15 12,13,15 * * *"
+      timezone: "Europe/Copenhagen"
+    - cron: "0 0,4,8,16,18,20,22 * * *"
+      timezone: "Europe/Copenhagen"
+
+    # Tariffs
+    - cron: "0 2 * * 1"
+      timezone: "Europe/Copenhagen"
+
+    # Go upgrades
+    - cron: "0 6 * * 1"
+      timezone: "Europe/Copenhagen"
+
+    # Health checks
+    - cron: "10 10 * * *"
+      timezone: "Europe/Copenhagen"
+
+permissions:
+  contents: read
+
+jobs:
+  pull-data:
+    if: github.event.schedule != '0 2 * * 1'
+    uses: ./.github/workflows/pull-data.yaml
+    secrets: inherit
+
+  pull-tariff-data:
+    if: github.event.schedule == '0 2 * * 1'
+    uses: ./.github/workflows/pull-tariff-data.yaml
+    secrets: inherit
+
+  upgrade-go:
+    if: github.event.schedule == '0 6 * * 1'
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/upgrade-go.yaml
+    secrets: inherit
+
+  health-checks:
+    if: github.event.schedule == '10 10 * * *'
+    permissions:
+      contents: read
+      issues: write
+    uses: ./.github/workflows/health-checks.yaml
