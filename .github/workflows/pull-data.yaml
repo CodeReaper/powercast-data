@@ -1,9 +1,7 @@
 name: Update contents
 
 on:
-  schedule:
-    - cron: "0,15,30,45 * * * *"
-      timezone: "Europe/Copenhagen"
+  workflow_call: {}
   workflow_dispatch:
     inputs:
       from-timestamp:

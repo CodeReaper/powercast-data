@@ -6,7 +6,7 @@ This file provides guidelines for agentic coding agents operating in this reposi
 
 ### Running Tests
 
-```bash
+```sh
 # Run all tests (Go + shell scripts + linting)
 make
 
@@ -69,22 +69,23 @@ Workflows are located in `.github/workflows/`.
 
 ### Essential Workflows
 
-| Workflow                      | Purpose                                                                                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `merge-test.yaml`             | Runs `make` on all PRs to main. Auto-merges dependabot and automation bot PRs.                                                  |
-| `health-checks.yaml`          | Scheduled daily health checks. Calls `health-check-grid.yaml`, `health-check-networks.yaml`, and `health-check-integrity.yaml`. |
-| `health-check-grid.yaml`      | Validates grid configuration data                                                                                               |
-| `health-check-networks.yaml`  | Validates network configuration data                                                                                            |
-| `health-check-integrity.yaml` | Validates data integrity across datasets                                                                                        |
-| `pull-data.yaml`              | Fetches energy price data from Energi Data Service API                                                                          |
-| `pull-tariff-data.yaml`       | Fetches tariff data from Energinet                                                                                              |
-| `update-visualization.yaml`   | Updates static visualization files                                                                                              |
-| `update-api-constants.yaml`   | Updates API constant definitions                                                                                                |
-| `upgrade-go.yaml`             | Automated Go version upgrades                                                                                                   |
+| Workflow                      | Purpose                                                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `merge-test.yaml`             | Runs `make` on all PRs to main. Auto-merges dependabot and automation bot PRs.                                    |
+| `health-checks.yaml`          | Runs health checks via `health-check-grid.yaml`, `health-check-networks.yaml`, and `health-check-integrity.yaml`. |
+| `health-check-grid.yaml`      | Validates grid configuration data                                                                                 |
+| `health-check-networks.yaml`  | Validates network configuration data                                                                              |
+| `health-check-integrity.yaml` | Validates data integrity across datasets                                                                          |
+| `pull-data.yaml`              | Fetches energy price data from Energi Data Service API                                                            |
+| `pull-tariff-data.yaml`       | Fetches tariff data from Energinet                                                                                |
+| `update-visualization.yaml`   | Updates static visualization files                                                                                |
+| `update-api-constants.yaml`   | Updates API constant definitions                                                                                  |
+| `upgrade-go.yaml`             | Automated Go version upgrades                                                                                     |
+| `schedule.yaml`               | Owns all cron schedules and calls the data, tariff, health-check, and Go-upgrade workflows.                       |
 
 ### Workflow Patterns
 
-- Workflows use `on.schedule` for periodic tasks
+- All cron schedules live in `schedule.yaml`
 - Most workflows support `workflow_dispatch` for manual runs
 - Health check workflows publish results to `gh-pages` branch
 
@@ -92,9 +93,8 @@ Workflows are located in `.github/workflows/`.
 
 Docker and Docker Compose are required for running tests and development:
 
-```bash
+```sh
 # Install dependencies and run all tests
-make deps
 make
 
 # Run a shell in the runner container
@@ -127,9 +127,9 @@ When modifying this repository:
 │   └── actions/       # Reusable GitHub Actions
 ├── build/             # Generated build artifacts (gitignored)
 ├── configuration/     # JSON configuration files
-├── resources/         # OpenAPI spec and static HTML
 ├── download/          # Go downloader for datasets
 ├── download/testdata/ # Go downloader test fixtures (raw API responses)
+├── resources/         # OpenAPI spec and static HTML
 ├── src/               # Shell scripts for data operations other than dataset downloads/writes
 ├── test/              # Shell script tests
 ├── test/fixtures/     # Shell test fixtures

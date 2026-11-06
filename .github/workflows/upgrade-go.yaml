@@ -1,10 +1,7 @@
 name: Upgrade Go Version
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 6 * * 1"
-      timezone: "Europe/Copenhagen"
+  workflow_dispatch: {}
 
 jobs:
   upgrade-go:

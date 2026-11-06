@@ -1,9 +1,7 @@
 name: Update tariff data
 
 on:
-  schedule:
-    - cron: "0 2 * * 1"
-      timezone: "Europe/Copenhagen"
+  workflow_call: {}
   workflow_dispatch: {}
   push:
     branches:
