@@ -96,7 +96,7 @@ jobs:
           done | tee ../../../${{ matrix.zone }}.v2
       - uses: actions/upload-artifact@v7
         with:
-          name: energy-price-${{ matrix.zone }}
+          name: energy-price-${{ matrix.zone }}.integrity
           path: |
             ${{ matrix.zone }}
             ${{ matrix.zone }}.v2
@@ -135,7 +135,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: emission-${{ matrix.zone }}
+          name: emission-${{ matrix.zone }}.integrity
           path: ${{ matrix.zone }}
 
   check-renewables:
@@ -171,7 +171,7 @@ jobs:
           cat ../../../${{ matrix.zone }}.raw | (grep -vf .ignore-grep || true) > ../../../${{ matrix.zone }}
       - uses: actions/upload-artifact@v7
         with:
-          name: renewables-${{ matrix.zone }}
+          name: renewables-${{ matrix.zone }}.integrity
           path: ${{ matrix.zone }}
 
   create-issue:
@@ -186,17 +186,17 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: artifacts/energy-price
-          pattern: energy-price-*
+          pattern: energy-price-*.integrity
           merge-multiple: true
       - uses: actions/download-artifact@v8
         with:
           path: artifacts/emission
-          pattern: emission-*
+          pattern: emission-*.integrity
           merge-multiple: true
       - uses: actions/download-artifact@v8
         with:
           path: artifacts/renewables
-          pattern: renewables-*
+          pattern: renewables-*.integrity
           merge-multiple: true
       - name: Prepare issue
         shell: bash
@@ -208,11 +208,11 @@ jobs:
           {
             echo 'There is not enough data in present in listed files'
             echo '#### Energy Price'
-            find artifacts/energy-price -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
+            find artifacts/energy-price -type f -exec sh -c 'printf "#### "; echo $(basename "$0" .integrity); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
             echo '#### Emission'
-            find artifacts/emission -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
+            find artifacts/emission -type f -exec sh -c 'printf "#### "; echo $(basename "$0" .integrity); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
             echo '#### Renewables'
-            find artifacts/renewables -type f -exec sh -c 'printf "#### "; echo $(basename "$0"); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
+            find artifacts/renewables -type f -exec sh -c 'printf "#### "; echo $(basename "$0" .integrity); echo \`\`\`; cat "$0"; echo \`\`\`;' {} \;
           } | tee body
       - uses: ./.github/actions/handle-issue
         if: github.ref == 'refs/heads/main'
