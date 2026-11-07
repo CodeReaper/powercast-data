@@ -1,4 +1,5 @@
 name: Scheduled tasks
+run-name: "Scheduled tasks — ${{ github.event.schedule }}"
 
 on:
   schedule:
@@ -48,3 +49,24 @@ jobs:
       contents: read
       issues: write
     uses: ./.github/workflows/health-checks.yaml
+
+  diagnostics:
+    name: Schedule diagnostics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record schedule and execution time
+        shell: sh
+        env:
+          CRON: ${{ github.event.schedule }}
+          TZ: Europe/Copenhagen
+        run: |
+          set -e
+          {
+            printf 'Cron: %s\n' "$CRON"
+            printf 'Timezone: %s\n' "$TZ"
+            date -u '+Observed UTC: %Y-%m-%dT%H:%M:%SZ'
+            date '+Observed local: %Y-%m-%dT%H:%M:%S%:z'
+            printf 'Run: %s; attempt: %s\n' \
+              "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            printf 'Commit: %s\n' "$GITHUB_SHA"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
