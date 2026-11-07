@@ -143,7 +143,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: energy-price
+          name: energy-price-data.patch
           path: energy-price.patch
 
   update-renewables-data:
@@ -252,7 +252,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: renewables
+          name: renewables-data.patch
           path: renewables.patch
 
   update-co2-emission-data:
@@ -361,7 +361,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: emission-co2
+          name: emission-co2-data.patch
           path: emission-co2.patch
 
   apply-updates:
@@ -374,6 +374,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
+          pattern: "*-data.patch"
           merge-multiple: true
 
       - shell: bash
