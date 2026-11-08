@@ -3,22 +3,16 @@ run-name: "Scheduled tasks — ${{ github.event.schedule }}"
 
 on:
   schedule:
-    # Data
-    - cron: "15 12,13,15 * * *"
-      timezone: "Europe/Copenhagen"
-    - cron: "0 0,4,8,16,18,20,22 * * *"
+    # hourly attempts while github scheduler is unreliable
+    - cron: "15 * * * *"
       timezone: "Europe/Copenhagen"
 
-    # Tariffs
+    # daily runs while github scheduler is unreliable
+    - cron: "45 4 * * *"
+      timezone: "Europe/Copenhagen"
+
+      # weekly runs while github scheduler is unreliable
     - cron: "0 2 * * 1"
-      timezone: "Europe/Copenhagen"
-
-    # Go upgrades
-    - cron: "0 6 * * 1"
-      timezone: "Europe/Copenhagen"
-
-    # Health checks
-    - cron: "10 10 * * *"
       timezone: "Europe/Copenhagen"
 
 permissions:
@@ -26,9 +20,16 @@ permissions:
 
 jobs:
   pull-data:
-    if: github.event.schedule != '0 2 * * 1'
+    if: github.event.schedule == '15 * * * *'
     uses: ./.github/workflows/pull-data.yaml
     secrets: inherit
+
+  health-checks:
+    if: github.event.schedule == '45 4 * * *'
+    permissions:
+      contents: read
+      issues: write
+    uses: ./.github/workflows/health-checks.yaml
 
   pull-tariff-data:
     if: github.event.schedule == '0 2 * * 1'
@@ -36,19 +37,12 @@ jobs:
     secrets: inherit
 
   upgrade-go:
-    if: github.event.schedule == '0 6 * * 1'
+    if: github.event.schedule == '0 2 * * 1'
     permissions:
       contents: write
       pull-requests: write
     uses: ./.github/workflows/upgrade-go.yaml
     secrets: inherit
-
-  health-checks:
-    if: github.event.schedule == '10 10 * * *'
-    permissions:
-      contents: read
-      issues: write
-    uses: ./.github/workflows/health-checks.yaml
 
   diagnostics:
     name: Schedule diagnostics
@@ -66,7 +60,6 @@ jobs:
             printf 'Timezone: %s\n' "$TZ"
             date -u '+Observed UTC: %Y-%m-%dT%H:%M:%SZ'
             date '+Observed local: %Y-%m-%dT%H:%M:%S%:z'
-            printf 'Run: %s; attempt: %s\n' \
-              "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            printf 'Run: %s; attempt: %s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
             printf 'Commit: %s\n' "$GITHUB_SHA"
           } | tee -a "$GITHUB_STEP_SUMMARY"
