@@ -4,10 +4,10 @@ run-name: "Scheduled tasks — ${{ github.event.schedule }}"
 on:
   schedule:
     # github scheduler is wildly unreliable - sorry
-    - cron: "15 13 * * * *"
+    - cron: "15 13 * * *"
       timezone: "Europe/Copenhagen"
 
-    - cron: "0 15 * * * *"
+    - cron: "0 15 * * *"
       timezone: "Europe/Copenhagen"
 
     - cron: "0 20 * * *"
