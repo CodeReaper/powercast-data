@@ -3,16 +3,17 @@ run-name: "Scheduled tasks — ${{ github.event.schedule }}"
 
 on:
   schedule:
-    # hourly attempts while github scheduler is unreliable
-    - cron: "15 * * * *"
+    # github scheduler is wildly unreliable - sorry
+    - cron: "15 13 * * *"
       timezone: "Europe/Copenhagen"
 
-    # daily runs while github scheduler is unreliable
-    - cron: "45 4 * * *"
+    - cron: "0 15 * * *"
       timezone: "Europe/Copenhagen"
 
-      # weekly runs while github scheduler is unreliable
-    - cron: "0 2 * * 1"
+    - cron: "0 20 * * *"
+      timezone: "Europe/Copenhagen"
+
+    - cron: "0 21 * * 1"
       timezone: "Europe/Copenhagen"
 
 permissions:
@@ -20,24 +21,24 @@ permissions:
 
 jobs:
   pull-data:
-    if: github.event.schedule == '15 * * * *'
+    if: github.event.schedule != '0 21 * * 1'
     uses: ./.github/workflows/pull-data.yaml
     secrets: inherit
 
   health-checks:
-    if: github.event.schedule == '45 4 * * *'
+    if: github.event.schedule == '0 20 * * *'
     permissions:
       contents: read
       issues: write
     uses: ./.github/workflows/health-checks.yaml
 
   pull-tariff-data:
-    if: github.event.schedule == '0 2 * * 1'
+    if: github.event.schedule == '0 21 * * 1'
     uses: ./.github/workflows/pull-tariff-data.yaml
     secrets: inherit
 
   upgrade-go:
-    if: github.event.schedule == '0 2 * * 1'
+    if: github.event.schedule == '0 21 * * 1'
     permissions:
       contents: write
       pull-requests: write
